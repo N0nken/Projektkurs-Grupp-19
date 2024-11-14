@@ -1,6 +1,4 @@
-# Projektkurs
-Ide: 
-
+# Projektkurs Ide: 
 Street fighter x Avatar: The Last Airbender 
 2D online multiplayer fighting spel. Typ street fighter. 
 
