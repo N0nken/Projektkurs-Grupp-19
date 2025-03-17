@@ -2,7 +2,7 @@
 Street fighter x Avatar: The Last Airbender 
 2D online multiplayer fighting spel. Typ street fighter. 
 
-Fighting spel (som antingens street fighter eller smash bros) med elementala attacker (tänk avatar: the last airbender).
+Fighting spel (som antingen street fighter eller smash bros) med elementala attacker (tänk avatar: the last airbender).
 Under matchen kan man när som helst byta mellan element.
 Elementen är olika effektiva mot de andra elementen. Tänk pokemon eller sten sax påse.
 
