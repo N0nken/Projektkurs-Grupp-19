@@ -10,5 +10,5 @@ Möjliga element kombinationer:
 - Vatten, eld, gräs (Blå, röd, gröd)
     - vatten -> eld -> gräs -> vatten
 - Ljus, mörker, energi (vit, lila, gul/blå/magenta/grön)
-    - ljust -> mörker -> energi -> ljus
+    - ljus -> mörker -> energi -> ljus
 
