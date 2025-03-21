@@ -1,14 +1,15 @@
 # Projektkurs Ide: 
-Street fighter x Avatar: The Last Airbender 
-2D online multiplayer fighting spel. Typ street fighter. 
+# Beskrivning av spelet
+1v1 fightingspel. Gimmicken är att karaktären ska kunna byta mellan 3 olika element. Man ska kunna byta mellan elementen fritt. Elementen är eld, vatten och gräs. Det är sten sax påse meta. Om man träffar den andra med rätt element tar man mer damage. Detta via ett svärd (alt. boxningshandskar) som byter färg beroende på vilket aktivt element. Detta kan ske antingen som att man tar mer HP dmg eller att man har 3 hp och blir av med en om rätt element träffar. 
 
-Fighting spel (som antingen street fighter eller smash bros) med elementala attacker (tänk avatar: the last airbender).
-Under matchen kan man när som helst byta mellan element.
-Elementen är olika effektiva mot de andra elementen. Tänk pokemon eller sten sax påse.
+#Funktionalitet
+Slagfunktion
+hitboxes
+Byta mellan elementen fritt
+Röra sig på en 2d skärm höger, vänster
+Gravitation 
+basic fysik
+Hoppa (dubbel ?)
+hadouken
 
-Möjliga element kombinationer:
-- Vatten, eld, gräs (Blå, röd, gröd)
-    - vatten -> eld -> gräs -> vatten
-- Ljus, mörker, energi (vit, lila, gul/blå/magenta/grön)
-    - ljus -> mörker -> energi -> ljus
 
