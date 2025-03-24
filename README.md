@@ -14,7 +14,7 @@
 
 # Tekniska detaljer
 Naming conventions:
-\nvariabelNamn
-\nStruct_Namn
-\nfunktion_namn
+- variabelNamn
+- Struct_Namn
+- funktion_namn
   
