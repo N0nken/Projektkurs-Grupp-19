@@ -4,11 +4,11 @@
 
 # Funktionalitet
 Slagfunktion
-- hitboxes
+hitboxes
 Byta mellan elementen fritt
 Röra sig på en 2d skärm höger, vänster
 Gravitation
-- basic fysik
+basic fysik
 Hoppa (dubbel ?)
 hadouken
 
