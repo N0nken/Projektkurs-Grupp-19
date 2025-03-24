@@ -12,4 +12,9 @@
 - Hoppa (dubbel ?)
 - hadouken
 
-
+# Tekniska detaljer
+Naming conventions:
+  variabelNamn
+  Struct_Namn
+  funktion_namn
+  
