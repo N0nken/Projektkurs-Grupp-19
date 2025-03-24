@@ -6,10 +6,10 @@
 - Slagfunktion
 - hitboxes
 - Byta mellan elementen fritt
-Röra sig på en 2d skärm höger, vänster
-Gravitation
-basic fysik
-Hoppa (dubbel ?)
-hadouken
+- Röra sig på en 2d skärm höger, vänster
+- Gravitation
+- basic fysik
+- Hoppa (dubbel ?)
+- hadouken
 
 
