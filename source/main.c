@@ -1,6 +1,7 @@
 #include <SDL.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include "../include/vector2.h"
 
 int main(int argv, char** args){
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -9,7 +10,7 @@ int main(int argv, char** args){
 
     bool isRunning = true;
     SDL_Event event;
-    
+
     while(isRunning){
         while(SDL_PollEvent(&event)){
             switch (event.type)
