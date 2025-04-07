@@ -3,7 +3,7 @@ CC=gcc
 BINDIR=.\bin
 
 helloSDL: $(BINDIR)\main.o
-	$(CC) -o main $(BINDIR)\main.o $(BINDIR)\attacks.o $(BINDIR)\player.o $(BINDIR)\collision.o $(BINDIR)\vector2.o $(BINDIR)\mathex.o -lmingw32 -lSDL2main -lSDL2
+	$(CC) -o main $(BINDIR)\main.o $(BINDIR)\attacks.o $(BINDIR)\player.o $(BINDIR)\collision.o $(BINDIR)\vector2.o $(BINDIR)\mathex.o -lmingw32 -lSDL2main -lSDL2 -lSDL2_image
 
 $(BINDIR)\main.o: $(SRCDIR)\main.c $(BINDIR)\attacks.o
 	$(CC) -c -g -IC:\msys64\mingw64\include\SDL2 $(SRCDIR)\main.c -o $(BINDIR)\main.o
