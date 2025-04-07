@@ -14,8 +14,7 @@ Vector2* create_Vector2(float x, float y) {
     v->y = y;
     return v;
 }
-
-int kill_Vector2(Vector2 *v) {
+int destroy_Vector2(Vector2 *v) {
     free(v);
     return 0;
 }
@@ -24,9 +23,18 @@ void print_Vector2(Vector2 *v) {
     printf("%.2f %.2f", v->x, v->y);
 }
 
-void Vector2_set(Vector2 *v, float x, float y) {
+/* Setters and Getters */
+void Vector2_set_x(Vector2 *v, float x) {
     v->x = x;
+}
+void Vector2_set_y(Vector2 *v, float y) {
     v->y = y;
+}
+float Vector2_get_x(Vector2 *v) {
+    return v->x;
+}
+float Vector2_get_y(Vector2 *v) {
+    return v->y;
 }
 
 /* The distance between two Vector2 treated as points */
@@ -35,8 +43,8 @@ float distance_to(Vector2 *pos1, Vector2 *pos2) {
 }
 /* Returns the length/magnitude of a Vector2 */
 float magnitude(Vector2 *v) {
-    Vector2 *origo = create_Vector2(0.0, 0.0);
-    return distance_to(v, origo);
+    Vector2 *origin = create_Vector2(0.0, 0.0);
+    return distance_to(v, origin);
 }
 /* Dot product of two Vector2 */
 float dot_product(Vector2 *v1, Vector2 *v2) {
