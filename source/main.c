@@ -1,6 +1,10 @@
 #include <SDL.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <SDL_net.h>
+
+#include "../include/collision.h"
+#include "../include/player.h"
 #include "../include/vector2.h"
 
 int main(int argv, char** args){
@@ -10,6 +14,14 @@ int main(int argv, char** args){
 
     bool isRunning = true;
     SDL_Event event;
+
+    Player *newPlayer = create_Player(
+        create_Vector2(0, 0), 
+        create_Collider(create_Vector2(0, 0), create_Vector2(1,1), 0), 
+        create_Collider(create_Vector2(0, 0), create_Vector2(1,1), 1),
+        create_Collider(create_Vector2(0, 0), create_Vector2(1,1), 1),
+        100, 0
+    );
 
     while(isRunning){
         while(SDL_PollEvent(&event)){

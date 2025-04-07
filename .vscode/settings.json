@@ -1,6 +1,6 @@
 {
     "files.associations": {
         "vector2.h": "c",
-        "sdl.h": "c"
+        "mathex.h": "c"
     }
 }

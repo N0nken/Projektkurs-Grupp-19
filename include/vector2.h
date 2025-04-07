@@ -1,16 +1,18 @@
-#ifndef ENGINE_H_   /* Include guard */
-#define ENGINE_H_
+#ifndef VECTOR2_H_   /* Include guard */
+#define VECTOR2_H_
 
 typedef struct Vector2 Vector2;
 
 Vector2* create_Vector2(float x, float y);
 
-int kill_Vector2(Vector2 *v);
+int destroy_Vector2(Vector2 *v);
 
 void print_Vector2(Vector2 *v);
 
-/* Set x and y values for a Vector2 */
-void Vector2_set(Vector2 *v, float x, float y);
+void Vector2_set_x(Vector2 *v, float x);
+void Vector2_set_y(Vector2 *v, float y);
+float Vector2_get_x(Vector2 *v);
+float Vector2_get_y(Vector2 *v);
 
 /* The distance between two Vector2 treated as points */
 float distance_to(Vector2 *pos1, Vector2 *pos2);
@@ -30,4 +32,4 @@ float angle_of(Vector2 *v);
 /* Normalize vector */
 void normalize(Vector2 *v);
 
-#endif // FOO_H_
+#endif
