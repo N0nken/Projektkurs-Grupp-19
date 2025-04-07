@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "../include/player.h"
 #include "../include/collision.h"
 #include "../include/vector2.h"
@@ -9,9 +11,10 @@ struct Player {
     Collider *attackHitbox;
     int hp;
     int weapon;
+    int isAlive;
 };
 
-Player* create_Player(Vector2 *position, Collider *collider, Collider *hurtbox, Collider *attackHitbox, int hp, int weapon) {
+Player *create_Player(Vector2 *position, Collider *collider, Collider *hurtbox, Collider *attackHitbox, int hp, int weapon, int isAlive) {
     Player *newPlayer = malloc(sizeof(struct Player));
     newPlayer->position = position;
     newPlayer->collider = collider;
@@ -19,11 +22,16 @@ Player* create_Player(Vector2 *position, Collider *collider, Collider *hurtbox, 
     newPlayer->attackHitbox = attackHitbox;
     newPlayer->hp = hp;
     newPlayer->weapon = weapon;
+    newPlayer->isAlive = isAlive;
     return newPlayer;
 }
 int destroy_Player(Player *p) {
+    destroy_Vector2(p->position);
+    destroy_Collider(p->collider);
+    destroy_Collider(p->hurtbox);
+    destroy_Collider(p->attackHitbox);
     free(p);
-    return 1;
+    return 0;
 }
 
 /* Setters */
@@ -49,6 +57,10 @@ void Player_set_hp(Player *p, int hp) {
 void Player_set_weapon(Player *p, int weapon) {
     p->weapon = weapon;
 }
+void Player_set_isAlive(Player *p, int isAlive) {
+    p->isAlive = isAlive;
+}
+
 /* Getters */
 Vector2 *Player_get_position(Player *p) {
     return p->position;
@@ -68,8 +80,6 @@ int Player_get_hp(Player *p) {
 int Player_get_weapon(Player *p) {
     return p->weapon;
 }
-
-void deal_damage(Player *player, int damage) {
-    Player_set_hp(player, Player_get_hp(player) - damage);
+int Player_get_isAlive(Player *p) {
+    return p->isAlive;
 }
-

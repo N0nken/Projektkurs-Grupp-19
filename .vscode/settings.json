@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "vector2.h": "c",
-        "mathex.h": "c"
+        "mathex.h": "c",
+        "collision.h": "c",
+        "player.h": "c"
     }
 }

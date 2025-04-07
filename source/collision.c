@@ -1,5 +1,7 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
 #include "../include/collision.h"
 #include "../include/vector2.h"
 #include "../include/mathex.h"
@@ -19,18 +21,59 @@ Collider* create_Collider(Vector2 *position, Vector2 *dimensions, int isTrigger)
 }
 
 int destroy_Collider(Collider *collider) {
+    free(collider->position);
+    free(collider->dimensions);
     free(collider);
-    return 1;
+    return 0;
 }
 
-int are_colliding(Collider *collider1, Collider *collider2) {
-    Vector2 *vBetween = create_Vector2(Vector2_get_x(collider1->position) - Vector2_get_x(collider2->position), Vector2_get_y(collider1->position) - Vector2_get_y(collider2->position));
+/* Setters */
+void Collider_set_position(Collider *collider, Vector2 *position) {
+    destroy_Vector2(collider->position);
+    collider->position = position;
+}
+void Collider_set_dimensions(Collider *collider, Vector2 *dimensions) {
+    destroy_Vector2(collider->dimensions);
+    collider->dimensions = dimensions;
+}
+void Collider_set_isTrigger(Collider *collider, int isTrigger) {
+    collider->isTrigger = isTrigger;
+}
+
+/* Getters */
+Vector2 *Collider_get_position(Collider *collider) {
+    return collider->position;
+}
+Vector2 *Collider_get_dimensions(Collider *collider) {
+    return collider->dimensions;
+}
+int Collider_get_isTrigger(Collider *collider) {
+    return collider->isTrigger;
+}
+
+void print_Collider(Collider *collider) {
+    printf("Position: ");
+    print_Vector2(Collider_get_position(collider));
+
+    printf("Dimensions: ");
+    print_Vector2(Collider_get_dimensions(collider));
+
+    printf("isTrigger: %d\n", Collider_get_isTrigger(collider));
+}
+
+int is_colliding(Collider *collider1, Collider *collider2) {
+    if (Vector2_get_x(Collider_get_position(collider1)) == Vector2_get_x(Collider_get_position(collider2)) &&
+        Vector2_get_y(Collider_get_position(collider1)) ==  Vector2_get_y(Collider_get_position(collider2))) {
+        return 1;
+    }
+    Vector2 *vBetween = create_Vector2(Vector2_get_x(Collider_get_position(collider1)) - Vector2_get_x(Collider_get_position(collider2)), 
+                                        Vector2_get_y(Collider_get_position(collider1)) - Vector2_get_y(Collider_get_position(collider2)));
     float angleBetween = angle_of(vBetween);
     float xMulti = clampf(cosf(angleBetween*2),0.0,1.0);
     float yMulti = clampf(sinf(angleBetween*2),0.0,1.0);
-    float dist = distance_to(collider1->position, collider2->position);
-    float maxX = (Vector2_get_x(collider1->dimensions) + Vector2_get_x(collider2->dimensions))*xMulti;
-    float maxY = (Vector2_get_y(collider1->dimensions) + Vector2_get_y(collider2->dimensions))*yMulti;
+    float dist = distance_to(Collider_get_position(collider1), Collider_get_position(collider2));
+    float maxX = (Vector2_get_x(Collider_get_dimensions(collider1)) + Vector2_get_x(Collider_get_dimensions(collider2)))*xMulti;
+    float maxY = (Vector2_get_y(Collider_get_dimensions(collider1)) + Vector2_get_y(Collider_get_dimensions(collider2)))*yMulti;
     float maxDist = sqrtf(powf(maxX, 2.0) + powf(maxY, 2.0));
     if (dist < maxDist) {
         return 1;

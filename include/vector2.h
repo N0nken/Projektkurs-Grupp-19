@@ -5,6 +5,7 @@ typedef struct Vector2 Vector2;
 
 Vector2* create_Vector2(float x, float y);
 
+/* Deallocates all memory to the struct object including struct fields */
 int destroy_Vector2(Vector2 *v);
 
 void print_Vector2(Vector2 *v);
