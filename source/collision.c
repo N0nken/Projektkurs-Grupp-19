@@ -21,8 +21,8 @@ Collider* create_Collider(Vector2 *position, Vector2 *dimensions, int isTrigger)
 }
 
 int destroy_Collider(Collider *collider) {
-    free(collider->position);
-    free(collider->dimensions);
+    destroy_Vector2(Collider_get_position(collider));
+    destroy_Vector2(Collider_get_dimensions(collider));
     free(collider);
     return 0;
 }
