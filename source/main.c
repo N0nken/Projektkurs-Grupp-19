@@ -10,7 +10,6 @@
 #include "../include/vector2.h"
 
 int main(int argv, char** args){
-    printf("hello world!");
 
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Window *window = SDL_CreateWindow("Hello SDL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_RESIZABLE);
