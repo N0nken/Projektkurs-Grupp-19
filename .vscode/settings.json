@@ -4,5 +4,6 @@
         "mathex.h": "c",
         "collision.h": "c",
         "player.h": "c"
-    }
+    },
+    "makefile.configureOnOpen": false
 }
