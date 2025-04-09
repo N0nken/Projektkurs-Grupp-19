@@ -3,6 +3,8 @@
 #include "../include/player.h"
 #include "../include/collision.h"
 #include "../include/vector2.h"
+#include "../include/attacks.h"
+
 
 struct Player {
     Vector2 *position;
@@ -13,6 +15,8 @@ struct Player {
     int weapon;
     int isAlive;
 };
+
+enum Weapons {ROCK, SCISSORS, PAPER};
 
 Player *create_Player(Vector2 *position, Collider *collider, Collider *hurtbox, Collider *attackHitbox, int hp, int weapon, int isAlive) {
     Player *newPlayer = malloc(sizeof(struct Player));
@@ -82,4 +86,32 @@ int Player_get_weapon(Player *p) {
 }
 int Player_get_isAlive(Player *p) {
     return p->isAlive;
+}
+
+void SwitchPlayerWeapon(Player *p, int Key){
+    switch (Key){
+    case 1:
+        p->weapon = ROCK;
+        break;
+    case 2:
+        p->weapon = SCISSORS;
+        break;
+    case 3:
+        p->weapon = PAPER;    
+        break;
+    }   
+}
+
+void SwitchPlayerWeaponSprite(Player *p, int Key, int *pCurrentImage){
+    switch (Key){
+    case 1:
+        //currentWeaponImage = rockImage;
+        break;
+    case 2:
+        //currentWeaponImage = scissorImage;
+        break;
+    case 3:
+        //currentWeaponImage = paperImage;
+        break;
+    }
 }
