@@ -5,6 +5,6 @@
 #include <SDL2/SDL.h>
 #include <stdlib.h>
 
-void update_player_position(Player *player, const Uint8 *keystates, Vector2 *Velocity);
+void update_player_position(Player *player, Vector2 *velocity);
 
 #endif

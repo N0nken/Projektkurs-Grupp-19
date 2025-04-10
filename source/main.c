@@ -27,20 +27,49 @@ int main(int argv, char** args){
 
     bool isRunning = true;
     SDL_Event event;
-    Vector2 *Velocity = create_Vector2(0, 0);
+    Vector2 *direction = create_Vector2(0, 0);
 
     Player *player1 = create_Player(create_Vector2(50, 50), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), 100, 1, 1);
     //SDL_Rect *rect1 = Player_get_rect(player1);
+    float deltaTime = 1;
 
     while(isRunning){
         while(SDL_PollEvent(&event)){
             switch (event.type)
             {
                 case SDL_QUIT: isRunning = false;
+                case SDL_KEYDOWN:
+                    switch (event.key.keysym.scancode) {
+                        case SDL_SCANCODE_W:
+                        case SDL_SCANCODE_UP:
+                            Vector2_set_y(direction, -1.0f);
+                            break;
+                        case SDL_SCANCODE_S:
+                        case SDL_SCANCODE_DOWN:
+                            Vector2_set_y(direction, 1.0f);
+                            break;
+                        case SDL_SCANCODE_A:
+                        case SDL_SCANCODE_LEFT:
+                            Vector2_set_x(direction, -1.0f);
+                            break;
+                        case SDL_SCANCODE_D:
+                        case SDL_SCANCODE_RIGHT:
+                            Vector2_set_x(direction, 1.0f);
+                            break;
+                    }
             }
         }
-        const Uint8 *keystates = SDL_GetKeyboardState(NULL);
-        update_player_position(player1, keystates, Velocity); // Anropa funktionen från movement.c
+        //print_Vector2(direction);
+        normalize(direction);
+        float speed = 5 * deltaTime;
+        Vector2 *velocity = Vector2_const_multiplication(direction, speed);
+        update_player_position(player1, velocity); // Anropa funktionen från movement.c
+        destroy_Vector2(velocity);
+        print_Vector2(Player_get_position(player1));
+        
+        // reset direction
+        Vector2_set_x(direction, 0.0f);
+        Vector2_set_y(direction, 0.0f);
 
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, backgroundtexture, NULL, NULL);

@@ -2,7 +2,7 @@ SRCDIR=.\source
 CC=gcc
 BINDIR=.\bin
 
-helloSDL: $(BINDIR)\main.o
+helloSDL: $(BINDIR)\main.o $(BINDIR)\movement.o
 	$(CC) -o main $(BINDIR)\main.o $(BINDIR)\attacks.o $(BINDIR)\player.o $(BINDIR)\collision.o $(BINDIR)\vector2.o $(BINDIR)\mathex.o $(BINDIR)\movement.o -lmingw32 -lSDL2main -lSDL2 -lSDL2_image
 
 $(BINDIR)\main.o: $(SRCDIR)\main.c $(BINDIR)\attacks.o
@@ -11,7 +11,7 @@ $(BINDIR)\main.o: $(SRCDIR)\main.c $(BINDIR)\attacks.o
 $(BINDIR)\attacks.o: $(SRCDIR)\attacks.c $(BINDIR)\player.o
 	$(CC) -c -g $(SRCDIR)\attacks.c -o $(BINDIR)\attacks.o
 
-$(BINDIR)\movement.o: $(SRCDIR)\movement.c $(BINDIR)\movement.o
+$(BINDIR)\movement.o: $(SRCDIR)\movement.c
 	$(CC) -c -g $(SRCDIR)\movement.c -o $(BINDIR)\movement.o
 
 

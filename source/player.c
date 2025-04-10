@@ -1,11 +1,10 @@
+#include <SDL2/SDL.h>
 #include <stdlib.h>
 
 #include "../include/player.h"
 #include "../include/collision.h"
 #include "../include/vector2.h"
 #include "../include/attacks.h"
-#include <SDL2/SDL.h>
-
 
 struct Player {
     Vector2 *position;
@@ -35,7 +34,6 @@ Player *create_Player(Vector2 *position, Collider *collider, Collider *hurtbox, 
     newPlayer->rect->y = (int)Vector2_get_y(position);
     newPlayer->rect->w = 64;
     newPlayer->rect->h = 64;
-
 
     return newPlayer;
 }

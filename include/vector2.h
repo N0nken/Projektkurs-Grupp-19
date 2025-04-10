@@ -16,10 +16,13 @@ float Vector2_get_x(Vector2 *v);
 float Vector2_get_y(Vector2 *v);
 
 /* Add two 2D vectors */
-Vector2 *Vector2_add(Vector2 *v1, Vector2 *v2);
+Vector2 *Vector2_addition(Vector2 *v1, Vector2 *v2);
 
 /* Multiply a 2d vector with a constant */
 Vector2 *Vector2_const_multiplication(Vector2 *v, int constant);
+
+/* Subtract v2 from v1 */
+Vector2 *Vector2_subtraction(Vector2 *v1, Vector2 *v2);
 
 /* The distance between two Vector2 treated as points */
 float distance_to(Vector2 *pos1, Vector2 *pos2);

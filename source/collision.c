@@ -66,8 +66,7 @@ int is_colliding(Collider *collider1, Collider *collider2) {
         Vector2_get_y(Collider_get_position(collider1)) ==  Vector2_get_y(Collider_get_position(collider2))) {
         return 1;
     }
-    Vector2 *vBetween = create_Vector2(Vector2_get_x(Collider_get_position(collider1)) - Vector2_get_x(Collider_get_position(collider2)), 
-                                        Vector2_get_y(Collider_get_position(collider1)) - Vector2_get_y(Collider_get_position(collider2)));
+    Vector2 *vBetween = Vector2_subtraction(Collider_get_position(collider1), Collider_get_position(collider2));
     float angleBetween = angle_of(vBetween);
     float xMulti = clampf(cosf(angleBetween*2),0.0,1.0);
     float yMulti = clampf(sinf(angleBetween*2),0.0,1.0);
