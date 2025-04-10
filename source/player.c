@@ -30,6 +30,7 @@ Player *create_Player(Vector2 *position, Collider *collider, Collider *hurtbox, 
     newPlayer->weapon = weapon;
     newPlayer->isAlive = isAlive;
 
+    newPlayer->rect = malloc(sizeof(struct SDL_Rect));
     newPlayer->rect->x = (int)Vector2_get_x(position);
     newPlayer->rect->y = (int)Vector2_get_y(position);
     newPlayer->rect->w = 64;
@@ -43,14 +44,18 @@ int destroy_Player(Player *p) {
     destroy_Collider(p->collider);
     destroy_Collider(p->hurtbox);
     destroy_Collider(p->attackHitbox);
+    free(p->rect);
     free(p);
     return 0;
 }
 
 /* Setters */
-void Player_set_position(Player *p, Vector2 *position) {
+void Player_set_position(Player *p, struct Vector2 *position) {
     destroy_Vector2(p->position);
     p->position = position;
+    
+    p->rect->x = (int)Vector2_get_x(position);
+    p->rect->y = (int)Vector2_get_y(position);  //flytta på rect
 }
 void Player_set_collider(Player *p, Collider *collider) {
     destroy_Collider(p->collider);

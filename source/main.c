@@ -30,8 +30,7 @@ int main(int argv, char** args){
     Vector2 *Velocity = create_Vector2(0, 0);
 
     Player *player1 = create_Player(create_Vector2(50, 50), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), 100, 1, 1);
-
-    SDL_Rect *rect1 = Player_get_rect(player1);
+    //SDL_Rect *rect1 = Player_get_rect(player1);
 
     while(isRunning){
         while(SDL_PollEvent(&event)){
@@ -45,7 +44,7 @@ int main(int argv, char** args){
 
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, backgroundtexture, NULL, NULL);
-        SDL_RenderCopy(renderer, playerTexture, NULL, rect1);
+        SDL_RenderCopy(renderer, playerTexture, NULL, Player_get_rect(player1));
         SDL_RenderPresent(renderer);
     }
     SDL_DestroyRenderer(renderer);
