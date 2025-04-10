@@ -8,6 +8,7 @@
 #include "../include/player.h"
 #include "../include/collision.h"
 #include "../include/vector2.h"
+#include "../include/movement.h" 
 
 int main(int argv, char** args){
 
@@ -17,8 +18,20 @@ int main(int argv, char** args){
     SDL_Surface *background= IMG_Load("images/BG_Prototype.png");
     SDL_Texture *backgroundtexture = SDL_CreateTextureFromSurface(renderer,background);
 
+    SDL_Surface *playerSurface = IMG_Load("images/char.png"); //texture för spelare
+    if (!playerSurface) {
+        printf("Error loading player image: %s\n", IMG_GetError());
+    }
+    SDL_Texture *playerTexture = SDL_CreateTextureFromSurface(renderer, playerSurface);
+    SDL_FreeSurface(playerSurface);
+
     bool isRunning = true;
     SDL_Event event;
+    Vector2 *Velocity = create_Vector2(0, 0);
+
+    Player *player1 = create_Player(create_Vector2(50, 50), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), 100, 1, 1);
+
+    SDL_Rect *rect1 = Player_get_rect(player1);
 
     while(isRunning){
         while(SDL_PollEvent(&event)){
@@ -27,8 +40,12 @@ int main(int argv, char** args){
                 case SDL_QUIT: isRunning = false;
             }
         }
+        const Uint8 *keystates = SDL_GetKeyboardState(NULL);
+        update_player_position(player1, keystates, Velocity); // Anropa funktionen från movement.c
+
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, backgroundtexture, NULL, NULL);
+        SDL_RenderCopy(renderer, playerTexture, NULL, rect1);
         SDL_RenderPresent(renderer);
     }
     SDL_DestroyRenderer(renderer);

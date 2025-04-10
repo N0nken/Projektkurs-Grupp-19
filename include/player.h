@@ -3,6 +3,7 @@
 
 #include "collision.h"
 #include "vector2.h"
+#include <SDL2/SDL.h>
 
 typedef struct Player Player;
 
@@ -29,6 +30,7 @@ Collider *Player_get_attackHitbox(Player *p);
 int Player_get_hp(Player *p);
 int Player_get_weapon(Player *p);
 int Player_get_isAlive(Player *p);
+SDL_Rect *Player_get_rect(Player *p);
 
 void deal_damage(Player *player, int damage);
 

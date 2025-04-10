@@ -4,6 +4,7 @@
 #include "../include/collision.h"
 #include "../include/vector2.h"
 #include "../include/attacks.h"
+#include <SDL2/SDL.h>
 
 
 struct Player {
@@ -14,6 +15,7 @@ struct Player {
     int hp;
     int weapon;
     int isAlive;
+    SDL_Rect *rect; //la till pga behövs för textur
 };
 
 enum Weapons {ROCK, SCISSORS, PAPER};
@@ -27,6 +29,13 @@ Player *create_Player(Vector2 *position, Collider *collider, Collider *hurtbox, 
     newPlayer->hp = hp;
     newPlayer->weapon = weapon;
     newPlayer->isAlive = isAlive;
+
+    newPlayer->rect->x = (int)Vector2_get_x(position);
+    newPlayer->rect->y = (int)Vector2_get_y(position);
+    newPlayer->rect->w = 64;
+    newPlayer->rect->h = 64;
+
+
     return newPlayer;
 }
 int destroy_Player(Player *p) {
@@ -86,6 +95,9 @@ int Player_get_weapon(Player *p) {
 }
 int Player_get_isAlive(Player *p) {
     return p->isAlive;
+}
+SDL_Rect *Player_get_rect(Player *p) {
+    return p->rect;
 }
 
 void SwitchPlayerWeapon(Player *p, int Key){
