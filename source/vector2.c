@@ -42,7 +42,9 @@ float Vector2_get_y(Vector2 *v) {
 Vector2 *Vector2_add(Vector2 *v1, Vector2 *v2) {
     return create_Vector2(Vector2_get_x(v1) + Vector2_get_x(v2), Vector2_get_y(v1) + Vector2_get_y(v2));
 }
-
+Vector2 *Vector2_const_multiplication(Vector2 *v, int constant) {
+    return create_Vector2(Vector2_get_x(v) * constant, Vector2_get_y(v) * constant);
+}
 float distance_to(Vector2 *pos1, Vector2 *pos2) {
     return sqrtf(powf(Vector2_get_x(pos1) - Vector2_get_x(pos2), 2.0) + powf(Vector2_get_y(pos1) - Vector2_get_y(pos2), 2.0));
 }
