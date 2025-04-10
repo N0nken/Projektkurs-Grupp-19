@@ -32,4 +32,7 @@ int Player_get_isAlive(Player *p);
 
 void deal_damage(Player *player, int damage);
 
+void switch_player_weapon(Player *p, int keyPressed);
+void SwitchPlayerWeaponSprite(Player *p, int Key, int *pCurrentImage);
+
 #endif

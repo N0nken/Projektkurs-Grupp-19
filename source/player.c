@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <SDL2/SDL.h> 
 
 #include "../include/player.h"
 #include "../include/collision.h"
@@ -14,6 +15,7 @@ struct Player {
     int hp;
     int weapon;
     int isAlive;
+    SDL_Texture *spriteSheet;
 };
 
 enum Weapons {ROCK, SCISSORS, PAPER};
@@ -65,6 +67,7 @@ void Player_set_isAlive(Player *p, int isAlive) {
     p->isAlive = isAlive;
 }
 
+
 /* Getters */
 Vector2 *Player_get_position(Player *p) {
     return p->position;
@@ -88,30 +91,34 @@ int Player_get_isAlive(Player *p) {
     return p->isAlive;
 }
 
-void SwitchPlayerWeapon(Player *p, int Key){
-    switch (Key){
-    case 1:
-        p->weapon = ROCK;
-        break;
-    case 2:
-        p->weapon = SCISSORS;
-        break;
-    case 3:
-        p->weapon = PAPER;    
-        break;
+
+void Player_get_weapon_sprite(Player *p, int weapon){
+    switch (weapon)
+    {
+        case ROCK: return p->spriteSheet; 
+        case SCISSORS: return p->spriteSheet;
+        case PAPER: return p->spriteSheet;
+    }
+}
+
+void switch_player_weapon(Player *p, int keyPressed){
+    switch (keyPressed){
+        case SDLK_1: Player_set_weapon(p, ROCK);break;
+        case SDLK_2: Player_set_weapon(p, SCISSORS);break;
+        case SDLK_3: Player_set_weapon(p, PAPER);break;
     }   
 }
 
-void SwitchPlayerWeaponSprite(Player *p, int Key, int *pCurrentImage){
-    switch (Key){
+void Switch_Player_Weapon_Sprite(Player *p, int weapon, int *pCurrentWeaponImage){
+    switch (weapon){
+    case 0:
+        //currentWeaponImage() = rockImage;
+        break;
     case 1:
-        //currentWeaponImage = rockImage;
+        //currentWeaponImage() = scissorImage;
         break;
     case 2:
-        //currentWeaponImage = scissorImage;
-        break;
-    case 3:
-        //currentWeaponImage = paperImage;
+        //currentWeaponImage() = paperImage;
         break;
     }
 }

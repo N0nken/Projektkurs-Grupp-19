@@ -24,8 +24,19 @@ int main(int argv, char** args){
         while(SDL_PollEvent(&event)){
             switch (event.type)
             {
-                case SDL_QUIT: isRunning = false;
+                case SDL_QUIT: isRunning = false; break;
             }
+            
+            if (ev.type==SDL_KEYDOWN)
+            {
+                switch (ev.key.keysym.sym)
+                {
+                    case SDLK_1: switch_player_weapon(player, SDLK_1); break;
+                    case SDLK_2: switch_player_weapon(player, SDLK_2); break;
+                    case SDLK_3: switch_player_weapon(player, SDLK_3); break;
+                }
+            }
+            
         }
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, backgroundtexture, NULL, NULL);
