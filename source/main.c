@@ -27,7 +27,6 @@ int main(int argv, char** args){
 
     bool isRunning = true;
     SDL_Event event;
-    Vector2 *direction = create_Vector2(0, 0);
 
     Player *player1 = create_Player(create_Vector2(50, 50), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), 100, 1, 1);
     //SDL_Rect *rect1 = Player_get_rect(player1);
@@ -43,33 +42,7 @@ int main(int argv, char** args){
         }
 
         const Uint8 *keystates = SDL_GetKeyboardState(NULL);
-        if (keystates[SDL_SCANCODE_W] || keystates[SDL_SCANCODE_UP]) {
-            Vector2_set_y(direction, -1.0f);  // Gå upp
-        } else if (keystates[SDL_SCANCODE_S] || keystates[SDL_SCANCODE_DOWN]) {
-            Vector2_set_y(direction, 1.0f);   // Gå ner
-        } else {
-            Vector2_set_y(direction, 0.0f);   // Ingen rörelse i Y-led
-        }
-        
-        if (keystates[SDL_SCANCODE_A] || keystates[SDL_SCANCODE_LEFT]) {
-            Vector2_set_x(direction, -1.0f);  // Gå vänster
-        } else if (keystates[SDL_SCANCODE_D] || keystates[SDL_SCANCODE_RIGHT]) {
-            Vector2_set_x(direction, 1.0f);   // Gå höger
-        } else {
-            Vector2_set_x(direction, 0.0f);   // Ingen rörelse i X-led
-        }
-        
-        //print_Vector2(direction);
-        normalize(direction);
-        float speed = 5;
-        Vector2 *velocity = Vector2_const_multiplication(direction, speed);
-        update_player_position(player1, velocity); // Anropa funktionen från movement.c
-        destroy_Vector2(velocity);
-        print_Vector2(Player_get_position(player1));
-        
-        //reset direction
-        Vector2_set_x(direction, 0.0f);
-        Vector2_set_y(direction, 0.0f);
+        handle_movement(player1, 5.0f, keystates);
 
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, backgroundtexture, NULL, NULL);

@@ -14,6 +14,7 @@ struct Player {
     int hp;
     int weapon;
     int isAlive;
+    int canDash;
     SDL_Rect *rect; //la till pga behövs för textur
 };
 
@@ -28,6 +29,7 @@ Player *create_Player(Vector2 *position, Collider *collider, Collider *hurtbox, 
     newPlayer->hp = hp;
     newPlayer->weapon = weapon;
     newPlayer->isAlive = isAlive;
+    newPlayer->canDash = 1;
 
     newPlayer->rect = malloc(sizeof(struct SDL_Rect));
     newPlayer->rect->x = (int)Vector2_get_x(position);
@@ -55,6 +57,17 @@ void Player_set_position(Player *p, struct Vector2 *position) {
     p->rect->x = (int)Vector2_get_x(position);
     p->rect->y = (int)Vector2_get_y(position);  //flytta på rect
 }
+
+void Player_set_yposition(Player *p, float y) {
+
+    float current_x = Vector2_get_x(p->position);
+    Vector2 *new_pos = create_Vector2(current_x, y);
+    Player_set_position(p, new_pos);
+}
+int Player_set_can_dash(Player *p, int yes)
+{
+    p->canDash = yes; //yes 1 = kan dasha
+}
 void Player_set_collider(Player *p, Collider *collider) {
     destroy_Collider(p->collider);
     p->collider = collider;
@@ -80,6 +93,13 @@ void Player_set_isAlive(Player *p, int isAlive) {
 /* Getters */
 Vector2 *Player_get_position(Player *p) {
     return p->position;
+}
+float Player_get_yposition(Player *p) {
+    return Vector2_get_y(p->position);
+}
+int Player_get_can_dash(Player *p)
+{
+    return p->canDash;
 }
 Collider *Player_get_collider(Player *p) {
     return p->collider;
