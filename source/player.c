@@ -64,8 +64,7 @@ void Player_set_yposition(Player *p, float y) {
     Vector2 *new_pos = create_Vector2(current_x, y);
     Player_set_position(p, new_pos);
 }
-int Player_set_can_dash(Player *p, int yes)
-{
+int Player_set_can_dash(Player *p, int yes) {
     p->canDash = yes; //yes 1 = kan dasha
 }
 void Player_set_collider(Player *p, Collider *collider) {

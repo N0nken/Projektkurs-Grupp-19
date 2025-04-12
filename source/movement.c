@@ -7,15 +7,13 @@
 
 #define MOVEUP 0
 
-void update_player_position(Player *player, Vector2 *velocity) {
+void move_player(Player *player, Vector2 *velocity) {
     // Hämta nuvarande position
     Vector2 *pos = Player_get_position(player);
     
     // Uppdatera positionen
     Player_set_position(player, Vector2_addition(pos, velocity));
 }
-
-
 
 void handle_movement(Player *player, float speed, const Uint8 *keystates) {
     Vector2 *direction = create_Vector2(0.0f, 0.0f);
@@ -53,7 +51,7 @@ void handle_movement(Player *player, float speed, const Uint8 *keystates) {
         vertical_velocity
     );
 
-    update_player_position(player, velocity); 
+    move_player(player, velocity); 
 
     if(Player_get_yposition(player) > 400) { //måste uppdateras, ska använda SDL_has_intersect
         Player_set_yposition(player, 400);
