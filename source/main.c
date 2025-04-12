@@ -31,6 +31,13 @@ int main(int argv, char** args){
     Player *player1 = create_Player(create_Vector2(50, 50), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), 100, 1, 1);
     //SDL_Rect *rect1 = Player_get_rect(player1);
     //float deltaTime = 1;
+    
+    /* avkommentera för att testa move_and_collide()
+    Collider *col1 = create_Collider(create_Vector2(0, 0), create_Vector2(5, 5), 0);
+    Collider *col2 = create_Collider(create_Vector2(100, 100), create_Vector2(5, 5), 0);
+    move_and_collide(col1, create_Vector2(1000, 1000));
+    print_Collider(col1);
+    */
 
     while(isRunning){
         while(SDL_PollEvent(&event)){

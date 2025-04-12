@@ -59,12 +59,11 @@ void Player_set_position(Player *p, struct Vector2 *position) {
 }
 
 void Player_set_yposition(Player *p, float y) {
-
     float current_x = Vector2_get_x(p->position);
     Vector2 *new_pos = create_Vector2(current_x, y);
     Player_set_position(p, new_pos);
 }
-int Player_set_can_dash(Player *p, int yes) {
+void Player_set_can_dash(Player *p, int yes) {
     p->canDash = yes; //yes 1 = kan dasha
 }
 void Player_set_collider(Player *p, Collider *collider) {

@@ -12,10 +12,10 @@ Player *create_Player(Vector2 *position, Collider *collider, Collider *hurtbox, 
 int destroy_Player(Player *p);
 
 /* Setters */
-
+/* */
 void Player_set_position(Player *p, Vector2 *position);
 void Player_set_yposition(Player *p, float y);
-int Player_set_can_dash(Player *p, int yes);
+void Player_set_can_dash(Player *p, int yes);
 void Player_set_collider(Player *p, Collider *collider);
 void Player_set_hurtbox(Player *p, Collider *hurtbox);
 void Player_set_attackHitbox(Player *p, Collider *attackHitbox);
@@ -24,7 +24,7 @@ void Player_set_weapon(Player *p, int weapon);
 void Player_set_isAlive(Player *p, int isAlive);
 
 /* Getters */
-
+/* */
 Vector2 *Player_get_position(Player *p);
 float Player_get_yposition(Player *p);
 int Player_get_can_dash(Player *p);

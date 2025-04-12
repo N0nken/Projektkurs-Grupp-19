@@ -30,7 +30,7 @@ void handle_movement(Player *player, float speed, const Uint8 *keystates) {
         Vector2_set_x(direction, 1.0f);
     }
 
-    if ((keystates[SDL_SCANCODE_W] || keystates[SDL_SCANCODE_UP]) && Player_get_yposition(player)>=400) //här måste ändras när plattformar läggs till, använd sdl_HASintersect
+    if ((keystates[SDL_SCANCODE_W] || keystates[SDL_SCANCODE_UP]) && Vector2_get_y(Player_get_position(player)) >= 400) //här måste ändras när plattformar läggs till, använd sdl_HASintersect
     {
         vertical_velocity = jump_force;
     }
@@ -53,8 +53,8 @@ void handle_movement(Player *player, float speed, const Uint8 *keystates) {
 
     move_player(player, velocity); 
 
-    if(Player_get_yposition(player) > 400) { //måste uppdateras, ska använda SDL_has_intersect
-        Player_set_yposition(player, 400);
+    if(Vector2_get_y(Player_get_position(player)) > 400) { //måste uppdateras, ska använda SDL_has_intersect
+        Vector2_set_y(Player_get_position(player), 400);
         vertical_velocity = 0;  // Nollställ fallhastighet
     }
 

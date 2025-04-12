@@ -15,6 +15,9 @@ void Vector2_set_y(Vector2 *v, float y);
 float Vector2_get_x(Vector2 *v);
 float Vector2_get_y(Vector2 *v);
 
+/* v1 == v2 */
+int Vector2_equals(Vector2 *v1, Vector2 *v2);
+
 /* Add two 2D vectors */
 Vector2 *Vector2_addition(Vector2 *v1, Vector2 *v2);
 
@@ -41,5 +44,8 @@ float angle_of(Vector2 *v);
 
 /* Normalize vector */
 void normalize(Vector2 *v);
+
+/* Returns a normalized copy of a given vector2 */
+Vector2 *normalized(Vector2 *v)
 
 #endif
