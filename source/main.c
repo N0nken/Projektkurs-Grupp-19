@@ -58,7 +58,9 @@ int main(int argv, char** args){
     printf("%d\n", Player_get_hp(p2));
     */
 
+    Uint64 deltaTime = 0;
     while(isRunning){
+
         while(SDL_PollEvent(&event)){
             switch (event.type)
             {
@@ -74,7 +76,8 @@ int main(int argv, char** args){
         SDL_RenderCopy(renderer, backgroundtexture, NULL, NULL);
         SDL_RenderCopy(renderer, playerTexture, NULL, Player_get_rect(player1));
         SDL_RenderPresent(renderer);
-        SDL_Delay(1000/60); // 60 fps
+        deltaTime = SDL_GetTicks64() - deltaTime;
+        SDL_Delay(1000/60 - deltaTime); // 60 fps
     }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

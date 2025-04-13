@@ -18,6 +18,7 @@ void deal_damage(Player *player, int damage) {
 }
 
 void attack(Player *attackingPlayer, Player *allPlayers[], int activePlayerCount) {
+    // play attack animation
     Collider *attackHitbox = Player_get_attackHitbox(attackingPlayer);
     Vector2 *origin = create_Vector2(Vector2_get_x(Collider_get_position(attackHitbox)), Vector2_get_y(Collider_get_position(attackHitbox)));
     Collider_set_position(attackHitbox, Vector2_addition(Player_get_position(attackingPlayer), Collider_get_position(attackHitbox)));
