@@ -8,7 +8,7 @@
 #include "../include/player.h"
 #include "../include/collision.h"
 #include "../include/vector2.h"
-#include "../include/movement.h" 
+#include "../include/movement.h"
 
 int main(int argv, char** args){
 
@@ -28,15 +28,34 @@ int main(int argv, char** args){
     bool isRunning = true;
     SDL_Event event;
 
-    Player *player1 = create_Player(create_Vector2(50, 50), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), 100, 1, 1);
+    Player *allPlayers[4];
+    int activePlayerCount = 0;
+
+    Player *player1 = create_Player(create_Vector2(50, 50), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), 100, 1, 1, allPlayers, &activePlayerCount);
     //SDL_Rect *rect1 = Player_get_rect(player1);
     //float deltaTime = 1;
-    
+
     /* avkommentera för att testa move_and_collide()
     Collider *col1 = create_Collider(create_Vector2(0, 0), create_Vector2(5, 5), 0);
     Collider *col2 = create_Collider(create_Vector2(100, 100), create_Vector2(5, 5), 0);
     move_and_collide(col1, create_Vector2(1000, 1000));
     print_Collider(col1);
+    */
+
+    /* avkommentera för att testa attack 
+    Player *p1 = create_Player(
+        create_Vector2(0, 0), create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 0), 
+        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1), 
+        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1),
+        100, 0, 1, allPlayers, &activePlayerCount);
+    Player *p2 = create_Player(
+        create_Vector2(0, 0), create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 0), 
+        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1), 
+        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1),
+        100, 0, 1, allPlayers, &activePlayerCount);
+    printf("%d\n", Player_get_hp(p2));
+    attack(p1, allPlayers, activePlayerCount);
+    printf("%d\n", Player_get_hp(p2));
     */
 
     while(isRunning){

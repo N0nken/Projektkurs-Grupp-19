@@ -7,7 +7,7 @@
 
 typedef struct Player Player;
 
-Player *create_Player(Vector2 *position, Collider *collider, Collider *hurtbox, Collider *attackHitbox, int hp, int weapon, int isAlive);
+Player *create_Player(Vector2 *position, Collider *collider, Collider *hurtbox, Collider *attackHitbox, int hp, int weapon, int isAlive, Player *allPlayers[], int *activePlayerCount);
 /* Deallocates all memory to the struct object including struct fields */
 int destroy_Player(Player *p);
 
@@ -35,6 +35,7 @@ int Player_get_hp(Player *p);
 int Player_get_weapon(Player *p);
 int Player_get_isAlive(Player *p);
 SDL_Rect *Player_get_rect(Player *p);
+int Player_get_id(Player *p);
 
 void deal_damage(Player *player, int damage);
 

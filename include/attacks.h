@@ -3,7 +3,7 @@
 #include "player.h"
 
 void deal_damage(Player *player, int damage);
-void attack(Player *attackingPlayer, Player *allPlayers[], int playerCount);
+void attack(Player *attackingPlayer, Player *allPlayers[], int activePlayerCount);
 
 
 #endif

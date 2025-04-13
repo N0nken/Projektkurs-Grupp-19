@@ -7,6 +7,7 @@
 #include "../include/attacks.h"
 
 struct Player {
+    int id;
     Vector2 *position;
     Collider *collider;
     Collider *hurtbox;
@@ -20,7 +21,7 @@ struct Player {
 
 enum Weapons {ROCK, SCISSORS, PAPER};
 
-Player *create_Player(Vector2 *position, Collider *collider, Collider *hurtbox, Collider *attackHitbox, int hp, int weapon, int isAlive) {
+Player *create_Player(Vector2 *position, Collider *collider, Collider *hurtbox, Collider *attackHitbox, int hp, int weapon, int isAlive, Player *allPlayers[], int *activePlayerCount) {
     Player *newPlayer = malloc(sizeof(struct Player));
     newPlayer->position = position;
     newPlayer->collider = collider;
@@ -37,6 +38,9 @@ Player *create_Player(Vector2 *position, Collider *collider, Collider *hurtbox, 
     newPlayer->rect->w = 64;
     newPlayer->rect->h = 64;
 
+    newPlayer->id = (*activePlayerCount)++;
+    allPlayers[newPlayer->id] = newPlayer;
+    
     return newPlayer;
 }
 int destroy_Player(Player *p) {
@@ -95,8 +99,7 @@ Vector2 *Player_get_position(Player *p) {
 float Player_get_yposition(Player *p) {
     return Vector2_get_y(p->position);
 }
-int Player_get_can_dash(Player *p)
-{
+int Player_get_can_dash(Player *p){
     return p->canDash;
 }
 Collider *Player_get_collider(Player *p) {
@@ -119,6 +122,9 @@ int Player_get_isAlive(Player *p) {
 }
 SDL_Rect *Player_get_rect(Player *p) {
     return p->rect;
+}
+int Player_get_id(Player *p) {
+    return p->id;
 }
 
 void SwitchPlayerWeapon(Player *p, int Key){

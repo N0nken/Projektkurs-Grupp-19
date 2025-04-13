@@ -46,6 +46,6 @@ float angle_of(Vector2 *v);
 void normalize(Vector2 *v);
 
 /* Returns a normalized copy of a given vector2 */
-Vector2 *normalized(Vector2 *v)
+Vector2 *normalized(Vector2 *v);
 
 #endif

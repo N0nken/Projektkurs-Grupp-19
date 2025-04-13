@@ -8,8 +8,8 @@
 
 #define VELOCITYFRAMESIZE 5
 #define MAXCOLLIDERCOUNT 50 // increase if necessary
-Collider *allColliders[MAXCOLLIDERCOUNT];
-int activeColliderCount = 0;
+static Collider *allColliders[MAXCOLLIDERCOUNT];
+static int activeColliderCount = 0;
 
 struct Collider {
     Vector2 *position;
