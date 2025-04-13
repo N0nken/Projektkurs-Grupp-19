@@ -26,14 +26,16 @@ struct Input_Logger {
 
 Input_Logger *create_Input_Logger() {
     Input_Logger *newInputLogger = malloc(sizeof(struct Input_Logger));
-    newInputLogger->up[3] = 0;
-    newInputLogger->down[3] = 0;
-    newInputLogger->left[3] = 0;
-    newInputLogger->right[3] = 0;
-    newInputLogger->attack[3] = 0;
-    newInputLogger->switchToRock[3] = 0;
-    newInputLogger->switchToPaper[3] = 0;
-    newInputLogger->switchToScissors[3] = 0;
+    for (int i = 0; i < 3; i++) {
+        newInputLogger->up[i] = 0;
+        newInputLogger->down[i] = 0;
+        newInputLogger->left[i] = 0;
+        newInputLogger->right[i] = 0;
+        newInputLogger->attack[i] = 0;
+        newInputLogger->switchToRock[i] = 0;
+        newInputLogger->switchToPaper[i] = 0;
+        newInputLogger->switchToScissors[i] = 0;
+    }
     return newInputLogger;
 }
 void destroy_Input_Logger(Input_Logger *logger) {
@@ -99,18 +101,20 @@ void Input_Logger_unset_action_state(Input_Logger *logger, char action[], int st
 void Input_Logger_update_all_actions(Input_Logger *logger, const Uint8 *keystates) {
     for (int i = 0; i < NUMBEROFACTIONS; i++) {
         if (keystates[actionTranslations[i][0]] == 1 || keystates[actionTranslations[i][1]] == 1) {
-            if (Input_Logger_get_action_state(logger, allActions[i], 0)) {
+            if (!Input_Logger_get_action_state(logger, allActions[i], 0) && !Input_Logger_get_action_state(logger, allActions[i], 1) && !Input_Logger_get_action_state(logger, allActions[i], 2)) {
+                Input_Logger_set_action_state(logger, allActions[i], 0);
+            } else if (Input_Logger_get_action_state(logger, allActions[i], 0)) {
                 Input_Logger_set_action_state(logger, allActions[i], 1);
                 Input_Logger_unset_action_state(logger, allActions[i], 0);
-            } else {
-                Input_Logger_set_action_state(logger, allActions[i], 0);
             }
         } else {
             if (Input_Logger_get_action_state(logger, allActions[i], 0) || Input_Logger_get_action_state(logger, allActions[i], 1)) {
                 Input_Logger_set_action_state(logger, allActions[i], 2);
                 Input_Logger_unset_action_state(logger, allActions[i], 1);
-            } else {
+            } else if (Input_Logger_get_action_state(logger, allActions[i], 2)) {
                 Input_Logger_unset_action_state(logger, allActions[i], 2);
+                Input_Logger_unset_action_state(logger, allActions[i], 1);
+                Input_Logger_unset_action_state(logger, allActions[i], 0);
             }
         }
     }

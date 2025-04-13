@@ -84,11 +84,8 @@ int main(int argv, char** args){
         printf("attack pressed %d\n", Input_Logger_is_action_just_pressed(p1Logger, "attack"));
         printf("attack just released %d\n", Input_Logger_is_action_just_pressed(p1Logger, "attack"));
         SDL_Delay(1000/60);
-        for (int i = 0; i < activePlayerCount; i++) {
-            Player *p = allPlayers[i];
-            Input_Logger *logger = Player_get_inputs(p);
-            Input_Logger_update_all_actions(logger, keystates);
-        }
+        Input_Logger *logger = Player_get_inputs(p1);
+        Input_Logger_update_all_actions(logger, keystates);
     }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
