@@ -45,9 +45,12 @@ void attack(Player *attackingPlayer, Player *allPlayers[], int activePlayerCount
     Collider_set_position(attackHitbox, origin);
 }
 
-void handle_attack_input(Player *p, Player *allPlayers[], int activePlayerCount) {
-    Input_Logger *logger = Player_get_inputs(p);
-    if (Input_Logger_is_action_just_pressed(logger, "attack")) {
-        attack(p, allPlayers, activePlayerCount);
+void handle_attack_input(Player *allPlayers[], int activePlayerCount) {
+    for (int i = 0; i < activePlayerCount; i++) {
+        Player *p = allPlayers[i];
+        Input_Logger *logger = Player_get_inputs(p);
+        if (Input_Logger_is_action_just_pressed(logger, "attack")) {
+            attack(p, allPlayers, activePlayerCount);
+        }
     }
 }

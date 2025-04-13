@@ -1,6 +1,7 @@
 #include "../include/input_logger.h"
 #include <SDL2/SDL.h>
 #include <string.h>
+#include <stdio.h>
 
 #define NUMBEROFACTIONS 8
 char allActions[8][20] = {
@@ -101,6 +102,8 @@ void Input_Logger_update_all_actions(Input_Logger *logger, const Uint8 *keystate
             if (Input_Logger_get_action_state(logger, allActions[i], 0)) {
                 Input_Logger_set_action_state(logger, allActions[i], 1);
                 Input_Logger_unset_action_state(logger, allActions[i], 0);
+            } else {
+                Input_Logger_set_action_state(logger, allActions[i], 0);
             }
         } else {
             if (Input_Logger_get_action_state(logger, allActions[i], 0) || Input_Logger_get_action_state(logger, allActions[i], 1)) {

@@ -4,12 +4,12 @@
 #include <SDL2/SDL_image.h>
 #include <SDL_net.h>
 
+#include "../include/input_logger.h"
 #include "../include/attacks.h"
 #include "../include/player.h"
 #include "../include/collision.h"
 #include "../include/vector2.h"
 #include "../include/movement.h"
-#include "../include/input_logger.h"
 
 int main(int argv, char** args){
 
@@ -57,7 +57,7 @@ int main(int argv, char** args){
     
     
 
-    Uint64 deltaTime = 0;
+    Uint64 deltaTime = SDL_GetTicks64();
     while(isRunning){
 
         while(SDL_PollEvent(&event)){
@@ -68,17 +68,27 @@ int main(int argv, char** args){
             }
         }
         printf("%d\n", Player_get_hp(p2));
-        handle_attack_input(p1);
+        handle_attack_input(allPlayers, activePlayerCount);
         printf("%d\n", Player_get_hp(p2));
         const Uint8 *keystates = SDL_GetKeyboardState(NULL);
         handle_movement(player1, 5.0f, keystates);
-
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, backgroundtexture, NULL, NULL);
         SDL_RenderCopy(renderer, playerTexture, NULL, Player_get_rect(player1));
         SDL_RenderPresent(renderer);
-        deltaTime = SDL_GetTicks64() - deltaTime;
+        /*deltaTime = SDL_GetTicks64() - deltaTime;
         SDL_Delay(1000/60 - deltaTime); // 60 fps
+        */
+        Input_Logger *p1Logger = Player_get_inputs(p1);
+        printf("attack just pressed %d\n", Input_Logger_is_action_just_pressed(p1Logger, "attack"));
+        printf("attack pressed %d\n", Input_Logger_is_action_just_pressed(p1Logger, "attack"));
+        printf("attack just released %d\n", Input_Logger_is_action_just_pressed(p1Logger, "attack"));
+        SDL_Delay(1000/60);
+        for (int i = 0; i < activePlayerCount; i++) {
+            Player *p = allPlayers[i];
+            Input_Logger *logger = Player_get_inputs(p);
+            Input_Logger_update_all_actions(logger, keystates);
+        }
     }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
