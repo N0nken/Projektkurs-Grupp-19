@@ -1,6 +1,7 @@
 #ifndef PLAYER_H_   /* Include guard */
 #define PLAYER_H_
 
+#include "input_logger.h"
 #include "collision.h"
 #include "vector2.h"
 #include <SDL2/SDL.h>
@@ -25,6 +26,7 @@ void Player_set_isAlive(Player *p, int isAlive);
 
 /* Getters */
 /* */
+Input_Logger *Player_get_inputs(Player *p);
 Vector2 *Player_get_position(Player *p);
 float Player_get_yposition(Player *p);
 int Player_get_can_dash(Player *p);
@@ -35,7 +37,6 @@ int Player_get_hp(Player *p);
 int Player_get_weapon(Player *p);
 int Player_get_isAlive(Player *p);
 SDL_Rect *Player_get_rect(Player *p);
-int Player_get_id(Player *p);
 
 void deal_damage(Player *player, int damage);
 

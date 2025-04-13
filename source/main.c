@@ -9,6 +9,7 @@
 #include "../include/collision.h"
 #include "../include/vector2.h"
 #include "../include/movement.h"
+#include "../include/input_logger.h"
 
 int main(int argv, char** args){
 
@@ -42,7 +43,7 @@ int main(int argv, char** args){
     print_Collider(col1);
     */
 
-    /* avkommentera för att testa attack 
+    /* avkommentera för att testa attack */
     Player *p1 = create_Player(
         create_Vector2(0, 0), create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 0), 
         create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1), 
@@ -53,10 +54,8 @@ int main(int argv, char** args){
         create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1), 
         create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1),
         100, 0, 1, allPlayers, &activePlayerCount);
-    printf("%d\n", Player_get_hp(p2));
-    attack(p1, allPlayers, activePlayerCount);
-    printf("%d\n", Player_get_hp(p2));
-    */
+    
+    
 
     Uint64 deltaTime = 0;
     while(isRunning){
@@ -68,7 +67,9 @@ int main(int argv, char** args){
                 
             }
         }
-
+        printf("%d\n", Player_get_hp(p2));
+        handle_attack_input(p1);
+        printf("%d\n", Player_get_hp(p2));
         const Uint8 *keystates = SDL_GetKeyboardState(NULL);
         handle_movement(player1, 5.0f, keystates);
 

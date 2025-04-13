@@ -3,6 +3,7 @@
 #include "../include/attacks.h"
 #include "../include/player.h"
 #include "../include/collision.h"
+#include "../include/input_logger.h"
 
 #define BASEDAMAGE 5
 #define DAMAGEBONUSMULTIPLIER 2
@@ -42,4 +43,11 @@ void attack(Player *attackingPlayer, Player *allPlayers[], int activePlayerCount
         }
     }
     Collider_set_position(attackHitbox, origin);
+}
+
+void handle_attack_input(Player *p, Player *allPlayers[], int activePlayerCount) {
+    Input_Logger *logger = Player_get_inputs(p);
+    if (Input_Logger_is_action_just_pressed(logger, "attack")) {
+        attack(p, allPlayers, activePlayerCount);
+    }
 }

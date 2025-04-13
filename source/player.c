@@ -1,13 +1,12 @@
 #include <SDL2/SDL.h>
 #include <stdlib.h>
 
+#include "../include/input_logger.h"
 #include "../include/player.h"
 #include "../include/collision.h"
 #include "../include/vector2.h"
-#include "../include/attacks.h"
 
 struct Player {
-    int id;
     Vector2 *position;
     Collider *collider;
     Collider *hurtbox;
@@ -17,6 +16,7 @@ struct Player {
     int isAlive;
     int canDash;
     SDL_Rect *rect; //la till pga behövs för textur
+    Input_Logger *logger;
 };
 
 enum Weapons {ROCK, SCISSORS, PAPER};
@@ -31,15 +31,14 @@ Player *create_Player(Vector2 *position, Collider *collider, Collider *hurtbox, 
     newPlayer->weapon = weapon;
     newPlayer->isAlive = isAlive;
     newPlayer->canDash = 1;
+    newPlayer->logger = create_Input_Logger();
 
     newPlayer->rect = malloc(sizeof(struct SDL_Rect));
     newPlayer->rect->x = (int)Vector2_get_x(position);
     newPlayer->rect->y = (int)Vector2_get_y(position);
     newPlayer->rect->w = 64;
     newPlayer->rect->h = 64;
-
-    newPlayer->id = (*activePlayerCount)++;
-    allPlayers[newPlayer->id] = newPlayer;
+    allPlayers[(*activePlayerCount)++] = newPlayer;
     
     return newPlayer;
 }
@@ -61,7 +60,6 @@ void Player_set_position(Player *p, struct Vector2 *position) {
     p->rect->x = (int)Vector2_get_x(position);
     p->rect->y = (int)Vector2_get_y(position);  //flytta på rect
 }
-
 void Player_set_yposition(Player *p, float y) {
     float current_x = Vector2_get_x(p->position);
     Vector2 *new_pos = create_Vector2(current_x, y);
@@ -93,6 +91,9 @@ void Player_set_isAlive(Player *p, int isAlive) {
 }
 
 /* Getters */
+Input_Logger *Player_get_inputs(Player *p) {
+    return p->logger;
+}
 Vector2 *Player_get_position(Player *p) {
     return p->position;
 }
@@ -122,9 +123,6 @@ int Player_get_isAlive(Player *p) {
 }
 SDL_Rect *Player_get_rect(Player *p) {
     return p->rect;
-}
-int Player_get_id(Player *p) {
-    return p->id;
 }
 
 void SwitchPlayerWeapon(Player *p, int Key){
