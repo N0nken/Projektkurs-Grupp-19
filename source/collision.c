@@ -16,9 +16,10 @@ struct Collider {
     Vector2 *dimensions;
     int isTrigger; // triggers allow other colliders to pass through them
     int id;
+    int layer;
 };
 
-Collider* create_Collider(Vector2 *position, Vector2 *dimensions, int isTrigger) {
+Collider* create_Collider(Vector2 *position, Vector2 *dimensions, int isTrigger, int layer) {
     if (activeColliderCount >= MAXCOLLIDERCOUNT) {
         printf("Maximum number of colliders reached. Increase MAXCOLLIDERCOUNT if this is intentional.\n");
         return NULL;
@@ -27,6 +28,7 @@ Collider* create_Collider(Vector2 *position, Vector2 *dimensions, int isTrigger)
     newCollider->dimensions = dimensions;
     newCollider->position = position;
     newCollider->isTrigger = isTrigger;
+    newCollider->layer = layer;
     allColliders[activeColliderCount] = newCollider;
     newCollider->id = activeColliderCount++;
     return newCollider;
@@ -69,6 +71,9 @@ int Collider_is_trigger(Collider *collider) {
 int Collider_get_id(Collider *collider) {
     return collider->id;
 }
+int Collider_get_layer(Collider *collider) {
+    return collider->layer;
+}
 
 void print_Collider(Collider *collider) {
     printf("Position: ");
@@ -82,9 +87,12 @@ void print_Collider(Collider *collider) {
     printf("ID: %d\n", Collider_get_id(collider));
 }
 
-int is_colliding(Collider *collider1, Collider *collider2) {
+int is_colliding(Collider *collider1, Collider *collider2, int layer) {
     if (Vector2_equals(Collider_get_position(collider1), Collider_get_position(collider2))) {
         return 1;
+    }
+    if (collider2->layer != layer && layer >= 0) {
+        return 0;
     }
     float yMax1 = Vector2_get_y(Collider_get_position(collider1)) + Vector2_get_y(Collider_get_dimensions(collider1));
     float xMax1 = Vector2_get_x(Collider_get_position(collider1)) + Vector2_get_x(Collider_get_dimensions(collider1));
@@ -121,7 +129,20 @@ int is_colliding(Collider *collider1, Collider *collider2) {
     */
 }
 
-void move_and_collide(Collider *collider, Vector2 *velocity) {
+int is_colliding_any(Collider *collider, int layer) {
+    for (int i = 0; i < MAXCOLLIDERCOUNT; i++) {
+        if (allColliders[i] == NULL) break;
+        if (allColliders[i] == collider) continue;
+        if (Collider_is_trigger(allColliders[i])) continue;
+        if (Collider_get_layer(allColliders[i]) != layer && layer >= 0) continue;
+        if (is_colliding(collider, allColliders[i], layer)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void move_and_collide(Collider *collider, Vector2 *velocity, int layer) {
     if (Collider_is_trigger(collider)) {
         Collider_set_position(collider, Vector2_addition(Collider_get_position(collider), velocity));
         return;
@@ -137,7 +158,8 @@ void move_and_collide(Collider *collider, Vector2 *velocity) {
             if (allColliders[i] == NULL) break;
             if (allColliders[i] == collider) continue;
             if (Collider_is_trigger(allColliders[i])) continue;
-            if (is_colliding(collider, allColliders[i])) {
+            if (Collider_get_layer(allColliders[i]) != layer && layer >= 0) continue;
+            if (is_colliding(collider, allColliders[i], layer)) {
                 destroy_Vector2(velocityFrame);
                 return;
             }

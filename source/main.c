@@ -32,7 +32,11 @@ int main(int argv, char** args){
     Player *allPlayers[4];
     int activePlayerCount = 0;
 
-    Player *player1 = create_Player(create_Vector2(50, 50), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), 100, 1, 1, allPlayers, &activePlayerCount);
+    Player *player1 = create_Player(
+        create_Vector2(50, 50), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1, 0), 
+        create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1, 0), 
+        create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1, 0), 
+    100, 1, 1, allPlayers, &activePlayerCount);
     //SDL_Rect *rect1 = Player_get_rect(player1);
     //float deltaTime = 1;
 
@@ -45,14 +49,14 @@ int main(int argv, char** args){
 
     /* avkommentera för att testa attack */
     Player *p1 = create_Player(
-        create_Vector2(0, 0), create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 0), 
-        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1), 
-        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1),
+        create_Vector2(0, 0), create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 0, 0), 
+        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1, 0), 
+        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1, 0),
         100, 0, 1, allPlayers, &activePlayerCount);
     Player *p2 = create_Player(
-        create_Vector2(0, 0), create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 0), 
-        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1), 
-        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1),
+        create_Vector2(0, 0), create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 0, 0), 
+        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1, 0), 
+        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1, 0),
         100, 0, 1, allPlayers, &activePlayerCount);
     
     
@@ -81,7 +85,9 @@ int main(int argv, char** args){
         handle_attack_input(allPlayers, activePlayerCount);
         printf("%d\n", Player_get_hp(p2));
         const Uint8 *keystates = SDL_GetKeyboardState(NULL);
+        printf("A");
         handle_movement(player1, 5.0f, keystates);
+        printf("B");
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, backgroundtexture, NULL, NULL);
         SDL_RenderCopy(renderer, playerTexture, NULL, Player_get_rect(player1));

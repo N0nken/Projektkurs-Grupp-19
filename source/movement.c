@@ -12,7 +12,11 @@ void move_player(Player *player, Vector2 *velocity) {
     Vector2 *pos = Player_get_position(player);
     
     // Uppdatera positionen
-    Player_set_position(player, Vector2_addition(pos, velocity));
+    move_and_collide(Player_get_collider(player), velocity, 1);
+    Vector2 *newPosition = copy_Vector2(Collider_get_position(Player_get_collider(player)));
+    printf("e");
+    Player_set_position(player, newPosition);
+    printf("f");
 }
 
 void handle_movement(Player *player, float speed, const Uint8 *keystates) {
@@ -50,9 +54,9 @@ void handle_movement(Player *player, float speed, const Uint8 *keystates) {
         Vector2_get_x(direction) * speed,
         vertical_velocity
     );
-
+    printf("c");
     move_player(player, velocity); 
-
+    printf("d");
     if(Vector2_get_y(Player_get_position(player)) > 400) { //måste uppdateras, ska använda SDL_has_intersect
         Vector2_set_y(Player_get_position(player), 400);
         vertical_velocity = 0;  // Nollställ fallhastighet

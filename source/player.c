@@ -56,11 +56,16 @@ int destroy_Player(Player *p) {
 
 /* Setters */
 void Player_set_position(Player *p, struct Vector2 *position) {
+    printf("g");
     destroy_Vector2(p->position);
-    p->position = position;
-    
+
+    Vector2 *hurtboxposition = create_Vector2(Vector2_get_x(position), Vector2_get_y(position));
+    p->position = position;    
     p->rect->x = (int)Vector2_get_x(position);
     p->rect->y = (int)Vector2_get_y(position);  //flytta på rect
+    //destroy_Vector2(Collider_get_position(Player_get_hurtbox(p)));
+    //Collider_set_position(Player_get_hurtbox(p), hurtboxposition);
+    printf("h");
 }
 void Player_set_yposition(Player *p, float y) {
     float current_x = Vector2_get_x(p->position);
