@@ -80,12 +80,12 @@ int main(int argv, char** args){
         SDL_Delay(1000/60 - deltaTime); // 60 fps
         */
         Input_Logger *p1Logger = Player_get_inputs(p1);
-        printf("attack just pressed %d\n", Input_Logger_is_action_just_pressed(p1Logger, "attack"));
-        printf("attack pressed %d\n", Input_Logger_is_action_just_pressed(p1Logger, "attack"));
-        printf("attack just released %d\n", Input_Logger_is_action_just_pressed(p1Logger, "attack"));
-        SDL_Delay(1000/60);
+        SDL_Delay(1000/5);
         Input_Logger *logger = Player_get_inputs(p1);
         Input_Logger_update_all_actions(logger, keystates);
+        printf("attack just pressed %d\n", Input_Logger_is_action_just_pressed(p1Logger, "attack"));
+        printf("attack pressed %d\n", Input_Logger_is_action_pressed(p1Logger, "attack"));
+        printf("attack just released %d\n", Input_Logger_is_action_just_released(p1Logger, "attack"));
     }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

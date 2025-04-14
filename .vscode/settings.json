@@ -59,6 +59,7 @@
   "makefile.configureOnOpen": false,
   "files.associations": {
     "attacks.h": "c",
-    "vector2.h": "c"
+    "vector2.h": "c",
+    "string.h": "c"
   }
 }

@@ -100,17 +100,21 @@ void Input_Logger_unset_action_state(Input_Logger *logger, char action[], int st
 }
 void Input_Logger_update_all_actions(Input_Logger *logger, const Uint8 *keystates) {
     for (int i = 0; i < NUMBEROFACTIONS; i++) {
+        if (i == 4) {
+            printf("attack %d\n", keystates[actionTranslations[i][0]]);
+        }
         if (keystates[actionTranslations[i][0]] == 1 || keystates[actionTranslations[i][1]] == 1) {
             if (!Input_Logger_get_action_state(logger, allActions[i], 0) && !Input_Logger_get_action_state(logger, allActions[i], 1) && !Input_Logger_get_action_state(logger, allActions[i], 2)) {
                 Input_Logger_set_action_state(logger, allActions[i], 0);
-            } else if (Input_Logger_get_action_state(logger, allActions[i], 0)) {
+            } else if (Input_Logger_get_action_state(logger, allActions[i], 0) && !Input_Logger_get_action_state(logger, allActions[i], 1) && !Input_Logger_get_action_state(logger, allActions[i], 2)) {
                 Input_Logger_set_action_state(logger, allActions[i], 1);
                 Input_Logger_unset_action_state(logger, allActions[i], 0);
             }
         } else {
-            if (Input_Logger_get_action_state(logger, allActions[i], 0) || Input_Logger_get_action_state(logger, allActions[i], 1)) {
+            if ((Input_Logger_get_action_state(logger, allActions[i], 0) || Input_Logger_get_action_state(logger, allActions[i], 1)) && !Input_Logger_get_action_state(logger, allActions[i], 2)) {
                 Input_Logger_set_action_state(logger, allActions[i], 2);
                 Input_Logger_unset_action_state(logger, allActions[i], 1);
+                Input_Logger_unset_action_state(logger, allActions[i], 0);
             } else if (Input_Logger_get_action_state(logger, allActions[i], 2)) {
                 Input_Logger_unset_action_state(logger, allActions[i], 2);
                 Input_Logger_unset_action_state(logger, allActions[i], 1);
