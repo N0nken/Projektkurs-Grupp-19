@@ -1,6 +1,5 @@
 #include <SDL2/SDL.h>
 #include <stdlib.h>
-#include <SDL2/SDL.h> 
 
 #include "../include/input_logger.h"
 #include "../include/player.h"
@@ -49,6 +48,7 @@ int destroy_Player(Player *p) {
     destroy_Collider(p->collider);
     destroy_Collider(p->hurtbox);
     destroy_Collider(p->attackHitbox);
+    destroy_Input_Logger(p->logger);
     free(p->rect);
     free(p);
     return 0;
