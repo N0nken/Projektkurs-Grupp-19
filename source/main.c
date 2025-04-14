@@ -66,13 +66,13 @@ int main(int argv, char** args){
                 case SDL_QUIT: isRunning = false; break;
             }
             
-            if (ev.type==SDL_KEYDOWN)
+            if (event.type==SDL_KEYDOWN)
             {
-                switch (ev.key.keysym.sym)
+                switch (event.key.keysym.sym)
                 {
-                    case SDLK_1: switch_player_weapon(player, SDLK_1); break;
-                    case SDLK_2: switch_player_weapon(player, SDLK_2); break;
-                    case SDLK_3: switch_player_weapon(player, SDLK_3); break;
+                    case SDLK_1: switch_player_weapon(player1, SDLK_1); break;
+                    case SDLK_2: switch_player_weapon(player1, SDLK_2); break;
+                    case SDLK_3: switch_player_weapon(player1, SDLK_3); break;
                 }
             }
             
@@ -90,7 +90,7 @@ int main(int argv, char** args){
         SDL_Delay(1000/60 - deltaTime); // 60 fps
         */
         Input_Logger *p1Logger = Player_get_inputs(p1);
-        SDL_Delay(1000/5);
+        SDL_Delay(1000/60);
         Input_Logger *logger = Player_get_inputs(p1);
         Input_Logger_update_all_actions(logger, keystates);
         printf("attack just pressed %d\n", Input_Logger_is_action_just_pressed(p1Logger, "attack"));

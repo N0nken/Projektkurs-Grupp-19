@@ -127,9 +127,7 @@ int Player_get_isAlive(Player *p) {
 SDL_Rect *Player_get_rect(Player *p) {
     return p->rect;
 }
-
-
-void Player_get_weapon_sprite(Player *p, int weapon){
+SDL_Texture *Player_get_weapon_sprite(Player *p, int weapon){
     switch (weapon)
     {
         case ROCK: return p->spriteSheet; 
@@ -146,7 +144,7 @@ void switch_player_weapon(Player *p, int keyPressed){
     }   
 }
 
-void Switch_Player_Weapon_Sprite(Player *p, int weapon, int *pCurrentWeaponImage){
+void switch_player_weapon_sprite(Player *p, int weapon, int *pCurrentWeaponImage){
     switch (weapon){
     case 0:
         //currentWeaponImage() = rockImage;
