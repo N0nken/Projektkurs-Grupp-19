@@ -19,6 +19,9 @@ int destroy_Vector2(Vector2 *v) {
     free(v);
     return 0;
 }
+Vector2 *copy_Vector2(Vector2 *v) {
+    return create_Vector2(Vector2_get_x(v), Vector2_get_y(v));
+}
 
 void print_Vector2(Vector2 *v) {
     printf("%.2f %.2f\n", Vector2_get_x(v), Vector2_get_y(v));
