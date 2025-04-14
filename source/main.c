@@ -4,10 +4,12 @@
 #include <SDL2/SDL_image.h>
 #include <SDL_net.h>
 
+#include "../include/input_logger.h"
 #include "../include/attacks.h"
 #include "../include/player.h"
 #include "../include/collision.h"
 #include "../include/vector2.h"
+#include "../include/movement.h"
 
 int main(int argv, char** args){
 
@@ -17,10 +19,47 @@ int main(int argv, char** args){
     SDL_Surface *background= IMG_Load("images/BG_Prototype.png");
     SDL_Texture *backgroundtexture = SDL_CreateTextureFromSurface(renderer,background);
 
+    SDL_Surface *playerSurface = IMG_Load("images/char.png"); //texture för spelare
+    if (!playerSurface) {
+        printf("Error loading player image: %s\n", IMG_GetError());
+    }
+    SDL_Texture *playerTexture = SDL_CreateTextureFromSurface(renderer, playerSurface);
+    SDL_FreeSurface(playerSurface);
+
     bool isRunning = true;
     SDL_Event event;
 
+    Player *allPlayers[4];
+    int activePlayerCount = 0;
+
+    Player *player1 = create_Player(create_Vector2(50, 50), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), 100, 1, 1, allPlayers, &activePlayerCount);
+    //SDL_Rect *rect1 = Player_get_rect(player1);
+    //float deltaTime = 1;
+
+    /* avkommentera för att testa move_and_collide()
+    Collider *col1 = create_Collider(create_Vector2(0, 0), create_Vector2(5, 5), 0);
+    Collider *col2 = create_Collider(create_Vector2(100, 100), create_Vector2(5, 5), 0);
+    move_and_collide(col1, create_Vector2(1000, 1000));
+    print_Collider(col1);
+    */
+
+    /* avkommentera för att testa attack */
+    Player *p1 = create_Player(
+        create_Vector2(0, 0), create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 0), 
+        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1), 
+        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1),
+        100, 0, 1, allPlayers, &activePlayerCount);
+    Player *p2 = create_Player(
+        create_Vector2(0, 0), create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 0), 
+        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1), 
+        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1),
+        100, 0, 1, allPlayers, &activePlayerCount);
+    
+    
+
+    Uint64 deltaTime = SDL_GetTicks64();
     while(isRunning){
+
         while(SDL_PollEvent(&event)){
             switch (event.type)
             {
@@ -38,9 +77,25 @@ int main(int argv, char** args){
             }
             
         }
+        printf("%d\n", Player_get_hp(p2));
+        handle_attack_input(allPlayers, activePlayerCount);
+        printf("%d\n", Player_get_hp(p2));
+        const Uint8 *keystates = SDL_GetKeyboardState(NULL);
+        handle_movement(player1, 5.0f, keystates);
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, backgroundtexture, NULL, NULL);
+        SDL_RenderCopy(renderer, playerTexture, NULL, Player_get_rect(player1));
         SDL_RenderPresent(renderer);
+        /*deltaTime = SDL_GetTicks64() - deltaTime;
+        SDL_Delay(1000/60 - deltaTime); // 60 fps
+        */
+        Input_Logger *p1Logger = Player_get_inputs(p1);
+        SDL_Delay(1000/5);
+        Input_Logger *logger = Player_get_inputs(p1);
+        Input_Logger_update_all_actions(logger, keystates);
+        printf("attack just pressed %d\n", Input_Logger_is_action_just_pressed(p1Logger, "attack"));
+        printf("attack pressed %d\n", Input_Logger_is_action_pressed(p1Logger, "attack"));
+        printf("attack just released %d\n", Input_Logger_is_action_just_released(p1Logger, "attack"));
     }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

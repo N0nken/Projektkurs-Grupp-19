@@ -3,6 +3,7 @@
 #include "../include/attacks.h"
 #include "../include/player.h"
 #include "../include/collision.h"
+#include "../include/input_logger.h"
 
 #define BASEDAMAGE 5
 #define DAMAGEBONUSMULTIPLIER 2
@@ -17,8 +18,12 @@ void deal_damage(Player *player, int damage) {
     }
 }
 
-void attack(Player *attackingPlayer, Player *allPlayers[], int playerCount) {
-    for (int i = 0; i < playerCount; i++) {
+void attack(Player *attackingPlayer, Player *allPlayers[], int activePlayerCount) {
+    // play attack animation
+    Collider *attackHitbox = Player_get_attackHitbox(attackingPlayer);
+    Vector2 *origin = create_Vector2(Vector2_get_x(Collider_get_position(attackHitbox)), Vector2_get_y(Collider_get_position(attackHitbox)));
+    Collider_set_position(attackHitbox, Vector2_addition(Player_get_position(attackingPlayer), Collider_get_position(attackHitbox)));
+    for (int i = 0; i < activePlayerCount; i++) {
         if (allPlayers[i] == attackingPlayer) continue;
         Player *defendingPlayer = allPlayers[i];
         if (is_colliding(Player_get_attackHitbox(attackingPlayer), Player_get_hurtbox(defendingPlayer))) {
@@ -35,6 +40,17 @@ void attack(Player *attackingPlayer, Player *allPlayers[], int playerCount) {
                 damage *= DAMAGEPENALTYMULTIPLIER;
             }
             deal_damage(defendingPlayer, damage);
+        }
+    }
+    Collider_set_position(attackHitbox, origin);
+}
+
+void handle_attack_input(Player *allPlayers[], int activePlayerCount) {
+    for (int i = 0; i < activePlayerCount; i++) {
+        Player *p = allPlayers[i];
+        Input_Logger *logger = Player_get_inputs(p);
+        if (Input_Logger_is_action_just_pressed(logger, "attack")) {
+            attack(p, allPlayers, activePlayerCount);
         }
     }
 }

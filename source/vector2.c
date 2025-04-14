@@ -39,6 +39,21 @@ float Vector2_get_y(Vector2 *v) {
 }
 
 /* 2D Vector math */
+int Vector2_equals(Vector2 *v1, Vector2 *v2) {
+    if (Vector2_get_x(v1) == Vector2_get_x(v2) && Vector2_get_y(v1) == Vector2_get_y(v2)) {
+        return 1;
+    }
+    return 0;
+}
+Vector2 *Vector2_addition(Vector2 *v1, Vector2 *v2) {
+    return create_Vector2(Vector2_get_x(v1) + Vector2_get_x(v2), Vector2_get_y(v1) + Vector2_get_y(v2));
+}
+Vector2 *Vector2_subtraction(Vector2 *v1, Vector2 *v2) {
+    return create_Vector2(Vector2_get_x(v1) - Vector2_get_x(v2), Vector2_get_y(v1) - Vector2_get_y(v2));
+}
+Vector2 *Vector2_const_multiplication(Vector2 *v, int constant) {
+    return create_Vector2(Vector2_get_x(v) * constant, Vector2_get_y(v) * constant);
+}
 float distance_to(Vector2 *pos1, Vector2 *pos2) {
     return sqrtf(powf(Vector2_get_x(pos1) - Vector2_get_x(pos2), 2.0) + powf(Vector2_get_y(pos1) - Vector2_get_y(pos2), 2.0));
 }
@@ -71,6 +86,14 @@ float angle_of(Vector2 *v) {
 }
 void normalize(Vector2 *v) {
     float mag = magnitude(v);
-    Vector2_set_x(v, Vector2_get_x(v) / mag);
-    Vector2_set_y(v, Vector2_get_y(v) / mag);
+    if (mag != 0) {
+        Vector2_set_x(v, Vector2_get_x(v) / mag);
+        Vector2_set_y(v, Vector2_get_y(v) / mag);
+    }
+}
+Vector2 *normalized(Vector2 *v) {
+    float mag = magnitude(v);
+    if (mag != 0) {
+        return create_Vector2(Vector2_get_x(v) / mag, Vector2_get_y(v) / mag);
+    }
 }
