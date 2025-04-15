@@ -7,16 +7,12 @@
 struct Vector2 {
     float x;
     float y;
-}; 
-
+};
 Vector2* create_Vector2(float x, float y) {
     Vector2 *v = malloc(sizeof(struct Vector2));
     v->x = x;
     v->y = y;
     return v;
-}
-Vector2 *copy_Vector2(Vector2 *v) {
-    return create_Vector2(v->x, v->y);
 }
 int destroy_Vector2(Vector2 *v) {
     free(v);
