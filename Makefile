@@ -11,7 +11,7 @@ ifeq ($(OS),Windows_NT)                    # MSYS / Git‑Bash / mingw32‑make
     PLATFORM   := WINDOWS
     CC         := gcc
     CFLAGS_SDL := -IC:/msys64/mingw64/include/SDL2
-    LIBS_SDL   := -lmingw32 -lSDL2main -lSDL2 -lSDL2_image
+    LIBS_SDL   := -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_net
     MKDIR      := @if not exist "$(BINDIR)" mkdir "$(BINDIR)"
     RM         := rm -f
 else
