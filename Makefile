@@ -11,7 +11,7 @@ ifeq ($(OS),Windows_NT)                    # MSYS / Git‑Bash / mingw32‑make
     PLATFORM   := WINDOWS
     CC         := gcc
     CFLAGS_SDL := -IC:/msys64/mingw64/include/SDL2
-    LIBS_SDL   := -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_net
+    LIBS_SDL   := -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_net -lSDL2_ttf
     MKDIR      := @if not exist "$(BINDIR)" mkdir "$(BINDIR)"
     RM         := rm -f
 else
@@ -41,11 +41,11 @@ EXECUTABLE := main$(if $(filter $(PLATFORM),WINDOWS),.exe,)
 # Byggregler
 # ----------------------------------------------------------
 
-helloSDL: $(BINDIR)/main.o $(BINDIR)/movement.o $(BINDIR)/input_logger.o
+helloSDL: $(BINDIR)/main.o $(BINDIR)/movement.o $(BINDIR)/input_logger.o $(BINDIR)/menu.o
 	$(CC) -o $(EXECUTABLE) $(BINDIR)/main.o \
 	      $(BINDIR)/attacks.o $(BINDIR)/player.o $(BINDIR)/collision.o \
 	      $(BINDIR)/vector2.o $(BINDIR)/mathex.o \
-	      $(BINDIR)/movement.o $(BINDIR)/input_logger.o $(LDFLAGS)
+	      $(BINDIR)/movement.o $(BINDIR)/input_logger.o $(BINDIR)/menu.o $(LDFLAGS)
 
 # ---------------- main.o ----------------
 $(BINDIR)/main.o: $(SRCDIR)/main.c $(BINDIR)/attacks.o
@@ -86,6 +86,11 @@ $(BINDIR)/mathex.o: $(SRCDIR)/mathex.c
 $(BINDIR)/input_logger.o: $(SRCDIR)/input_logger.c
 	$(MKDIR)
 	$(CC) $(CFLAGS) -c $(SRCDIR)/input_logger.c -o $@
+
+# ---------------- menu.o ----------------
+$(BINDIR)/menu.o: $(SRCDIR)/menu.c
+	$(MKDIR)
+	$(CC) $(CFLAGS) -c $(SRCDIR)/menu.c -o $@
 
 # ----------------------------------------------------------
 #  Städning

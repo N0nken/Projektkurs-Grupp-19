@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include <SDL_net.h>
+
 
 #include "../include/input_logger.h"
 #include "../include/attacks.h"
@@ -10,12 +12,23 @@
 #include "../include/collision.h"
 #include "../include/vector2.h"
 #include "../include/movement.h"
+#include "../include/menu.h"
+
+#define NrOfButton 2
+
+void background(SDL_Renderer* Renderer);
+void render_main_menu(SDL_Renderer* Renderer, SDL_Window* Window);
 
 int main(int argv, char** args){
 
     SDL_Init(SDL_INIT_EVERYTHING);
+    TTF_Init();
     SDL_Window *window = SDL_CreateWindow("Hello SDL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_RESIZABLE);
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
+    
+
+
+    render_main_menu( renderer,  window);
     SDL_Surface *background= IMG_Load("images/background.png");
     SDL_Texture *backgroundtexture = SDL_CreateTextureFromSurface(renderer,background);
 
@@ -25,6 +38,8 @@ int main(int argv, char** args){
     }
     SDL_Texture *playerTexture = SDL_CreateTextureFromSurface(renderer, playerSurface);
     SDL_FreeSurface(playerSurface);
+
+
 
     bool isRunning = true;
     SDL_Event event;
@@ -108,4 +123,69 @@ int main(int argv, char** args){
     SDL_Quit();
 
     return 0;
+}
+
+
+void background(SDL_Renderer* Renderer){
+    SDL_Surface* surface= IMG_Load("images/background.png");
+    SDL_Texture* texture= SDL_CreateTextureFromSurface(Renderer, surface);
+    SDL_RenderCopy(Renderer,texture,NULL,NULL);
+    SDL_FreeSurface(surface);
+    SDL_DestroyTexture(texture);
+}
+
+
+void render_main_menu(SDL_Renderer* Renderer, SDL_Window* Window){
+    button *Button[2];
+    Button[0] = button_create(900, 600, 400, 100, NULL, Renderer, Window);
+    Button[1]= button_create(900, 400, 400, 100, NULL, Renderer, Window);
+    center_button(Button[1],Window);
+    center_button(Button[0],Window);
+
+    bool quit;
+    SDL_Event event;
+    while(quit==false){
+        SDL_RenderClear(Renderer);
+        
+        background(Renderer);
+
+        for(int i=0; i<NrOfButton; i++){
+            if (ret_button_hover_state(Button[i])){
+                ret_button_hover(ret_button_rect(Button[i]), Renderer);
+            }
+            else{
+                ret_button_normal(ret_button_rect(Button[i]), Renderer);
+            }
+        }  
+
+        while(SDL_PollEvent( &event )!= 0){
+            if( event.type == SDL_QUIT ){
+                quit = true;
+            }
+            else if(event.type == SDL_MOUSEMOTION){
+                int x,y;
+                SDL_GetMouseState(&x, &y);
+                for(int i=0; i<NrOfButton; i++){
+                    if(is_in_button_rect(x, y, ret_button_rect(Button[i]))){
+                        set_button_hover_true(Button[i]);
+                    }
+                    else{
+                        set_button_hover_false(Button[i]);
+                    }
+                }
+            }
+        }
+        load_Button_Text(Button[1], "Single player", Renderer);
+        load_Button_Text(Button[0], "Lobby", Renderer);
+    SDL_RenderPresent(Renderer);
+
+    }
+
+    for(int i=0; i<NrOfButton; i++){
+        button_destroy(Button[i]);
+    }
+    
+    SDL_DestroyRenderer(Renderer);
+    SDL_DestroyWindow(Window);
+    TTF_Quit();
 }

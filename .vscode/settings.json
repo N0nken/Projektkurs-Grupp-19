@@ -60,6 +60,9 @@
   "files.associations": {
     "attacks.h": "c",
     "vector2.h": "c",
-    "string.h": "c"
+    "string.h": "c",
+    "sdl_image.h": "c",
+    "menu.h": "c",
+    "sdl_ttf.h": "c"
   }
 }
