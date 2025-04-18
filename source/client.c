@@ -80,7 +80,7 @@ int client_main() {
 }
 
 int init_client(Client *client, GameState *gameState) {
-    client->socket = SDLNet_UDP_Open(CLIENTPORT);
+    client->socket = SDLNet_UDP_Open(0);
     if (!client->socket) {
         printf("SDLNet_UDP_Open: %s\n", SDLNet_GetError());
         return 1;
@@ -118,14 +118,15 @@ void client_waiting(Client *client, GameState *gameState) {
             printf("Attempting to connect to server...\n");
             client->sendPacket->address = client->serverIP;
             client->sendPacket->len = 0; // No data to send
-            client->sendPacket->data = NULL;
+            *(client->sendPacket->data) = 1;
             SDLNet_UDP_Send(client->socket, -1, client->sendPacket);
         } else {
             printf("Connected to server %s\n", SDLNet_ResolveIP(&client->serverIP));
             send_player_input(client, gameState);
+            printf("Player input sent\n");
         }
         sync_game_state_with_server(client, gameState);
-        SDL_Delay(1000); // Wait for 1 second before checking again
+        SDL_Delay(1000);
     }
 }
 
@@ -141,6 +142,7 @@ void client_playing(Client *client, GameState *gameState) {
 
         // sync simulation with server
         sync_game_state_with_server(client, gameState);
+        SDL_Delay(1000 / 60); // Run at 60 FPS
     }
 }
 
@@ -149,8 +151,8 @@ void client_game_over() {
 }
 
 int send_player_input(Client *client, GameState *gameState) {
-    printf("in send_player_input\n");
     ClientData clientData;
+    printf("Preparing sending packet\n");
     InputLogger *playerInputLogger = Player_get_inputs(gameState->players[gameState->playerID]);
     for (int i = 0; i < 3; i++) {
         clientData.up[i] = InputLogger_get_action_state(playerInputLogger, "move_up", i);
@@ -162,17 +164,14 @@ int send_player_input(Client *client, GameState *gameState) {
         clientData.switchToPaper[i] = InputLogger_get_action_state(playerInputLogger, "switch_to_paper", i);
         clientData.switchToScissors[i] = InputLogger_get_action_state(playerInputLogger, "switch_to_scissors", i);
     }
-    printf("A\n");
     memcpy(client->sendPacket->data, &clientData, sizeof(ClientData));
-    printf("B\n");
     client->sendPacket->address = client->serverIP;
-    client->sendPacket->len = sizeof(ClientData);
+    client->sendPacket->len = sizeof(clientData);
     printf("packet sending\n");
     return SDLNet_UDP_Send(client->socket, -1, client->sendPacket);
 }
 
 void sync_game_state_with_server(Client *client, GameState *gameState) {
-    printf("in sync_game_state_with_server\n");
     ServerData serverData;
     // Receive all packets from the server
     while (SDLNet_UDP_Recv(client->socket, client->recvPacket)) {

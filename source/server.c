@@ -141,6 +141,7 @@ void server_playing(Server *server, GameState *gameState) {
 
 
         send_server_game_state_to_all_clients(server, gameState);
+        SDL_Delay(1000 / 60); // Run at 60 FPS
     }
 }
 
