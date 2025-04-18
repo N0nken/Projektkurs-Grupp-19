@@ -9,7 +9,6 @@
 struct Player {
     Vector2 *position;
     Collider *collider;
-    Collider *hurtbox;
     Collider *attackHitbox;
     int hp;
     int weapon;
@@ -17,22 +16,22 @@ struct Player {
     SDL_Texture *spriteSheet;
     int canDash;
     SDL_Rect *rect; //la till pga behövs för textur
-    Input_Logger *logger;
+    InputLogger *logger;
+    int direction; // left -1, right 1
 };
 
 enum Weapons {ROCK, SCISSORS, PAPER};
 
-Player *create_Player(Vector2 *position, Collider *collider, Collider *hurtbox, Collider *attackHitbox, int hp, int weapon, int isAlive, Player *allPlayers[], int *activePlayerCount) {
+Player *create_Player(Vector2 *position, Collider *collider, Collider *attackHitbox, int hp, int weapon, int isAlive, Player *allPlayers[], int *activePlayerCount) {
     Player *newPlayer = malloc(sizeof(struct Player));
     newPlayer->position = position;
     newPlayer->collider = collider;
-    newPlayer->hurtbox = hurtbox;
     newPlayer->attackHitbox = attackHitbox;
     newPlayer->hp = hp;
     newPlayer->weapon = weapon;
     newPlayer->isAlive = isAlive;
     newPlayer->canDash = 1;
-    newPlayer->logger = create_Input_Logger();
+    newPlayer->logger = create_InputLogger();
 
     newPlayer->rect = malloc(sizeof(struct SDL_Rect));
     newPlayer->rect->x = (int)Vector2_get_x(position);
@@ -40,15 +39,15 @@ Player *create_Player(Vector2 *position, Collider *collider, Collider *hurtbox, 
     newPlayer->rect->w = 64;
     newPlayer->rect->h = 64;
     allPlayers[(*activePlayerCount)++] = newPlayer;
+    newPlayer->direction = 1; // default direction to right
     
     return newPlayer;
 }
 int destroy_Player(Player *p) {
     destroy_Vector2(p->position);
     destroy_Collider(p->collider);
-    destroy_Collider(p->hurtbox);
     destroy_Collider(p->attackHitbox);
-    destroy_Input_Logger(p->logger);
+    destroy_InputLogger(p->logger);
     free(p->rect);
     free(p);
     return 0;
@@ -59,12 +58,9 @@ void Player_set_position(Player *p, struct Vector2 *position) {
     printf("g");
     destroy_Vector2(p->position);
 
-    Vector2 *hurtboxposition = create_Vector2(Vector2_get_x(position), Vector2_get_y(position));
     p->position = position;    
     p->rect->x = (int)Vector2_get_x(position);
     p->rect->y = (int)Vector2_get_y(position);  //flytta på rect
-    //destroy_Vector2(Collider_get_position(Player_get_hurtbox(p)));
-    //Collider_set_position(Player_get_hurtbox(p), hurtboxposition);
     printf("h");
 }
 void Player_set_yposition(Player *p, float y) {
@@ -79,10 +75,6 @@ void Player_set_collider(Player *p, Collider *collider) {
     destroy_Collider(p->collider);
     p->collider = collider;
 }
-void Player_set_hurtbox(Player *p, Collider *hurtbox) {
-    destroy_Collider(p->hurtbox);
-    p->hurtbox = hurtbox;
-}
 void Player_set_attackHitbox(Player *p, Collider *attackHitbox) {
     destroy_Collider(p->attackHitbox);
     p->attackHitbox = attackHitbox;
@@ -96,10 +88,13 @@ void Player_set_weapon(Player *p, int weapon) {
 void Player_set_isAlive(Player *p, int isAlive) {
     p->isAlive = isAlive;
 }
+void Player_set_direction(Player *p, int direction) {
+    p->direction = direction;
+}
 
 
 /* Getters */
-Input_Logger *Player_get_inputs(Player *p) {
+InputLogger *Player_get_inputs(Player *p) {
     return p->logger;
 }
 Vector2 *Player_get_position(Player *p) {
@@ -113,9 +108,6 @@ int Player_get_can_dash(Player *p){
 }
 Collider *Player_get_collider(Player *p) {
     return p->collider;
-}
-Collider *Player_get_hurtbox(Player *p) {
-    return p->hurtbox;
 }
 Collider *Player_get_attackHitbox(Player *p) {
     return p->attackHitbox;
@@ -139,6 +131,9 @@ SDL_Texture *Player_get_weapon_sprite(Player *p, int weapon){
         case SCISSORS: return p->spriteSheet;
         case PAPER: return p->spriteSheet;
     }
+}
+int Player_get_direction(Player *p) {
+    return p->direction;
 }
 
 void switch_player_weapon(Player *p, int keyPressed){

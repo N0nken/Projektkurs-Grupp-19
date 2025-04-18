@@ -2,6 +2,9 @@
 #define COLLISION_H_
 #include "vector2.h"
 
+#define PLAYERCOLLISIONLAYER 0
+#define PLAYERATTACKLAYER 1
+
 typedef struct Collider Collider;
 
 Collider* create_Collider(Vector2 *position, Vector2 *dimensions, int isTrigger, int layer);
