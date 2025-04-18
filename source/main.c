@@ -137,8 +137,8 @@ void background(SDL_Renderer* Renderer){
 
 void render_main_menu(SDL_Renderer* Renderer, SDL_Window* Window){
     button *Button[2];
-    Button[0] = button_create(900, 600, 400, 100, NULL, Renderer, Window);
-    Button[1]= button_create(900, 400, 400, 100, NULL, Renderer, Window);
+    Button[0] = button_create(0, 600, 400, 100, NULL, Renderer, Window);
+    Button[1]= button_create(0, 400, 400, 100, NULL, Renderer, Window);
     center_button(Button[1],Window);
     center_button(Button[0],Window);
 
@@ -174,6 +174,16 @@ void render_main_menu(SDL_Renderer* Renderer, SDL_Window* Window){
                     }
                 }
             }
+            
+            else if (event.type == SDL_MOUSEBUTTONDOWN){
+                int x,y;
+                SDL_GetMouseState(&x, &y);
+                for(int i=0; i<NrOfButton; i++){
+                    if(is_in_button_rect(x, y, ret_button_rect(Button[i]))) ret_button_clicked(ret_button_rect(Button[0]), Renderer);
+                }
+
+            }
+            else if(event.type == SDL_MOUSEBUTTONUP)quit=true;
         }
         load_Button_Text(Button[1], "Single player", Renderer);
         load_Button_Text(Button[0], "Lobby", Renderer);
@@ -185,7 +195,5 @@ void render_main_menu(SDL_Renderer* Renderer, SDL_Window* Window){
         button_destroy(Button[i]);
     }
     
-    SDL_DestroyRenderer(Renderer);
-    SDL_DestroyWindow(Window);
-    TTF_Quit();
+    
 }

@@ -93,7 +93,7 @@ SDL_Rect ret_button_rect(button *Button){
 
 void ret_button_normal(SDL_Rect Area, SDL_Renderer *Renderer){
     SDL_SetRenderDrawColor(Renderer, 230, 230, 230, SDL_ALPHA_OPAQUE);
-    SDL_RenderFillRect(Renderer, &Area);
+    SDL_RenderDrawRect(Renderer, &Area);
 
 }
 
