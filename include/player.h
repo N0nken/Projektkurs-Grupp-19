@@ -37,7 +37,11 @@ int Player_get_hp(Player *p);
 int Player_get_weapon(Player *p);
 int Player_get_isAlive(Player *p);
 SDL_Rect *Player_get_rect(Player *p);
+SDL_Texture *Player_get_weapon_sprite(Player *p, int weapon);
 
 void deal_damage(Player *player, int damage);
+
+void switch_player_weapon(Player *p, int keyPressed);
+void switch_player_weapon_sprite(Player *p, int Key, int *pCurrentImage);
 
 #endif

@@ -16,7 +16,7 @@ int main(int argv, char** args){
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Window *window = SDL_CreateWindow("Hello SDL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_RESIZABLE);
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
-    SDL_Surface *background= IMG_Load("images/BG_Prototype.png");
+    SDL_Surface *background= IMG_Load("images/background.png");
     SDL_Texture *backgroundtexture = SDL_CreateTextureFromSurface(renderer,background);
 
     SDL_Surface *playerSurface = IMG_Load("images/char.png"); //texture för spelare
@@ -32,7 +32,11 @@ int main(int argv, char** args){
     Player *allPlayers[4];
     int activePlayerCount = 0;
 
-    Player *player1 = create_Player(create_Vector2(50, 50), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1), 100, 1, 1, allPlayers, &activePlayerCount);
+    Player *player1 = create_Player(
+        create_Vector2(50, 50), create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1, 0), 
+        create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1, 0), 
+        create_Collider(create_Vector2(10, 10), create_Vector2(10, 10), 1, 0), 
+    100, 1, 1, allPlayers, &activePlayerCount);
     //SDL_Rect *rect1 = Player_get_rect(player1);
     //float deltaTime = 1;
 
@@ -45,16 +49,20 @@ int main(int argv, char** args){
 
     /* avkommentera för att testa attack */
     Player *p1 = create_Player(
-        create_Vector2(0, 0), create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 0), 
-        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1), 
-        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1),
+        create_Vector2(0, 0), create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 0, 0), 
+        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1, 0), 
+        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1, 0),
         100, 0, 1, allPlayers, &activePlayerCount);
     Player *p2 = create_Player(
-        create_Vector2(0, 0), create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 0), 
-        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1), 
-        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1),
+        create_Vector2(0, 0), create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 0, 0), 
+        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1, 0), 
+        create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1, 0),
         100, 0, 1, allPlayers, &activePlayerCount);
     
+    
+    Collider *ground = create_Collider(create_Vector2(250, 410), create_Vector2(300, 20), 0, 1);  //collider och sdl rect är annorlunda, måste skapa formel
+    SDL_Rect platforms[1];
+    platforms[0] = (SDL_Rect){0, 452, 580, 1};
     
 
     Uint64 deltaTime = SDL_GetTicks64();
@@ -63,29 +71,47 @@ int main(int argv, char** args){
         while(SDL_PollEvent(&event)){
             switch (event.type)
             {
-                case SDL_QUIT: isRunning = false;
-                
+                case SDL_QUIT: isRunning = false; break;
             }
+            
+            if (event.type==SDL_KEYDOWN)
+            {
+                switch (event.key.keysym.sym)
+                {
+                    case SDLK_1: switch_player_weapon(player1, SDLK_1); break;
+                    case SDLK_2: switch_player_weapon(player1, SDLK_2); break;
+                    case SDLK_3: switch_player_weapon(player1, SDLK_3); break;
+                }
+            }
+            
         }
         printf("%d\n", Player_get_hp(p2));
         handle_attack_input(allPlayers, activePlayerCount);
         printf("%d\n", Player_get_hp(p2));
         const Uint8 *keystates = SDL_GetKeyboardState(NULL);
-        handle_movement(player1, 5.0f, keystates);
-        SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, backgroundtexture, NULL, NULL);
-        SDL_RenderCopy(renderer, playerTexture, NULL, Player_get_rect(player1));
-        SDL_RenderPresent(renderer);
-        /*deltaTime = SDL_GetTicks64() - deltaTime;
-        SDL_Delay(1000/60 - deltaTime); // 60 fps
-        */
+        printf("A");
+
         Input_Logger *p1Logger = Player_get_inputs(p1);
-        SDL_Delay(1000/5);
+        SDL_Delay(1000/60);
         Input_Logger *logger = Player_get_inputs(p1);
         Input_Logger_update_all_actions(logger, keystates);
         printf("attack just pressed %d\n", Input_Logger_is_action_just_pressed(p1Logger, "attack"));
         printf("attack pressed %d\n", Input_Logger_is_action_pressed(p1Logger, "attack"));
         printf("attack just released %d\n", Input_Logger_is_action_just_released(p1Logger, "attack"));
+
+        handle_movement(player1, 5.0f, logger, ground);
+        printf("B");
+        SDL_RenderClear(renderer);
+        SDL_RenderCopy(renderer, backgroundtexture, NULL, NULL);
+        SDL_RenderCopy(renderer, playerTexture, NULL, Player_get_rect(player1));
+        
+        SDL_SetRenderDrawColor(renderer, 150, 75, 0, 255);
+        SDL_RenderFillRect(renderer, &platforms[0]);
+
+        SDL_RenderPresent(renderer);
+        /*deltaTime = SDL_GetTicks64() - deltaTime;
+        SDL_Delay(1000/60 - deltaTime); // 60 fps
+        */
     }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

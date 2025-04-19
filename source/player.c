@@ -14,6 +14,7 @@ struct Player {
     int hp;
     int weapon;
     int isAlive;
+    SDL_Texture *spriteSheet;
     int canDash;
     SDL_Rect *rect; //la till pga behövs för textur
     Input_Logger *logger;
@@ -47,6 +48,7 @@ int destroy_Player(Player *p) {
     destroy_Collider(p->collider);
     destroy_Collider(p->hurtbox);
     destroy_Collider(p->attackHitbox);
+    destroy_Input_Logger(p->logger);
     free(p->rect);
     free(p);
     return 0;
@@ -54,11 +56,16 @@ int destroy_Player(Player *p) {
 
 /* Setters */
 void Player_set_position(Player *p, struct Vector2 *position) {
+    printf("g");
     destroy_Vector2(p->position);
-    p->position = position;
-    
+
+    Vector2 *hurtboxposition = create_Vector2(Vector2_get_x(position), Vector2_get_y(position));
+    p->position = position;    
     p->rect->x = (int)Vector2_get_x(position);
     p->rect->y = (int)Vector2_get_y(position);  //flytta på rect
+    //destroy_Vector2(Collider_get_position(Player_get_hurtbox(p)));
+    //Collider_set_position(Player_get_hurtbox(p), hurtboxposition);
+    printf("h");
 }
 void Player_set_yposition(Player *p, float y) {
     float current_x = Vector2_get_x(p->position);
@@ -89,6 +96,7 @@ void Player_set_weapon(Player *p, int weapon) {
 void Player_set_isAlive(Player *p, int isAlive) {
     p->isAlive = isAlive;
 }
+
 
 /* Getters */
 Input_Logger *Player_get_inputs(Player *p) {
@@ -124,31 +132,33 @@ int Player_get_isAlive(Player *p) {
 SDL_Rect *Player_get_rect(Player *p) {
     return p->rect;
 }
+SDL_Texture *Player_get_weapon_sprite(Player *p, int weapon){
+    switch (weapon)
+    {
+        case ROCK: return p->spriteSheet; 
+        case SCISSORS: return p->spriteSheet;
+        case PAPER: return p->spriteSheet;
+    }
+}
 
-void SwitchPlayerWeapon(Player *p, int Key){
-    switch (Key){
-    case 1:
-        p->weapon = ROCK;
-        break;
-    case 2:
-        p->weapon = SCISSORS;
-        break;
-    case 3:
-        p->weapon = PAPER;    
-        break;
+void switch_player_weapon(Player *p, int keyPressed){
+    switch (keyPressed){
+        case SDLK_1: Player_set_weapon(p, ROCK);break;
+        case SDLK_2: Player_set_weapon(p, SCISSORS);break;
+        case SDLK_3: Player_set_weapon(p, PAPER);break;
     }   
 }
 
-void SwitchPlayerWeaponSprite(Player *p, int Key, int *pCurrentImage){
-    switch (Key){
+void switch_player_weapon_sprite(Player *p, int weapon, int *pCurrentWeaponImage){
+    switch (weapon){
+    case 0:
+        //currentWeaponImage() = rockImage;
+        break;
     case 1:
-        //currentWeaponImage = rockImage;
+        //currentWeaponImage() = scissorImage;
         break;
     case 2:
-        //currentWeaponImage = scissorImage;
-        break;
-    case 3:
-        //currentWeaponImage = paperImage;
+        //currentWeaponImage() = paperImage;
         break;
     }
 }

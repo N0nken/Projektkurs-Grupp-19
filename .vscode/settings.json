@@ -60,6 +60,7 @@
   "files.associations": {
     "attacks.h": "c",
     "vector2.h": "c",
-    "string.h": "c"
+    "string.h": "c",
+    "stdlib.h": "c"
   }
 }

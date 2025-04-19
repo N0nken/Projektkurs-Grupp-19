@@ -26,7 +26,7 @@ void attack(Player *attackingPlayer, Player *allPlayers[], int activePlayerCount
     for (int i = 0; i < activePlayerCount; i++) {
         if (allPlayers[i] == attackingPlayer) continue;
         Player *defendingPlayer = allPlayers[i];
-        if (is_colliding(Player_get_attackHitbox(attackingPlayer), Player_get_hurtbox(defendingPlayer))) {
+        if (is_colliding(Player_get_attackHitbox(attackingPlayer), Player_get_hurtbox(defendingPlayer), -1)) {
             int damage = BASEDAMAGE;
             int attackingPlayerWeapon = Player_get_weapon(attackingPlayer);
             int defendingPlayerWeapon = Player_get_weapon(defendingPlayer);
