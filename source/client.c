@@ -7,6 +7,7 @@
 #include "../include/collision.h"
 #include "../include/vector2.h"
 #include "../include/movement.h"
+#include "../include/render_controller.h"
 
 #define MAXCLIENTS 4
 #define CLIENTPORT 50000
@@ -67,13 +68,15 @@ void sync_game_state_with_server();
 int client_main() {
     Client client;
     GameState gameState;
+    RenderController *renderController;
 
     if (init_client(&client, &gameState)) return 1;
+    if (init_rendering(renderController)) return 1; // Initialize rendering (if needed)
 
     while (1) {
-        client_waiting(&client, &gameState);
-        client_playing(&client, &gameState);
-        client_game_over(&client, &gameState);
+        client_waiting(&client, &gameState, renderController);
+        client_playing(&client, &gameState, renderController);
+        client_game_over(&client, &gameState, renderController);
     }
 
     return 0;
@@ -107,7 +110,11 @@ int init_client(Client *client, GameState *gameState) {
     return 0;
 }
 
-void client_waiting(Client *client, GameState *gameState) {
+int init_rendering(RenderController *renderController) {
+    
+}
+
+void client_waiting(Client *client, GameState *gameState, RenderController *renderController) {
     char targetIPaddress[16];
     printf("Enter server IP address: ");
     scanf("%s", &targetIPaddress);
@@ -117,7 +124,7 @@ void client_waiting(Client *client, GameState *gameState) {
         if (gameState->playerID == -1) {
             printf("Attempting to connect to server...\n");
             client->sendPacket->address = client->serverIP;
-            client->sendPacket->len = 0; // No data to send
+            client->sendPacket->len = sizeof(1); // No data to send
             *(client->sendPacket->data) = 1;
             SDLNet_UDP_Send(client->socket, -1, client->sendPacket);
         } else {
@@ -130,7 +137,7 @@ void client_waiting(Client *client, GameState *gameState) {
     }
 }
 
-void client_playing(Client *client, GameState *gameState) {
+void client_playing(Client *client, GameState *gameState, RenderController *renderController) {
     while (gameState->matchState == PLAYING) {
         // Handle player input
         InputLogger_update_all_actions(Player_get_inputs(gameState->players[gameState->playerID]), SDL_GetKeyboardState(NULL));
@@ -142,11 +149,14 @@ void client_playing(Client *client, GameState *gameState) {
 
         // sync simulation with server
         sync_game_state_with_server(client, gameState);
+
+        // Render current frame
+
         SDL_Delay(1000 / 60); // Run at 60 FPS
     }
 }
 
-void client_game_over() {
+void client_game_over(Client *client, GameState *gameState, RenderController *renderController) {
 
 }
 
@@ -185,7 +195,7 @@ void sync_game_state_with_server(Client *client, GameState *gameState) {
                 continue;
             }
             gameState->playerAliveCount++;
-            printf("%d %d %d %d %.2f %.2f %d\n", serverData.players[i].isAlive, serverData.players[i].hp, serverData.players[i].weapon, serverData.players[i].posX, serverData.players[i].posY, serverData.players[i].direction);
+            //printf("%d %d %d %d %.2f %.2f %d\n", serverData.players[i].isAlive, serverData.players[i].hp, serverData.players[i].weapon, serverData.players[i].posX, serverData.players[i].posY, serverData.players[i].direction);
             Player_set_isAlive(gameState->players[i], serverData.players[i].isAlive);
             Player_set_hp(gameState->players[i], serverData.players[i].hp);
             Player_set_weapon(gameState->players[i], serverData.players[i].weapon);

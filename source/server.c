@@ -20,6 +20,7 @@ struct Server {
     UDPsocket socket;
     UDPpacket *sendPacket;
     UDPpacket *recvPacket;
+    int framesSinceLatestPacket[MAXCLIENTS]; // Number of frames since the last packet was received from each client. Assume client has disconnected when it reaches X frames.
 }; typedef struct Server Server;
 
 struct GameState {
@@ -75,6 +76,8 @@ int server_main() {
     
     int running = 1;
     while (running) {
+        server.clientCount = 0; // Reset client count for each new game
+        gameState.matchState = WAITING;
         server_waiting(&server, &gameState);
         server_playing(&server, &gameState);
         server_game_over(&server, &gameState);
@@ -138,7 +141,10 @@ void server_playing(Server *server, GameState *gameState) {
     while (gameState->matchState == PLAYING) {
         receive_player_inputs(server, gameState);
         // Update game state logic here
-
+        for (int i = 0; i < MAXCLIENTS; i++) {
+            //handle_movement();
+            handle_attack_input(gameState->players, MAXCLIENTS);
+        }
 
         send_server_game_state_to_all_clients(server, gameState);
         SDL_Delay(1000 / 60); // Run at 60 FPS
@@ -163,6 +169,7 @@ int save_client(Server *server, IPaddress ip) {
 void receive_player_inputs(Server *server, GameState *gameState) {
     ClientData clientData;
     while (SDLNet_UDP_Recv(server->socket, server->recvPacket)) {
+        printf("Packet received from %s\n", SDLNet_ResolveIP(&server->recvPacket->address));
         memcpy(&clientData, server->recvPacket->data, sizeof(ClientData));
         int playerID = get_player_id_from_ip(server, server->recvPacket->address);
         if (playerID == -1) {
