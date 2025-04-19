@@ -11,6 +11,12 @@ void move_player(Player *player, Vector2 *velocity) {
     // Hämta nuvarande position
     Vector2 *pos = Player_get_position(player);
     
+    if (Vector2_get_x(velocity) < 0) {
+        Player_set_direction(player, -1); // left
+    } else if (Vector2_get_x(velocity) > 0) {
+        Player_set_direction(player, 1); // right
+    }
+
     // Uppdatera positionen
     move_and_collide(Player_get_collider(player), velocity, 1);
     Vector2 *newPosition = copy_Vector2(Collider_get_position(Player_get_collider(player)));
