@@ -66,4 +66,3 @@ void handle_movement(Player *player, float speed, const Uint8 *keystates) {
     destroy_Vector2(velocity);
 }
 
-

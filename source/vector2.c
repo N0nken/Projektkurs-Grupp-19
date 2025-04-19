@@ -8,16 +8,19 @@ struct Vector2 {
     float x;
     float y;
 };
+
 Vector2* create_Vector2(float x, float y) {
     Vector2 *v = malloc(sizeof(struct Vector2));
     v->x = x;
     v->y = y;
     return v;
 }
+
 int destroy_Vector2(Vector2 *v) {
     free(v);
     return 0;
 }
+
 Vector2 *copy_Vector2(Vector2 *v) {
     return create_Vector2(Vector2_get_x(v), Vector2_get_y(v));
 }
@@ -30,12 +33,15 @@ void print_Vector2(Vector2 *v) {
 void Vector2_set_x(Vector2 *v, float x) {
     v->x = x;
 }
+
 void Vector2_set_y(Vector2 *v, float y) {
     v->y = y;
 }
+
 float Vector2_get_x(Vector2 *v) {
     return v->x;
 }
+
 float Vector2_get_y(Vector2 *v) {
     return v->y;
 }
