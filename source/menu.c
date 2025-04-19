@@ -25,7 +25,7 @@ button *button_create(int x, int y, int w,int h, TTF_Font *Font, SDL_Renderer *R
     Button->is_clicked =false;
     Button->color= (SDL_Color){0,0,0,255};
     if(!Font){
-        Button->font= TTF_OpenFont("fonts/p.ttf", 24);
+        Button->font= TTF_OpenFont("fonts/p.ttf", 20);
         if(!Button->font){
             printf("The fonts for buttons failed%s\n",TTF_GetError());
         }

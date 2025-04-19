@@ -1,5 +1,5 @@
-#ifndef TEST_H
-#define TEST_H
+#ifndef menu_h
+#define menu_h
 
 
 typedef struct button button;

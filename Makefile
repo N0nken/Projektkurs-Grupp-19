@@ -41,11 +41,12 @@ EXECUTABLE := main$(if $(filter $(PLATFORM),WINDOWS),.exe,)
 # Byggregler
 # ----------------------------------------------------------
 
-helloSDL: $(BINDIR)/main.o $(BINDIR)/movement.o $(BINDIR)/input_logger.o $(BINDIR)/menu.o
+helloSDL: $(BINDIR)/main.o $(BINDIR)/movement.o $(BINDIR)/input_logger.o $(BINDIR)/menu.o $(BINDIR)/dynamic_textarea.o 
 	$(CC) -o $(EXECUTABLE) $(BINDIR)/main.o \
 	      $(BINDIR)/attacks.o $(BINDIR)/player.o $(BINDIR)/collision.o \
 	      $(BINDIR)/vector2.o $(BINDIR)/mathex.o \
-	      $(BINDIR)/movement.o $(BINDIR)/input_logger.o $(BINDIR)/menu.o $(LDFLAGS)
+	      $(BINDIR)/movement.o $(BINDIR)/input_logger.o $(BINDIR)/menu.o \
+		  $(BINDIR)/dynamic_textarea.o $(LDFLAGS)
 
 # ---------------- main.o ----------------
 $(BINDIR)/main.o: $(SRCDIR)/main.c $(BINDIR)/attacks.o
@@ -91,6 +92,10 @@ $(BINDIR)/input_logger.o: $(SRCDIR)/input_logger.c
 $(BINDIR)/menu.o: $(SRCDIR)/menu.c
 	$(MKDIR)
 	$(CC) $(CFLAGS) -c $(SRCDIR)/menu.c -o $@
+# ---------------- dynamic_textarea.o ----
+$(BINDIR)/dynamic_textarea.o: $(SRCDIR)/dynamic_textarea.c
+	$(MKDIR)
+	$(CC) $(CFLAGS) -c $(SRCDIR)/dynamic_textarea.c -o $@
 
 # ----------------------------------------------------------
 #  Städning

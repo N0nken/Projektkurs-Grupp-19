@@ -63,6 +63,7 @@
     "string.h": "c",
     "sdl_image.h": "c",
     "menu.h": "c",
-    "sdl_ttf.h": "c"
+    "sdl_ttf.h": "c",
+    "dynamic_textarea.h": "c"
   }
 }

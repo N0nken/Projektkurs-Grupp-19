@@ -13,11 +13,12 @@
 #include "../include/vector2.h"
 #include "../include/movement.h"
 #include "../include/menu.h"
+#include "../include/dynamic_textarea.h"
 
-#define NrOfButton 2
+#define NrOfButton 3
 
 void background(SDL_Renderer* Renderer);
-void render_main_menu(SDL_Renderer* Renderer, SDL_Window* Window);
+void main_menu(SDL_Renderer* Renderer, SDL_Window* Window,bool *mainQuit);
 
 int main(int argv, char** args){
 
@@ -28,7 +29,7 @@ int main(int argv, char** args){
     
 
 
-    render_main_menu( renderer,  window);
+    
     SDL_Surface *background= IMG_Load("images/background.png");
     SDL_Texture *backgroundtexture = SDL_CreateTextureFromSurface(renderer,background);
 
@@ -42,6 +43,7 @@ int main(int argv, char** args){
 
 
     bool isRunning = true;
+    main_menu( renderer,  window, &isRunning);
     SDL_Event event;
 
     Player *allPlayers[4];
@@ -126,74 +128,61 @@ int main(int argv, char** args){
 }
 
 
-void background(SDL_Renderer* Renderer){
+void background(SDL_Renderer* renderer){
     SDL_Surface* surface= IMG_Load("images/background.png");
-    SDL_Texture* texture= SDL_CreateTextureFromSurface(Renderer, surface);
-    SDL_RenderCopy(Renderer,texture,NULL,NULL);
+    SDL_Texture* texture= SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_RenderCopy(renderer,texture,NULL,NULL);
     SDL_FreeSurface(surface);
     SDL_DestroyTexture(texture);
 }
 
 
-void render_main_menu(SDL_Renderer* Renderer, SDL_Window* Window){
-    button *Button[2];
-    Button[0] = button_create(0, 600, 400, 100, NULL, Renderer, Window);
-    Button[1]= button_create(0, 400, 400, 100, NULL, Renderer, Window);
-    center_button(Button[1],Window);
+void main_menu(SDL_Renderer* renderer, SDL_Window* Window, bool *mainQuit){
+    button *Button[NrOfButton];
+    Button[0] = button_create(0, 600, 400, 100, NULL, renderer, Window);
+    Button[1]= button_create(0, 500, 400, 100, NULL, renderer, Window);
+    Button[2]= button_create(0, 400, 400, 100, NULL, renderer, Window);
     center_button(Button[0],Window);
-
+    center_button(Button[1],Window);
+    center_button(Button[2],Window);
     bool quit;
     SDL_Event event;
     while(quit==false){
-        SDL_RenderClear(Renderer);
+        SDL_RenderClear(renderer);
+        background(renderer);
         
-        background(Renderer);
+        create_textarea( renderer, 500,  100,  500, 200 , NULL,  40, "Game name", (SDL_Color){0,0,0,255});
 
         for(int i=0; i<NrOfButton; i++){
-            if (ret_button_hover_state(Button[i])){
-                ret_button_hover(ret_button_rect(Button[i]), Renderer);
-            }
-            else{
-                ret_button_normal(ret_button_rect(Button[i]), Renderer);
-            }
+            if (ret_button_hover_state(Button[i])) ret_button_hover(ret_button_rect(Button[i]), renderer);
+            else ret_button_normal(ret_button_rect(Button[i]), renderer);
         }  
-
-        while(SDL_PollEvent( &event )!= 0){
-            if( event.type == SDL_QUIT ){
+        int x,y;
+        SDL_GetMouseState(&x, &y);
+        
+        while(SDL_PollEvent(&event)!= 0){
+            if(event.type == SDL_QUIT) {
                 quit = true;
+                *mainQuit=false;
             }
+
             else if(event.type == SDL_MOUSEMOTION){
-                int x,y;
-                SDL_GetMouseState(&x, &y);
                 for(int i=0; i<NrOfButton; i++){
-                    if(is_in_button_rect(x, y, ret_button_rect(Button[i]))){
-                        set_button_hover_true(Button[i]);
-                    }
-                    else{
-                        set_button_hover_false(Button[i]);
-                    }
+                    if(is_in_button_rect(x, y, ret_button_rect(Button[i]))) set_button_hover_true(Button[i]);
+                    else set_button_hover_false(Button[i]);
                 }
             }
-            
-            else if (event.type == SDL_MOUSEBUTTONDOWN){
-                int x,y;
-                SDL_GetMouseState(&x, &y);
-                for(int i=0; i<NrOfButton; i++){
-                    if(is_in_button_rect(x, y, ret_button_rect(Button[i]))) ret_button_clicked(ret_button_rect(Button[0]), Renderer);
-                }
-
+            else if(event.type == SDL_MOUSEBUTTONUP){
+                if(is_in_button_rect(x, y, ret_button_rect(Button[2]))) quit=true;;
             }
-            else if(event.type == SDL_MOUSEBUTTONUP)quit=true;
         }
-        load_Button_Text(Button[1], "Single player", Renderer);
-        load_Button_Text(Button[0], "Lobby", Renderer);
-    SDL_RenderPresent(Renderer);
-
+        load_Button_Text(Button[2], "Single player", renderer);
+        load_Button_Text(Button[1], "Lobby", renderer);
+        load_Button_Text(Button[0], "How to play?", renderer);
+        SDL_RenderPresent(renderer);
     }
-
-    for(int i=0; i<NrOfButton; i++){
-        button_destroy(Button[i]);
-    }
-    
-    
+    for(int i=0; i<NrOfButton; i++) button_destroy(Button[i]);
 }
+
+
+//void lobby(SDL_Renderer* renderer, SDL_Window* Window){}
