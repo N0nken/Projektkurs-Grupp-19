@@ -11,6 +11,8 @@
 #include "../include/vector2.h"
 #include "../include/movement.h"
 
+enum Weapons { ROCK = 0, SCISSORS, PAPER };
+
 int main(int argv, char** args){
 
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -25,6 +27,13 @@ int main(int argv, char** args){
     }
     SDL_Texture *playerTexture = SDL_CreateTextureFromSurface(renderer, playerSurface);
     SDL_FreeSurface(playerSurface);
+
+    SDL_Texture *rockTex = IMG_LoadTexture(renderer, "images/rock.png");
+    SDL_Texture *scissorsTex = IMG_LoadTexture(renderer, "images/scissors.png");
+    SDL_Texture *paperTex = IMG_LoadTexture(renderer, "images/paper.png");
+    if (!rockTex || !scissorsTex || !paperTex) {
+        printf("Could not load weapon PNGs: %s\n", IMG_GetError());
+    }
 
     bool isRunning = true;
     SDL_Event event;
@@ -63,7 +72,6 @@ int main(int argv, char** args){
 
     Uint64 deltaTime = SDL_GetTicks64();
     while(isRunning){
-
         while(SDL_PollEvent(&event)){
             switch (event.type)
             {
@@ -89,9 +97,31 @@ int main(int argv, char** args){
         handle_movement(player1, 5.0f, keystates);
         printf("B");
         SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, backgroundtexture, NULL, NULL);
+        
+        /*SDL_RenderCopy(renderer, backgroundtexture, NULL, NULL);
         SDL_RenderCopy(renderer, playerTexture, NULL, Player_get_rect(player1));
-        SDL_RenderPresent(renderer);
+        SDL_RenderPresent(renderer);*/ // replace by below
+    
+    SDL_RenderCopy(renderer, backgroundtexture, NULL, NULL); //background
+    SDL_RenderCopy(renderer,playerTexture, NULL, Player_get_rect(player1);
+    SDL_Texture *weaponTex = NULL; // choose texture depending on weapon
+    switch (Player_get_weapon(player1)){
+        case ROCK: weaponTex = rockTex;
+        break;
+        case SCISSORS: weaponTex = scissorsTex; 
+        break;
+        case PAPER: weaponTex = paperTex;
+        break;
+    }
+    if (weaponTex) { //where the weapon /offset is place
+        SDL_Rect dest = *Player_get_rect(player1);
+        dest.x += 40;   /* handOffsetX */
+        dest.y += 48;   /* handOffsetY */
+        SDL_RenderCopy(renderer, weaponTex, NULL, &dest);
+    }
+
+    SDL_RenderPresent(renderer); // show the image
+    
         /*deltaTime = SDL_GetTicks64() - deltaTime;
         SDL_Delay(1000/60 - deltaTime); // 60 fps
         */
