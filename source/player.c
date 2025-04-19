@@ -47,6 +47,7 @@ int destroy_Player(Player *p) {
     destroy_Vector2(p->position);
     destroy_Collider(p->collider);
     destroy_Collider(p->attackHitbox);
+    destroy_Input_Logger(p->logger);
     destroy_InputLogger(p->logger);
     free(p->rect);
     free(p);

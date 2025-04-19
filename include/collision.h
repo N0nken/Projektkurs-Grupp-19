@@ -20,6 +20,7 @@ void Collider_set_trigger(Collider *collider, int isTrigger);
 
 /* Getters */
 Vector2 *Collider_get_position(Collider *collider);
+float Collider_get_yposition(Collider *collider);
 Vector2 *Collider_get_dimensions(Collider *collider);
 int Collider_is_trigger(Collider *collider);
 int Collider_get_id(Collider *collider);

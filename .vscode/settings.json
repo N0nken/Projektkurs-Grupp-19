@@ -64,6 +64,7 @@
     "sdl.h": "c",
     "movement.h": "c",
     "sdl_net.h": "c",
-    "input_logger.h": "c"
+    "input_logger.h": "c",
+    "stdlib.h": "c"
   }
 }
