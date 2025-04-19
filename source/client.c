@@ -9,6 +9,7 @@
 #include "../include/movement.h"
 #include "../include/render_controller.h"
 
+#define PACKETLOSSLIMIT 10 // Give up sending packets to server after this many failed attempts
 #define MAXCLIENTS 4
 #define CLIENTPORT 50000
 #define SERVERPORT 50001
@@ -20,6 +21,7 @@ struct Client {
     UDPsocket socket;
     UDPpacket *sendPacket;
     UDPpacket *recvPacket;
+    int failedPackets; // Number of packets that failed to send
 }; typedef struct Client Client;
 
 struct GameState {
@@ -36,15 +38,17 @@ struct UDPplayer {
     float posX;
     float posY;
     int direction;
+    int state; // 0 = idle, 1 = moving, 2 = attacking
 }; typedef struct UDPplayer UDPplayer;
 
-struct ServerData {
+struct SimulationData {
     int matchState; // waiting, playing, game over
     UDPplayer players[MAXCLIENTS];
     int playerID; // ID of the player receiving the data
-}; typedef struct ServerData ServerData;
+}; typedef struct SimulationData SimulationData;
 
-struct ClientData {
+struct ClientInput {
+    int playerID; // ID of the player whose input is being sent. = -1 when sent from client
     int up[3];
     int down[3];
     int left[3];
@@ -53,7 +57,7 @@ struct ClientData {
     int switchToRock[3];
     int switchToPaper[3];
     int switchToScissors[3];
-}; typedef struct ClientData ClientData;
+}; typedef struct ClientInput ClientInput;
 
 int client_main();
 int init_client();
@@ -139,18 +143,24 @@ void client_waiting(Client *client, GameState *gameState, RenderController *rend
 
 void client_playing(Client *client, GameState *gameState, RenderController *renderController) {
     while (gameState->matchState == PLAYING) {
-        // Handle player input
-        InputLogger_update_all_actions(Player_get_inputs(gameState->players[gameState->playerID]), SDL_GetKeyboardState(NULL));
-        while (!send_player_input(client, gameState));
-        
-        // run simulation
-        handle_movement(gameState->players[gameState->playerID], 5.0f, SDL_GetKeyboardState(NULL));
-        handle_attack_input(gameState->players, MAXCLIENTS);
-
         // sync simulation with server
         sync_game_state_with_server(client, gameState);
+        // Handle player input
+        InputLogger_update_all_actions(Player_get_inputs(gameState->players[gameState->playerID]), SDL_GetKeyboardState(NULL));
+        while (!send_player_input(client, gameState) && client->failedPackets < PACKETLOSSLIMIT) {
+            printf("Failed to send player input\n");
+            client->failedPackets++;
+        }
+        
+        // run simulation
+        for (int i = 0; i < MAXCLIENTS; i++) {
+            handle_movement(gameState->players[i], PLAYERSPEED, NULL); // Assuming ground is NULL for now
+            // handle_weapon_switching(player);
+        }
+        handle_attack_input(gameState->players, MAXCLIENTS);
 
         // Render current frame
+        
 
         SDL_Delay(1000 / 60); // Run at 60 FPS
     }
@@ -161,47 +171,69 @@ void client_game_over(Client *client, GameState *gameState, RenderController *re
 }
 
 int send_player_input(Client *client, GameState *gameState) {
-    ClientData clientData;
+    ClientInput clientInput;
     printf("Preparing sending packet\n");
     InputLogger *playerInputLogger = Player_get_inputs(gameState->players[gameState->playerID]);
+    clientInput.playerID = -1;
     for (int i = 0; i < 3; i++) {
-        clientData.up[i] = InputLogger_get_action_state(playerInputLogger, "move_up", i);
-        clientData.down[i] = InputLogger_get_action_state(playerInputLogger, "move_down", i);
-        clientData.left[i] = InputLogger_get_action_state(playerInputLogger, "move_left", i);
-        clientData.right[i] = InputLogger_get_action_state(playerInputLogger, "move_right", i);
-        clientData.attack[i] = InputLogger_get_action_state(playerInputLogger, "attack", i);
-        clientData.switchToRock[i] = InputLogger_get_action_state(playerInputLogger, "switch_to_rock", i);
-        clientData.switchToPaper[i] = InputLogger_get_action_state(playerInputLogger, "switch_to_paper", i);
-        clientData.switchToScissors[i] = InputLogger_get_action_state(playerInputLogger, "switch_to_scissors", i);
+        clientInput.up[i] = InputLogger_get_action_state(playerInputLogger, "move_up", i);
+        clientInput.down[i] = InputLogger_get_action_state(playerInputLogger, "move_down", i);
+        clientInput.left[i] = InputLogger_get_action_state(playerInputLogger, "move_left", i);
+        clientInput.right[i] = InputLogger_get_action_state(playerInputLogger, "move_right", i);
+        clientInput.attack[i] = InputLogger_get_action_state(playerInputLogger, "attack", i);
+        clientInput.switchToRock[i] = InputLogger_get_action_state(playerInputLogger, "switch_to_rock", i);
+        clientInput.switchToPaper[i] = InputLogger_get_action_state(playerInputLogger, "switch_to_paper", i);
+        clientInput.switchToScissors[i] = InputLogger_get_action_state(playerInputLogger, "switch_to_scissors", i);
     }
-    memcpy(client->sendPacket->data, &clientData, sizeof(ClientData));
+    memcpy(client->sendPacket->data, &clientInput, sizeof(ClientInput));
     client->sendPacket->address = client->serverIP;
-    client->sendPacket->len = sizeof(clientData);
-    printf("packet sending\n");
+    client->sendPacket->len = sizeof(clientInput);
+    printf("sending packet\n");
     return SDLNet_UDP_Send(client->socket, -1, client->sendPacket);
 }
 
 void sync_game_state_with_server(Client *client, GameState *gameState) {
-    ServerData serverData;
+    SimulationData simulationData;
+    ClientInput clientInput;
     // Receive all packets from the server
     while (SDLNet_UDP_Recv(client->socket, client->recvPacket)) {
-        printf("Packet received from: %s\n", SDLNet_ResolveIP(&client->recvPacket->address));
-        memcpy(&serverData, client->recvPacket->data, sizeof(ServerData));
-        gameState->matchState = serverData.matchState;
-        gameState->playerID = serverData.playerID;
-        gameState->playerAliveCount = 0;
-        for (int i = 0; i < MAXCLIENTS; i++) {
-            if (!serverData.players[i].isAlive) {
-                continue;
+        // sync player data
+        if (client->recvPacket->len == sizeof(SimulationData)) {
+            printf("Simulation packet received from: %s\n", SDLNet_ResolveIP(&client->recvPacket->address));
+            memcpy(&simulationData, client->recvPacket->data, sizeof(SimulationData));
+            gameState->matchState = simulationData.matchState;
+            gameState->playerID = simulationData.playerID;
+            gameState->playerAliveCount = 0;
+            for (int i = 0; i < MAXCLIENTS; i++) {
+                if (!simulationData.players[i].isAlive) {
+                    continue;
+                }
+                gameState->playerAliveCount++;
+                //printf("%d %d %d %d %.2f %.2f %d\n", simulationData.players[i].isAlive, simulationData.players[i].hp, simulationData.players[i].weapon, simulationData.players[i].posX, simulationData.players[i].posY, simulationData.players[i].direction);
+                Player_set_isAlive(gameState->players[i], simulationData.players[i].isAlive);
+                Player_set_hp(gameState->players[i], simulationData.players[i].hp);
+                Player_set_weapon(gameState->players[i], simulationData.players[i].weapon);
+                Vector2_set_x(Player_get_position(gameState->players[i]), simulationData.players[i].posX);
+                Vector2_set_y(Player_get_position(gameState->players[i]), simulationData.players[i].posY);
+                Player_set_direction(gameState->players[i], simulationData.players[i].direction);
             }
-            gameState->playerAliveCount++;
-            //printf("%d %d %d %d %.2f %.2f %d\n", serverData.players[i].isAlive, serverData.players[i].hp, serverData.players[i].weapon, serverData.players[i].posX, serverData.players[i].posY, serverData.players[i].direction);
-            Player_set_isAlive(gameState->players[i], serverData.players[i].isAlive);
-            Player_set_hp(gameState->players[i], serverData.players[i].hp);
-            Player_set_weapon(gameState->players[i], serverData.players[i].weapon);
-            Vector2_set_x(Player_get_position(gameState->players[i]), serverData.players[i].posX);
-            Vector2_set_y(Player_get_position(gameState->players[i]), serverData.players[i].posY);
-            Player_set_direction(gameState->players[i], serverData.players[i].direction);
+        // sync player input data
+        } else if (client->recvPacket->len == sizeof(ClientInput)) {
+            printf("Client input packet received from: %s\n", SDLNet_ResolveIP(&client->recvPacket->address));
+            memcpy(&clientInput, client->recvPacket->data, sizeof(ClientInput));
+            InputLogger *targetLogger = Player_get_inputs(gameState->players[clientInput.playerID]);
+            for (int i = 0; i < 3; i++) {
+                InputLogger_set_action_state(targetLogger, "move_up", i, clientInput.up[i]);
+                InputLogger_set_action_state(targetLogger, "move_down", i, clientInput.down[i]);
+                InputLogger_set_action_state(targetLogger, "move_left", i, clientInput.left[i]);
+                InputLogger_set_action_state(targetLogger, "move_right", i, clientInput.right[i]);
+                InputLogger_set_action_state(targetLogger, "attack", i, clientInput.attack[i]);
+                InputLogger_set_action_state(targetLogger, "switch_to_rock", i, clientInput.switchToRock[i]);
+                InputLogger_set_action_state(targetLogger, "switch_to_paper", i, clientInput.switchToPaper[i]);
+                InputLogger_set_action_state(targetLogger, "switch_to_scissors", i, clientInput.switchToScissors[i]);
+            }
+        } else {
+            printf("Unknown packet type received\n");
         }
     }
 }

@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include "input_logger.h"
 
+#define PLAYERSPEED 5.0f
+
 void move_player(Player *player, Vector2 *velocity);
-void handle_movement(Player *player, float speed, Input_Logger *logger, Collider *ground);
+void handle_movement(Player *player, float speed, Collider *ground);
 #endif

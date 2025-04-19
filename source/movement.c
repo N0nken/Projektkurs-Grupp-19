@@ -18,14 +18,14 @@ void move_player(Player *player, Vector2 *velocity) {
     printf("e");
     Player_set_position(player, newPosition);
     printf("f");
-    move_and_collide(Player_get_collider(player), velocity, 1);
+    move_and_collide(Player_get_collider(player), velocity, -1);
     Vector2 *newPosition = copy_Vector2(Collider_get_position(Player_get_collider(player)));
     printf("e");
     Player_set_position(player, newPosition);
     printf("f");
 }
 
-void handle_movement(Player *player, float speed, Input_Logger *logger, Collider *ground) {
+void handle_movement(Player *player, float speed, Collider *ground) {
     Vector2 *direction = create_Vector2(0.0f, 0.0f);
     static float vertical_velocity = 0;  // Behåller hastighet mellan frames
     const float gravity = 0.6f;
@@ -34,14 +34,15 @@ void handle_movement(Player *player, float speed, Input_Logger *logger, Collider
     Player_set_can_dash(player, 1);
     int isJumping = 0;
 
-    if (Input_Logger_is_action_pressed(logger, "move_left")) {
+    InputLogger *logger = Player_get_inputs(player);
+    if (InputLogger_is_action_pressed(logger, "move_left")) {
         Vector2_set_x(direction, -1.0f);
     }
-    else if (Input_Logger_is_action_pressed(logger, "move_right")) {
+    else if (InputLogger_is_action_pressed(logger, "move_right")) {
         Vector2_set_x(direction, 1.0f);
     }
 
-    if ((Input_Logger_is_action_pressed(logger, "move_up") && is_colliding(Player_get_collider(player), ground, 1)))
+    if ((InputLogger_is_action_pressed(logger, "move_up") && is_colliding(Player_get_collider(player), ground, 1)))
     {
         vertical_velocity = jump_force;
         isJumping = 1;

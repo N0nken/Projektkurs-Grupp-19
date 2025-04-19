@@ -4,6 +4,7 @@
 
 #define PLAYERCOLLISIONLAYER 0
 #define PLAYERATTACKLAYER 1
+#define GROUNDCOLLISIONLAYER 2
 
 typedef struct Collider Collider;
 
@@ -28,7 +29,8 @@ int Collider_get_layer(Collider *collider);
 
 /* Checks if two colliders are colliding */
 int is_colliding(Collider *collider1, Collider *collider2, int layer);
-/* Moves a collider along a given vector2 until it collides with another collider */
+/* Moves a collider along a given vector2 until it collides with another collider 
+set layer=-1 to collide with all layers */
 void move_and_collide(Collider *collider, Vector2 *velocity, int layer);
 
 int is_colliding_any(Collider *collider, int layer);
