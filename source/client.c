@@ -112,6 +112,7 @@ int init_client(Client *client, GameState *gameState) {
             create_Collider(create_Vector2(0, 0), create_Vector2(PLAYERWIDTH, PLAYERHEIGHT), 0, PLAYERCOLLISIONLAYER), 
             create_Collider(create_Vector2(PLAYERATTACKHITBOXOFFSETX, PLAYERATTACKHITBOXOFFSETY), create_Vector2(PLAYERATTACKHITBOXWIDTH, PLAYERATTACKHITBOXHEIGHT), 0, PLAYERATTACKLAYER), 
             100, 0, 1, gameState->players, &gameState->playerAliveCount);
+        InputLogger_reset_all_actions(Player_get_inputs(gameState->players[i]));
     }
     return 0;
 }
@@ -148,7 +149,9 @@ void client_playing(Client *client, GameState *gameState, RenderController *rend
         // sync simulation with server
         sync_game_state_with_server(client, gameState);
         // Handle player input
+        printf("updating client input\n");
         InputLogger_update_all_actions(Player_get_inputs(gameState->players[gameState->playerID]), SDL_GetKeyboardState(NULL));
+        printf("finished updating client input\n");
         while (!send_player_input(client, gameState) && client->failedPackets < PACKETLOSSLIMIT) {
             printf("Failed to send player input\n");
             client->failedPackets++;

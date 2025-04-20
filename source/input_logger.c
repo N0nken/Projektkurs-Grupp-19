@@ -82,9 +82,6 @@ void InputLogger_set_action_state(InputLogger *logger, char action[], int stateI
 /* CLIENT ONLY */
 void InputLogger_update_all_actions(InputLogger *logger, const Uint8 *keystates) {
     for (int i = 0; i < NUMBEROFACTIONS; i++) {
-        if (i == 4) {
-            printf("attack %d\n", keystates[actionTranslations[i][0]]);
-        }
         if (keystates[actionTranslations[i][0]] == 1 || keystates[actionTranslations[i][1]] == 1) {
             if (!InputLogger_get_action_state(logger, allActions[i], 0) && !InputLogger_get_action_state(logger, allActions[i], 1) && !InputLogger_get_action_state(logger, allActions[i], 2)) {
                 InputLogger_set_action_state(logger, allActions[i], 0, 1);
@@ -113,4 +110,17 @@ int InputLogger_is_action_pressed(InputLogger *logger, char action[]) {
 }
 int InputLogger_is_action_just_released(InputLogger *logger, char action[]) {
     return InputLogger_get_action_state(logger, action, 2);
+}
+
+void InputLogger_reset_all_actions(InputLogger *logger) {
+    for (int i = 0; i < 3; i++) {
+        logger->up[i] = 0;
+        logger->down[i] = 0;
+        logger->left[i] = 0;
+        logger->right[i] = 0;
+        logger->attack[i] = 0;
+        logger->switchToRock[i] = 0;
+        logger->switchToPaper[i] = 0;
+        logger->switchToScissors[i] = 0;
+    }
 }
