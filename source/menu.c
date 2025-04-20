@@ -6,6 +6,7 @@
 #include "../include/menu.h"
 
 
+
 struct button{
     SDL_Rect area;
     SDL_Color color;

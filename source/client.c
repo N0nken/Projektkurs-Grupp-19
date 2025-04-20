@@ -1,5 +1,9 @@
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_net.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
+#include <SDL_net.h>
 
 #include "../include/input_logger.h"
 #include "../include/attacks.h"
@@ -7,6 +11,7 @@
 #include "../include/collision.h"
 #include "../include/vector2.h"
 #include "../include/movement.h"
+#include "../include/dynamic_textarea.h"
 
 #define MAXCLIENTS 4
 #define CLIENTPORT 50000
@@ -43,6 +48,7 @@ struct ServerData {
     int playerID; // ID of the player receiving the data
 }; typedef struct ServerData ServerData;
 
+
 struct ClientData {
     int up[3];
     int down[3];
@@ -54,7 +60,7 @@ struct ClientData {
     int switchToScissors[3];
 }; typedef struct ClientData ClientData;
 
-int client_main();
+int client_main(SDL_Window* Window,  SDL_Renderer* renderer);
 int init_client();
 
 void client_waiting();
@@ -63,15 +69,17 @@ void client_game_over();
 
 int send_player_input();
 void sync_game_state_with_server();
+void client_background(SDL_Renderer* renderer);
+void client_lobby(SDL_Renderer* renderer);
 
-int client_main() {
+int client_main(SDL_Window* Window,  SDL_Renderer* renderer) {
     Client client;
     GameState gameState;
 
     if (init_client(&client, &gameState)) return 1;
-
+    bool quit=false;
     while (1) {
-        client_waiting(&client, &gameState);
+        client_waiting(&client, &gameState, renderer);
         client_playing(&client, &gameState);
         client_game_over(&client, &gameState);
     }
@@ -107,8 +115,9 @@ int init_client(Client *client, GameState *gameState) {
     return 0;
 }
 
-void client_waiting(Client *client, GameState *gameState) {
+void client_waiting(Client *client, GameState *gameState, SDL_Renderer *renderer) {
     char targetIPaddress[16];
+    client_lobby(renderer);
     printf("Enter server IP address: ");
     scanf("%s", &targetIPaddress);
     SDLNet_ResolveHost(&client->serverIP, targetIPaddress, SERVERPORT);
@@ -193,5 +202,45 @@ void sync_game_state_with_server(Client *client, GameState *gameState) {
             Vector2_set_y(Player_get_position(gameState->players[i]), serverData.players[i].posY);
             Player_set_direction(gameState->players[i], serverData.players[i].direction);
         }
+    }
+}
+
+
+
+
+
+void client_background(SDL_Renderer* renderer){  
+    SDL_Surface* surface= IMG_Load("images/background.png");
+    SDL_Texture* texture= SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_RenderCopy(renderer,texture,NULL,NULL);
+    SDL_FreeSurface(surface);
+    SDL_DestroyTexture(texture);
+}
+
+void client_lobby(SDL_Renderer* renderer){
+    bool quit=false;
+    while(!quit){
+        
+        SDL_RenderClear(renderer);
+        client_background(renderer);
+        create_textarea(renderer, 450-120,  100, 120, NULL, "Enter the server ip", (SDL_Color){0,0,0,255});
+        SDL_RenderPresent(renderer);
+
+        SDL_StartTextInput();
+        SDL_Event event;
+        SDL_WaitEvent(&event);
+        switch(event.type)
+        {
+            case SDL_QUIT:
+                {
+                   quit =true;
+                    break;
+                }
+            case SDL_TEXTINPUT:
+                {
+                    printf("%s",event.text.text);
+                    break;
+                }
+        }   
     }
 }
