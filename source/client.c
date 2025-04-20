@@ -145,6 +145,7 @@ void client_waiting(Client *client, GameState *gameState, RenderController *rend
 }
 
 void client_playing(Client *client, GameState *gameState, RenderController *renderController) {
+    Collider *ground = create_Collider(create_Vector2(400, 400), create_Vector2(400, 10), 0, GROUNDCOLLISIONLAYER);
     while (gameState->matchState == PLAYING) {
         // sync simulation with server
         sync_game_state_with_server(client, gameState);
@@ -159,11 +160,13 @@ void client_playing(Client *client, GameState *gameState, RenderController *rend
         
         // run simulation
         for (int i = 0; i < MAXCLIENTS; i++) {
-            handle_movement(gameState->players[i], PLAYERSPEED, NULL); // Assuming ground is NULL for now
+            printf("A---");
+            handle_movement(gameState->players[i], PLAYERSPEED, ground); // Assuming ground is NULL for now
+            printf("B---");
             // handle_weapon_switching(player);
         }
         handle_attack_input(gameState->players, MAXCLIENTS);
-
+        printf("C---\n");
         // Render current frame
         
 
