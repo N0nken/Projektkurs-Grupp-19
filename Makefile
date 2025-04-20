@@ -41,7 +41,7 @@ EXECUTABLE := main$(if $(filter $(PLATFORM),WINDOWS),.exe,)
 # Byggregler
 # ----------------------------------------------------------
 
-helloSDL: $(BINDIR)/main.o $(BINDIR)/client.o $(BINDIR)/server.o
+helloSDL: $(BINDIR)/main.o
 	$(CC) -o $(EXECUTABLE) $(BINDIR)/main.o \
 		$(BINDIR)/client.o $(BINDIR)/server.o \
 	    $(BINDIR)/attacks.o $(BINDIR)/player.o $(BINDIR)/collision.o \
@@ -54,12 +54,12 @@ $(BINDIR)/main.o: $(SRCDIR)/main.c $(BINDIR)/client.o $(BINDIR)/server.o
 	$(CC) $(CFLAGS) -c $(SRCDIR)/main.c -o $@
 
 # ---------------- client.o -------------
-$(BINDIR)/client.o: $(SRCDIR)/client.c $(BINDIR)/attacks.o $(BINDIR)/player.o $(BINDIR)/input_logger.o
+$(BINDIR)/client.o: $(SRCDIR)/client.c $(BINDIR)/attacks.o $(BINDIR)/player.o $(BINDIR)/input_logger.o $(BINDIR)/movement.o
 	$(MKDIR)
 	$(CC) $(CFLAGS) -c $(SRCDIR)/client.c -o $@
 
 # ---------------- server.o -------------
-$(BINDIR)/server.o: $(SRCDIR)/server.c $(BINDIR)/attacks.o $(BINDIR)/player.o $(BINDIR)/input_logger.o
+$(BINDIR)/server.o: $(SRCDIR)/server.c $(BINDIR)/attacks.o $(BINDIR)/player.o $(BINDIR)/input_logger.o $(BINDIR)/movement.o
 	$(MKDIR)
 	$(CC) $(CFLAGS) -c $(SRCDIR)/server.c -o $@
 

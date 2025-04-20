@@ -18,11 +18,6 @@ void move_player(Player *player, Vector2 *velocity) {
     printf("e");
     Player_set_position(player, newPosition);
     printf("f");
-    move_and_collide(Player_get_collider(player), velocity, -1);
-    Vector2 *newPosition = copy_Vector2(Collider_get_position(Player_get_collider(player)));
-    printf("e");
-    Player_set_position(player, newPosition);
-    printf("f");
 }
 
 void handle_movement(Player *player, float speed, Collider *ground) {

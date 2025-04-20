@@ -18,6 +18,7 @@ struct Player {
     SDL_Rect *rect; //la till pga behövs för textur
     InputLogger *logger;
     int direction; // left -1, right 1
+    int state; // 0 = idle, 1 = moving, 2 = attacking
 };
 
 enum Weapons {ROCK, SCISSORS, PAPER};
@@ -92,7 +93,6 @@ void Player_set_direction(Player *p, int direction) {
     p->direction = direction;
 }
 
-
 /* Getters */
 InputLogger *Player_get_inputs(Player *p) {
     return p->logger;
@@ -134,6 +134,9 @@ SDL_Texture *Player_get_weapon_sprite(Player *p, int weapon){
 }
 int Player_get_direction(Player *p) {
     return p->direction;
+}
+int Player_get_state(Player *p) {
+    return p->state;
 }
 
 void switch_player_weapon(Player *p, int keyPressed){

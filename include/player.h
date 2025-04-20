@@ -45,6 +45,7 @@ int Player_get_isAlive(Player *p);
 SDL_Rect *Player_get_rect(Player *p);
 SDL_Texture *Player_get_weapon_sprite(Player *p, int weapon);
 int Player_get_direction(Player *p);
+int Player_get_state(Player *p);
 
 void deal_damage(Player *player, int damage);
 
