@@ -11,6 +11,7 @@
 #define MAXCLIENTS 4
 #define CLIENTPORT 50000
 #define SERVERPORT 50001
+#define MAXPACKETSRECEIVEDPERFRAME 4
 
 enum MatchStates {WAITING,PLAYING,GAME_OVER};
 
@@ -140,11 +141,12 @@ void server_waiting(Server *server, GameState *gameState) {
 
 void server_playing(Server *server, GameState *gameState) {
     // Game logic for playing state
+    Collider *ground = create_Collider(create_Vector2(400, 400), create_Vector2(800, 600), 0,GROUNDCOLLISIONLAYER);
     while (gameState->matchState == PLAYING) {
         receive_player_inputs(server, gameState);
         // Update game state logic here
         for (int i = 0; i < MAXCLIENTS; i++) {
-            handle_movement(gameState->players[i], 5.0f, NULL); // Assuming ground is NULL for now
+            handle_movement(gameState->players[i], 5.0f, ground); // Assuming ground is NULL for now
             handle_attack_input(gameState->players, MAXCLIENTS);
         }
 

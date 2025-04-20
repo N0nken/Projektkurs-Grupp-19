@@ -13,6 +13,7 @@
 #define MAXCLIENTS 4
 #define CLIENTPORT 50000
 #define SERVERPORT 50001
+#define MAXPACKETSRECEIVEDPERFRAME 4
 
 enum MatchStates {WAITING,PLAYING,GAME_OVER};
 
@@ -22,6 +23,7 @@ struct Client {
     UDPpacket *sendPacket;
     UDPpacket *recvPacket;
     int failedPackets; // Number of packets that failed to send
+    int packetsReceived; // Number of packets received in the current frame
 }; typedef struct Client Client;
 
 struct GameState {
@@ -196,7 +198,8 @@ void sync_game_state_with_server(Client *client, GameState *gameState) {
     SimulationData simulationData;
     ClientInput clientInput;
     // Receive all packets from the server
-    while (SDLNet_UDP_Recv(client->socket, client->recvPacket)) {
+    while (SDLNet_UDP_Recv(client->socket, client->recvPacket) && client->packetsReceived < MAXPACKETSRECEIVEDPERFRAME) {
+        client->packetsReceived++;
         // sync player data
         if (client->recvPacket->len == sizeof(SimulationData)) {
             printf("Simulation packet received from: %s\n", SDLNet_ResolveIP(&client->recvPacket->address));
@@ -236,4 +239,5 @@ void sync_game_state_with_server(Client *client, GameState *gameState) {
             printf("Unknown packet type received\n");
         }
     }
+    client->packetsReceived = 0;
 }
