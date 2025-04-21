@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_net.h>
+#include <SDL2/SDL_image.h>
 
 #include "../include/input_logger.h"
 #include "../include/attacks.h"
@@ -7,13 +8,13 @@
 #include "../include/collision.h"
 #include "../include/vector2.h"
 #include "../include/movement.h"
-#include "../include/render_controller.h"
 
 #define PACKETLOSSLIMIT 10 // Give up sending packets to server after this many failed attempts
 #define MAXCLIENTS 4
 #define CLIENTPORT 50000
 #define SERVERPORT 50001
-#define MAXPACKETSRECEIVEDPERFRAME 4
+#define MAXPACKETSRECEIVEDPERFRAME 10
+#define TARGETFPS 5
 
 enum MatchStates {WAITING,PLAYING,GAME_OVER};
 
@@ -64,25 +65,43 @@ struct ClientInput {
 int client_main();
 int init_client();
 
-void client_waiting();
-void client_playing();
-void client_game_over();
+int client_waiting();
+int client_playing();
+int client_game_over();
 
 int send_player_input();
 void sync_game_state_with_server();
 
+void show_debug_info_client(GameState *gameState, Client *client) {
+    printf("Player ID: %d\n", gameState->playerID);
+    printf("Match State: %d\n", gameState->matchState);
+    printf("Alive Players: %d\n", gameState->playerAliveCount);
+    for (int i = 0; i < MAXCLIENTS; i++) {
+        if (gameState->players[i]) {
+            printf("Player %d - HP: %d, Weapon: %d, Position: (%.2f, %.2f)\n", i, Player_get_hp(gameState->players[i]), Player_get_weapon(gameState->players[i]), 
+                Vector2_get_x(Player_get_position(gameState->players[i])), Vector2_get_y(Player_get_position(gameState->players[i])));
+        }
+        printf("Player %d ", gameState->playerID);
+        InputLogger_print_inputs(Player_get_inputs(gameState->players[i]));
+    }
+}
+
 int client_main() {
     Client client;
     GameState gameState;
-    RenderController *renderController;
 
     if (init_client(&client, &gameState)) return 1;
-    if (init_rendering(renderController)) return 1; // Initialize rendering (if needed)
 
     while (1) {
-        client_waiting(&client, &gameState, renderController);
-        client_playing(&client, &gameState, renderController);
-        client_game_over(&client, &gameState, renderController);
+        if(client_waiting(&client, &gameState)) {
+            break;
+        }
+        if(client_playing(&client, &gameState)) {
+            break;
+        }
+        if(client_game_over(&client, &gameState)) {
+            break;
+        }
     }
 
     return 0;
@@ -117,17 +136,20 @@ int init_client(Client *client, GameState *gameState) {
     return 0;
 }
 
-int init_rendering(RenderController *renderController) {
-    
-}
-
-void client_waiting(Client *client, GameState *gameState, RenderController *renderController) {
+int client_waiting(Client *client, GameState *gameState) {
     char targetIPaddress[16];
     printf("Enter server IP address: ");
     scanf("%s", &targetIPaddress);
     SDLNet_ResolveHost(&client->serverIP, targetIPaddress, SERVERPORT);
     printf("server: %s\n", SDLNet_ResolveIP(&client->serverIP));
+    SDL_Event event;
     while (gameState->matchState == WAITING) {
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+                case SDL_QUIT:
+                    return 1;
+            }
+        }
         if (gameState->playerID == -1) {
             printf("Attempting to connect to server...\n");
             client->sendPacket->address = client->serverIP;
@@ -142,40 +164,76 @@ void client_waiting(Client *client, GameState *gameState, RenderController *rend
         sync_game_state_with_server(client, gameState);
         SDL_Delay(1000);
     }
+    return 0;
 }
 
-void client_playing(Client *client, GameState *gameState, RenderController *renderController) {
+int client_playing(Client *client, GameState *gameState) {
+    SDL_Window *window = SDL_CreateWindow("Hello SDL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_RESIZABLE);
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
+    SDL_Surface *background = IMG_Load("images/background.png");
+    SDL_Texture *backgroundTexture = SDL_CreateTextureFromSurface(renderer, background);
+
     Collider *ground = create_Collider(create_Vector2(400, 400), create_Vector2(400, 10), 0, GROUNDCOLLISIONLAYER);
+    SDL_Event event;
     while (gameState->matchState == PLAYING) {
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+                case SDL_QUIT:
+                    gameState->matchState = GAME_OVER;
+                    return 1;
+            }
+        }
+        show_debug_info_client(gameState, client);
         // sync simulation with server
         sync_game_state_with_server(client, gameState);
-        // Handle player input
-        printf("updating client input\n");
-        InputLogger_update_all_actions(Player_get_inputs(gameState->players[gameState->playerID]), SDL_GetKeyboardState(NULL));
-        printf("finished updating client input\n");
-        while (!send_player_input(client, gameState) && client->failedPackets < PACKETLOSSLIMIT) {
-            printf("Failed to send player input\n");
-            client->failedPackets++;
+        // Update player input...
+        if (Player_get_isAlive(gameState->players[gameState->playerID])) {
+            InputLogger_update_all_actions(Player_get_inputs(gameState->players[gameState->playerID]), SDL_GetKeyboardState(NULL));
+            InputLogger_print_inputs(Player_get_inputs(gameState->players[gameState->playerID]));
+            // ...and send it to the server
+            while (!send_player_input(client, gameState) && client->failedPackets < PACKETLOSSLIMIT) {
+                printf("Failed to send player input\n");
+                client->failedPackets++;
+            }
+        } else {
+            printf("Player %d is dead\n", gameState->playerID);
         }
+        
         
         // run simulation
         for (int i = 0; i < MAXCLIENTS; i++) {
-            printf("A---");
-            handle_movement(gameState->players[i], PLAYERSPEED, ground); // Assuming ground is NULL for now
-            printf("B---");
-            // handle_weapon_switching(player);
+            handle_movement(gameState->players[i], PLAYERSPEED, ground);
+            // handle_weapon_switching(gameState->players[i]);
         }
         handle_attack_input(gameState->players, MAXCLIENTS);
-        printf("C---\n");
-        // Render current frame
-        
+        if (gameState->playerAliveCount == 1) {
+            gameState->matchState = GAME_OVER;
+        }
 
-        SDL_Delay(1000 / 60); // Run at 60 FPS
+        // Render current frame
+        SDL_RenderClear(renderer);
+        SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
+        SDL_RenderPresent(renderer);
+
+        SDL_Delay(1000 / TARGETFPS); // Run at target FPS
     }
+    return 0;
 }
 
-void client_game_over(Client *client, GameState *gameState, RenderController *renderController) {
-
+int client_game_over(Client *client, GameState *gameState) {
+    SDL_Event event;
+    while (gameState->matchState == GAME_OVER) {
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+                case SDL_QUIT:
+                    return 1;
+            }
+        }
+        // Render game over screen
+        printf("Game Over\n");
+        SDL_Delay(1000 / TARGETFPS); // Run at target FPS
+    }
+    return 0;
 }
 
 int send_player_input(Client *client, GameState *gameState) {

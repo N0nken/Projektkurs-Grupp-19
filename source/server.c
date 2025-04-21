@@ -71,6 +71,18 @@ void receive_player_inputs();
 int save_client();
 int get_player_id_from_ip();
 
+void show_debug_info_server(GameState *gameState, Server *server) {
+    printf("Match State: %d\n", gameState->matchState);
+    printf("Alive Players: %d\n", gameState->playerAliveCount);
+    for (int i = 0; i < MAXCLIENTS; i++) {
+        if (gameState->players[i]) {
+            printf("Player %d - HP: %d, Weapon: %d, Position: (%.2f, %.2f)\n", i, Player_get_hp(gameState->players[i]), Player_get_weapon(gameState->players[i]), 
+                Vector2_get_x(Player_get_position(gameState->players[i])), Vector2_get_y(Player_get_position(gameState->players[i])));
+            InputLogger_print_inputs(Player_get_inputs(gameState->players[i]));
+        }
+    }
+}
+
 int server_main() {
     Server server;
     GameState gameState;
@@ -146,14 +158,15 @@ void server_playing(Server *server, GameState *gameState) {
     Collider *ground = create_Collider(create_Vector2(400, 400), create_Vector2(800, 600), 0,GROUNDCOLLISIONLAYER);
     while (gameState->matchState == PLAYING) {
         receive_player_inputs(server, gameState);
+        show_debug_info_server(gameState, server);
         // Update game state logic here
         for (int i = 0; i < MAXCLIENTS; i++) {
             handle_movement(gameState->players[i], 5.0f, ground); // Assuming ground is NULL for now
-            handle_attack_input(gameState->players, MAXCLIENTS);
         }
+        handle_attack_input(gameState->players, MAXCLIENTS);
 
         send_server_game_state_to_all_clients(server, gameState);
-        SDL_Delay(1000 / 60); // Run at 60 FPS
+        SDL_Delay(1000 / 5); // Run at 60 FPS
     }
 }
 

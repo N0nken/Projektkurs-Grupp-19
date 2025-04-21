@@ -13,5 +13,6 @@ int InputLogger_is_action_just_pressed(InputLogger *logger, char action[]);
 int InputLogger_is_action_pressed(InputLogger *logger, char action[]);
 int InputLogger_is_action_just_released(InputLogger *logger, char action[]);
 void InputLogger_reset_all_actions(InputLogger *logger);
+void InputLogger_print_inputs(InputLogger *logger);
 
 #endif
