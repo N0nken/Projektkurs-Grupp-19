@@ -60,9 +60,12 @@ int main(int argv, char** args){
         100, 0, 1, allPlayers, &activePlayerCount);
     
     
-    Collider *ground = create_Collider(create_Vector2(250, 410), create_Vector2(300, 20), 0, 1);  //collider och sdl rect är annorlunda, måste skapa formel
-    SDL_Rect platforms[1];
-    platforms[0] = (SDL_Rect){0, 452, 580, 1};
+    Collider *platform1 = create_Collider(create_Vector2(100, 410), create_Vector2(120, 20), 0, 1);  
+    Collider *platform2 = create_Collider(create_Vector2(290, 410-100), create_Vector2(120, 20), 0, 1);  //x led fungerar tvärtom i collider och sdl rect
+
+    SDL_Rect platforms[2];
+    platforms[0] = (SDL_Rect){10, 388+64, 240, 20};
+    platforms[1] = (SDL_Rect){200, 388+64-100, 240, 20};
     
 
     Uint64 deltaTime = SDL_GetTicks64();
@@ -85,33 +88,35 @@ int main(int argv, char** args){
             }
             
         }
-        printf("%d\n", Player_get_hp(p2));
+        //printf("%d\n", Player_get_hp(p2));
         handle_attack_input(allPlayers, activePlayerCount);
-        printf("%d\n", Player_get_hp(p2));
+        //printf("%d\n", Player_get_hp(p2));
         const Uint8 *keystates = SDL_GetKeyboardState(NULL);
-        printf("A");
+        //printf("A");
 
         Input_Logger *p1Logger = Player_get_inputs(p1);
         SDL_Delay(1000/60);
         Input_Logger *logger = Player_get_inputs(p1);
         Input_Logger_update_all_actions(logger, keystates);
-        printf("attack just pressed %d\n", Input_Logger_is_action_just_pressed(p1Logger, "attack"));
-        printf("attack pressed %d\n", Input_Logger_is_action_pressed(p1Logger, "attack"));
-        printf("attack just released %d\n", Input_Logger_is_action_just_released(p1Logger, "attack"));
-
-        handle_movement(player1, 5.0f, logger, ground);
-        printf("B");
+        //printf("attack just pressed %d\n", Input_Logger_is_action_just_pressed(p1Logger, "attack"));
+        //printf("attack pressed %d\n", Input_Logger_is_action_pressed(p1Logger, "attack"));
+        //printf("attack just released %d\n", Input_Logger_is_action_just_released(p1Logger, "attack"));
+        handle_movement(player1, 5.0f, logger, platform1, platform2);
+        //printf("B");
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, backgroundtexture, NULL, NULL);
         SDL_RenderCopy(renderer, playerTexture, NULL, Player_get_rect(player1));
         
         SDL_SetRenderDrawColor(renderer, 150, 75, 0, 255);
         SDL_RenderFillRect(renderer, &platforms[0]);
+        SDL_RenderFillRect(renderer, &platforms[1]);
 
         SDL_RenderPresent(renderer);
-        /*deltaTime = SDL_GetTicks64() - deltaTime;
-        SDL_Delay(1000/60 - deltaTime); // 60 fps
-        */
+        //deltaTime = SDL_GetTicks64() - deltaTime;
+        //SDL_Delay(1000/60 - deltaTime); // 60 fpss
+        printf("player xpos main %f \n", Vector2_get_x(Player_get_position(player1)));
+        printf("%f\n", Collider_get_yposition(platform1));
+        
     }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

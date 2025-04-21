@@ -4,13 +4,13 @@
 #include <stdio.h>
 
 #define NUMBEROFACTIONS 8
-char allActions[8][20] = {
+char allActions[9][20] = {
     "move_up", "move_down", "move_left", "move_right",
-    "attack", "switch_to_rock", "switch_to_paper", "switch_to_scissors"
+    "attack", "switch_to_rock", "switch_to_paper", "switch_to_scissors", "dash"
 };
-int actionTranslations[8][2] = {
+int actionTranslations[9][2] = {
     {SDL_SCANCODE_W, SDL_SCANCODE_UP}, {SDL_SCANCODE_S, SDL_SCANCODE_DOWN}, {SDL_SCANCODE_A, SDL_SCANCODE_LEFT}, {SDL_SCANCODE_D, SDL_SCANCODE_RIGHT},
-    {SDL_SCANCODE_SPACE, SDL_SCANCODE_UNKNOWN}, {SDL_SCANCODE_1, SDL_SCANCODE_UNKNOWN}, {SDL_SCANCODE_2, SDL_SCANCODE_UNKNOWN}, {SDL_SCANCODE_3, SDL_SCANCODE_UNKNOWN}
+    {SDL_SCANCODE_SPACE, SDL_SCANCODE_UNKNOWN}, {SDL_SCANCODE_1, SDL_SCANCODE_UNKNOWN}, {SDL_SCANCODE_2, SDL_SCANCODE_UNKNOWN}, {SDL_SCANCODE_3, SDL_SCANCODE_UNKNOWN}, {SDL_SCANCODE_LSHIFT}
 };
 
 struct Input_Logger {

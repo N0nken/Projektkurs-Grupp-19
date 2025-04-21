@@ -47,8 +47,12 @@ int destroy_Collider(Collider *collider) {
 
 /* Setters */
 void Collider_set_position(Collider *collider, Vector2 *position) {
-    destroy_Vector2(collider->position);
+    //destroy_Vector2(collider->position);
     collider->position = position;
+}
+float Collider_set_yposition(Collider *collider, float position) {
+    //destroy_Vector2(collider->position);
+    Vector2_set_y(collider->position, position);
 }
 void Collider_set_dimensions(Collider *collider, Vector2 *dimensions) {
     destroy_Vector2(collider->dimensions);
