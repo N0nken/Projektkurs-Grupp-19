@@ -70,7 +70,7 @@ void client_game_over();
 int send_player_input();
 void sync_game_state_with_server();
 void client_background(SDL_Renderer* renderer);
-void client_lobby(SDL_Renderer* renderer);
+char *client_lobby(SDL_Renderer* renderer, char* targetIPaddress);
 
 int client_main(SDL_Window* Window,  SDL_Renderer* renderer) {
     Client client;
@@ -117,9 +117,7 @@ int init_client(Client *client, GameState *gameState) {
 
 void client_waiting(Client *client, GameState *gameState, SDL_Renderer *renderer) {
     char targetIPaddress[16];
-    client_lobby(renderer);
-    printf("Enter server IP address: ");
-    scanf("%s", &targetIPaddress);
+    client_lobby(renderer, targetIPaddress);
     SDLNet_ResolveHost(&client->serverIP, targetIPaddress, SERVERPORT);
     printf("server: %s\n", SDLNet_ResolveIP(&client->serverIP));
     while (gameState->matchState == WAITING) {
@@ -217,15 +215,21 @@ void client_background(SDL_Renderer* renderer){
     SDL_DestroyTexture(texture);
 }
 
-void client_lobby(SDL_Renderer* renderer){
+char* client_lobby(SDL_Renderer* renderer, char* targetIPaddress){
+    
+    strcpy(targetIPaddress, "_______________");
     bool quit=false;
+    int max=15, count=0;
+    
+
     while(!quit){
-        
+        TTF_Font* font = TTF_OpenFont("fonts/poppins.regular.ttf", 50);
         SDL_RenderClear(renderer);
         client_background(renderer);
-        create_textarea(renderer, 450-120,  100, 120, NULL, "Enter the server ip", (SDL_Color){0,0,0,255});
+        create_textarea(renderer, 450-120,  100, 50, NULL, "Enter the server ip", (SDL_Color){0,0,0,255});
+        create_textarea(renderer, 450-120,  300, 50, font, targetIPaddress, (SDL_Color){0,0,0,255});
         SDL_RenderPresent(renderer);
-
+        
         SDL_StartTextInput();
         SDL_Event event;
         SDL_WaitEvent(&event);
@@ -233,14 +237,29 @@ void client_lobby(SDL_Renderer* renderer){
         {
             case SDL_QUIT:
                 {
-                   quit =true;
+                   quit=true;
                     break;
                 }
             case SDL_TEXTINPUT:
                 {
                     printf("%s",event.text.text);
+                    if(count<max){
+                        printf("%d",count);
+                        targetIPaddress[count]= *event.text.text;
+                        count++;
+                    }
                     break;
                 }
         }   
+        if (event.key.keysym.sym == SDLK_BACKSPACE){
+                if(count>-1){
+                    if(count!=0)count--;
+                    targetIPaddress[count]='_';
+                    
+                }
+        }
+        else if(event.key.keysym.sym == SDLK_RETURN){
+            return targetIPaddress;
+        }
     }
 }

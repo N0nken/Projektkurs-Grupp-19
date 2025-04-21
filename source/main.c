@@ -80,6 +80,7 @@ char main_menu(SDL_Renderer* renderer, SDL_Window* Window, bool *mainQuit){
     while(quit==false){
         SDL_RenderClear(renderer);
         background(renderer);
+        //Ändra Namnet på spelet här och försök få den att va på mitten också då jag inte gjorde en center funktion till den.
         create_textarea(renderer, 450-120,  100, 120, NULL, "Game name", (SDL_Color){0,0,0,255});
 
         for(int i=0; i<NrOfButton; i++){
@@ -118,7 +119,7 @@ char main_menu(SDL_Renderer* renderer, SDL_Window* Window, bool *mainQuit){
                 }
             }
         }
-
+        //Ändra how to play texten här! 
         if(howtoplay){
             create_textarea_linebreaks(renderer, 1000,  500, 23, NULL, "This section willl explain what keys to use to play the game.", (SDL_Color){0,0,0,255});
            
