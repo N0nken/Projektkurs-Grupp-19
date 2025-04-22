@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#define NUMBEROFACTIONS 8
+#define NUMBEROFACTIONS 9
 char allActions[9][20] = {
     "move_up", "move_down", "move_left", "move_right",
     "attack", "switch_to_rock", "switch_to_paper", "switch_to_scissors", "dash"
@@ -22,6 +22,7 @@ struct Input_Logger {
     int switchToRock[3];
     int switchToPaper[3];
     int switchToScissors[3];
+    int dash[3];
 };
 
 Input_Logger *create_Input_Logger() {
@@ -35,6 +36,7 @@ Input_Logger *create_Input_Logger() {
         newInputLogger->switchToRock[i] = 0;
         newInputLogger->switchToPaper[i] = 0;
         newInputLogger->switchToScissors[i] = 0;
+        newInputLogger->dash[i] = 0;
     }
     return newInputLogger;
 }
@@ -59,6 +61,10 @@ int Input_Logger_get_action_state(Input_Logger *logger, char action[], int state
     } else if (strcmp(action, "switch_to_scissors") == 0) {
         return logger->switchToScissors[state];
     }
+    else if (strcmp(action, "dash") == 0) {
+        return logger->dash[state];
+    }
+    
 }
 void Input_Logger_set_action_state(Input_Logger *logger, char action[], int state) {
     if (strcmp(action, "move_up") == 0) {
@@ -78,6 +84,9 @@ void Input_Logger_set_action_state(Input_Logger *logger, char action[], int stat
     } else if (strcmp(action, "switch_to_scissors") == 0) {
         logger->switchToScissors[state] = 1;
     }
+    else if (strcmp(action, "dash") == 0) {
+        logger->dash[state] = 1;
+    }
 }
 void Input_Logger_unset_action_state(Input_Logger *logger, char action[], int state) {
     if (strcmp(action, "move_up") == 0) {
@@ -96,6 +105,9 @@ void Input_Logger_unset_action_state(Input_Logger *logger, char action[], int st
         logger->switchToPaper[state] = 0;
     } else if (strcmp(action, "switch_to_scissors") == 0) {
         logger->switchToScissors[state] = 0;
+    }
+    else if (strcmp(action, "dash") == 0) {
+        logger->dash[state] = 0;
     }
 }
 void Input_Logger_update_all_actions(Input_Logger *logger, const Uint8 *keystates) {

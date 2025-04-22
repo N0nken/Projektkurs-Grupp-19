@@ -7,5 +7,5 @@
 #include "input_logger.h"
 
 void move_player(Player *player, Vector2 *velocity);
-void handle_movement(Player *player, float speed, Input_Logger *logger, Collider *platform1, Collider *platform2);
+void handle_movement(Player *player, float speed, Input_Logger *logger, Collider *platform1, Collider *platform2, Collider *platform3, float deltaTime);
 #endif

@@ -62,13 +62,17 @@ int main(int argv, char** args){
     
     Collider *platform1 = create_Collider(create_Vector2(100, 410), create_Vector2(120, 20), 0, 1);  
     Collider *platform2 = create_Collider(create_Vector2(290, 410-100), create_Vector2(120, 20), 0, 1);  //x led fungerar tvärtom i collider och sdl rect
+    Collider *platform3 = create_Collider(create_Vector2(480, 410), create_Vector2(120, 20), 0, 1);  //x led fungerar tvärtom i collider och sdl rect
 
-    SDL_Rect platforms[2];
+    SDL_Rect platforms[3];
     platforms[0] = (SDL_Rect){10, 388+64, 240, 20};
     platforms[1] = (SDL_Rect){200, 388+64-100, 240, 20};
+    platforms[2] = (SDL_Rect){390, 388+64, 240, 20};
+
+    Uint64 lastTicks = SDL_GetTicks64();
     
 
-    Uint64 deltaTime = SDL_GetTicks64();
+    //Uint64 deltaTime = SDL_GetTicks64();
     while(isRunning){
 
         while(SDL_PollEvent(&event)){
@@ -88,6 +92,12 @@ int main(int argv, char** args){
             }
             
         }
+
+        Uint64 currentTicks = SDL_GetTicks64();             // nu i ms
+        Uint64 elapsedTicks = currentTicks - lastTicks;     // skillnad i ms
+        lastTicks = currentTicks;
+        float deltaTime = elapsedTicks * 0.001f;
+
         //printf("%d\n", Player_get_hp(p2));
         handle_attack_input(allPlayers, activePlayerCount);
         //printf("%d\n", Player_get_hp(p2));
@@ -101,7 +111,9 @@ int main(int argv, char** args){
         //printf("attack just pressed %d\n", Input_Logger_is_action_just_pressed(p1Logger, "attack"));
         //printf("attack pressed %d\n", Input_Logger_is_action_pressed(p1Logger, "attack"));
         //printf("attack just released %d\n", Input_Logger_is_action_just_released(p1Logger, "attack"));
-        handle_movement(player1, 5.0f, logger, platform1, platform2);
+
+
+        handle_movement(player1, 5.0f, logger, platform1, platform2, platform3, deltaTime);
         //printf("B");
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, backgroundtexture, NULL, NULL);
@@ -110,6 +122,7 @@ int main(int argv, char** args){
         SDL_SetRenderDrawColor(renderer, 150, 75, 0, 255);
         SDL_RenderFillRect(renderer, &platforms[0]);
         SDL_RenderFillRect(renderer, &platforms[1]);
+        SDL_RenderFillRect(renderer, &platforms[2]);
 
         SDL_RenderPresent(renderer);
         //deltaTime = SDL_GetTicks64() - deltaTime;
