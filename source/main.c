@@ -38,12 +38,11 @@ int main(int argv, char** args){
 
     bool isRunning = true;
     char choice = main_menu(renderer,  Window, &isRunning);
-     
     while(isRunning){
         if (choice == 's'){
             server_main();
         } else if (choice == 'c'){
-            client_main(Window, renderer);
+            if(!client_main(Window, renderer)) return 1;
         } else if (choice == 'q'){
             isRunning = 0;
         } else {
@@ -68,7 +67,7 @@ void background(SDL_Renderer* renderer){
 
 char main_menu(SDL_Renderer* renderer, SDL_Window* Window, bool *mainQuit){
     button *Button[NrOfButton];
-    Button[0] = button_create(0, 600, 400, 100, NULL, renderer, Window);
+    Button[0]= button_create(0, 600, 400, 100, NULL, renderer, Window);
     Button[1]= button_create(0, 500, 400, 100, NULL, renderer, Window);
     Button[2]= button_create(0, 400, 400, 100, NULL, renderer, Window);
     center_button(Button[0],Window);

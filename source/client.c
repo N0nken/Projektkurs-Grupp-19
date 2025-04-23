@@ -60,7 +60,7 @@ struct ClientData {
     int switchToScissors[3];
 }; typedef struct ClientData ClientData;
 
-int client_main(SDL_Window* Window,  SDL_Renderer* renderer);
+int client_main();
 int init_client();
 
 void client_waiting();
@@ -69,8 +69,8 @@ void client_game_over();
 
 int send_player_input();
 void sync_game_state_with_server();
-void client_background(SDL_Renderer* renderer);
-char *client_lobby(SDL_Renderer* renderer, char* targetIPaddress);
+void client_background();
+char *client_lobby();
 
 int client_main(SDL_Window* Window,  SDL_Renderer* renderer) {
     Client client;
@@ -78,8 +78,9 @@ int client_main(SDL_Window* Window,  SDL_Renderer* renderer) {
 
     if (init_client(&client, &gameState)) return 1;
     bool quit=false;
-    while (1) {
-        client_waiting(&client, &gameState, renderer);
+    while (!quit) {
+        client_waiting(&client, &gameState, renderer, &quit);
+        if(quit==true)return 0;
         client_playing(&client, &gameState);
         client_game_over(&client, &gameState);
     }
@@ -115,9 +116,10 @@ int init_client(Client *client, GameState *gameState) {
     return 0;
 }
 
-void client_waiting(Client *client, GameState *gameState, SDL_Renderer *renderer) {
+void client_waiting(Client *client, GameState *gameState, SDL_Renderer *renderer, bool *quit) {
     char targetIPaddress[16];
-    client_lobby(renderer, targetIPaddress);
+    client_lobby(renderer, targetIPaddress, quit);
+    if(*quit) return;
     SDLNet_ResolveHost(&client->serverIP, targetIPaddress, SERVERPORT);
     printf("server: %s\n", SDLNet_ResolveIP(&client->serverIP));
     while (gameState->matchState == WAITING) {
@@ -215,14 +217,12 @@ void client_background(SDL_Renderer* renderer){
     SDL_DestroyTexture(texture);
 }
 
-char* client_lobby(SDL_Renderer* renderer, char* targetIPaddress){
+char* client_lobby(SDL_Renderer* renderer, char* targetIPaddress, bool *quit) {
     
     strcpy(targetIPaddress, "_______________");
-    bool quit=false;
     int max=15, count=0;
-    
-
-    while(!quit){
+    while(!*quit){
+      
         TTF_Font* font = TTF_OpenFont("fonts/poppins.regular.ttf", 50);
         SDL_RenderClear(renderer);
         client_background(renderer);
@@ -237,7 +237,7 @@ char* client_lobby(SDL_Renderer* renderer, char* targetIPaddress){
         {
             case SDL_QUIT:
                 {
-                   quit=true;
+                   *quit=true;
                     break;
                 }
             case SDL_TEXTINPUT:

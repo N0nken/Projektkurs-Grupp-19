@@ -28,7 +28,6 @@ bool is_in_button_rect(int x, int y, SDL_Rect r);
 //Return the SDL_rect in the button.
 SDL_Rect ret_button_rect(button *Button);
 
-//Pallar inte kommentera saker längre.....
 void ret_button_normal(SDL_Rect Area, SDL_Renderer *Renderer);
 void ret_button_hover(SDL_Rect Area, SDL_Renderer *Renderer);
 void ret_button_clicked(SDL_Rect Area, SDL_Renderer *Renderer);

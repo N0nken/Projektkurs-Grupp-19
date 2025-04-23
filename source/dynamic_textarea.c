@@ -15,7 +15,7 @@ void create_textarea(SDL_Renderer* renderer,int x, int y, int size, TTF_Font* fo
     SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
     SDL_Rect area={x, y, surfaceMessage->w, surfaceMessage->h};
     SDL_RenderCopy(renderer, Message, NULL, &area);
-   
+    TTF_CloseFont(font);
     SDL_FreeSurface(surfaceMessage);
     SDL_DestroyTexture(Message);
     
