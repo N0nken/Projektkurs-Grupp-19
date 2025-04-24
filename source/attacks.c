@@ -22,11 +22,13 @@ void attack(Player *attackingPlayer, Player *allPlayers[], int activePlayerCount
     // play attack animation
     Collider *attackHitbox = Player_get_attackHitbox(attackingPlayer);
     Vector2 *origin = create_Vector2(Vector2_get_x(Collider_get_position(attackHitbox)), Vector2_get_y(Collider_get_position(attackHitbox)));
-    Collider_set_position(attackHitbox, Vector2_addition(Player_get_position(attackingPlayer), Collider_get_position(attackHitbox)));
+    Vector2 *offset = Vector2_const_multiplication(Collider_get_position(attackHitbox), Player_get_direction(attackingPlayer));
+    Collider_set_position(attackHitbox, Vector2_addition(Player_get_position(attackingPlayer), offset));
+    destroy_Vector2(offset);
     for (int i = 0; i < activePlayerCount; i++) {
         if (allPlayers[i] == attackingPlayer) continue;
         Player *defendingPlayer = allPlayers[i];
-        if (is_colliding(Player_get_attackHitbox(attackingPlayer), Player_get_hurtbox(defendingPlayer), -1)) {
+        if (is_colliding(Player_get_attackHitbox(attackingPlayer), Player_get_collider(defendingPlayer), -1)) {
             int damage = BASEDAMAGE;
             int attackingPlayerWeapon = Player_get_weapon(attackingPlayer);
             int defendingPlayerWeapon = Player_get_weapon(defendingPlayer);
@@ -48,8 +50,8 @@ void attack(Player *attackingPlayer, Player *allPlayers[], int activePlayerCount
 void handle_attack_input(Player *allPlayers[], int activePlayerCount) {
     for (int i = 0; i < activePlayerCount; i++) {
         Player *p = allPlayers[i];
-        Input_Logger *logger = Player_get_inputs(p);
-        if (Input_Logger_is_action_just_pressed(logger, "attack")) {
+        InputLogger *logger = Player_get_inputs(p);
+        if (InputLogger_is_action_just_pressed(logger, "attack")) {
             attack(p, allPlayers, activePlayerCount);
         }
     }

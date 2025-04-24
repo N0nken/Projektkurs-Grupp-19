@@ -4,7 +4,10 @@
 #include "vector2.h"
 #include <SDL2/SDL.h>
 #include <stdlib.h>
+#include "input_logger.h"
+
+#define PLAYERSPEED 5.0f
 
 void move_player(Player *player, Vector2 *velocity);
-void handle_movement(Player *player, float speed, const Uint8 *keystates);
+void handle_movement(Player *player, float speed, Collider *ground);
 #endif

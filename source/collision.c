@@ -62,6 +62,9 @@ void Collider_set_trigger(Collider *collider, int isTrigger) {
 Vector2 *Collider_get_position(Collider *collider) {
     return collider->position;
 }
+float Collider_get_yposition(Collider *collider) {
+     return Vector2_get_y(collider->position);
+}
 Vector2 *Collider_get_dimensions(Collider *collider) {
     return collider->dimensions;
 }

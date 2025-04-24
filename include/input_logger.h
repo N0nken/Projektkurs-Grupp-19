@@ -2,13 +2,17 @@
 #define INPUT_LOGGER_H_
 #include <SDL2/SDL.h>
 
-typedef struct Input_Logger Input_Logger;
+typedef struct InputLogger InputLogger;
 
-Input_Logger *create_Input_Logger();
-void destroy_Input_Logger(Input_Logger *logger);
-void Input_Logger_update_all_actions(Input_Logger *logger, const Uint8 *keystates);
-int Input_Logger_is_action_just_pressed(Input_Logger *logger, char action[]);
-int Input_Logger_is_action_pressed(Input_Logger *logger, char action[]);
-int Input_Logger_is_action_just_released(Input_Logger *logger, char action[]);
+InputLogger *create_InputLogger();
+void destroy_InputLogger(InputLogger *logger);
+void InputLogger_update_all_actions(InputLogger *logger, const Uint8 *keystates);
+void InputLogger_set_action_state(InputLogger *logger, char action[], int stateID, int state);
+int InputLogger_get_action_state(InputLogger *logger, char action[], int stateID);
+int InputLogger_is_action_just_pressed(InputLogger *logger, char action[]);
+int InputLogger_is_action_pressed(InputLogger *logger, char action[]);
+int InputLogger_is_action_just_released(InputLogger *logger, char action[]);
+void InputLogger_reset_all_actions(InputLogger *logger);
+void InputLogger_print_inputs(InputLogger *logger);
 
 #endif
