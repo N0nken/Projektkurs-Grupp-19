@@ -168,7 +168,9 @@ int client_waiting(Client *client, GameState *gameState) {
 }
 
 int client_playing(Client *client, GameState *gameState) {
-    SDL_Window *window = SDL_CreateWindow("Hello SDL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_RESIZABLE);
+    SDL_Window *window = SDL_CreateWindow("Hello SDL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALWAYS_ON_TOP);
+    SDL_ShowWindow(window);
+    SDL_RaiseWindow(window);
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
     SDL_Surface *background = IMG_Load("images/background.png");
     SDL_Texture *backgroundTexture = SDL_CreateTextureFromSurface(renderer, background);
