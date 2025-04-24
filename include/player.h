@@ -7,6 +7,7 @@
 #include <SDL2/SDL.h>
 
 typedef struct Player Player;
+typedef struct Frame frame;
 
 Player *create_Player(Vector2 *position, Collider *collider, Collider *hurtbox, Collider *attackHitbox, int hp, int weapon, int isAlive, Player *allPlayers[], int *activePlayerCount);
 /* Deallocates all memory to the struct object including struct fields */
@@ -43,5 +44,10 @@ void deal_damage(Player *player, int damage);
 
 void switch_player_weapon(Player *p, int keyPressed);
 void switch_player_weapon_sprite(Player *p, int Key, int *pCurrentImage);
+
+SDL_Rect *get_Player_Frame(frame *f, int weapon, int animationCounter);
+int get_animation_offset(Input_Logger *logger);
+int get_Animation_Counter(Input_Logger *logger);
+int get_Number_Of_Frames(Input_Logger *logger);
 
 #endif

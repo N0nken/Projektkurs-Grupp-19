@@ -11,19 +11,35 @@
 #include "../include/vector2.h"
 #include "../include/movement.h"
 
+typedef struct Frame{
+    int x;
+    int y;
+    int h;
+    int w;
+}; frame;
+
+
 int main(int argv, char** args){
+
+    int spriteWidth = 32,spriteHeight = 32, animationCounter=0;
+
+    frame playerFrame = {0};
 
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Window *window = SDL_CreateWindow("Hello SDL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_RESIZABLE);
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
     SDL_Surface *background= IMG_Load("images/background.png");
     SDL_Texture *backgroundtexture = SDL_CreateTextureFromSurface(renderer,background);
 
-    SDL_Surface *playerSurface = IMG_Load("images/char.png"); //texture för spelare
+    SDL_Surface *playerSurface = IMG_Load("images/animationer.png"); //texture för spelare
+    //SDL_Surface *playerSurface = IMG_Load("images/char.png"); //texture för spelare
+
     if (!playerSurface) {
         printf("Error loading player image: %s\n", IMG_GetError());
     }
     SDL_Texture *playerTexture = SDL_CreateTextureFromSurface(renderer, playerSurface);
+    
+    
     SDL_FreeSurface(playerSurface);
 
     bool isRunning = true;
@@ -59,7 +75,6 @@ int main(int argv, char** args){
         create_Collider(create_Vector2(0, 0), create_Vector2(10, 10), 1, 0),
         100, 0, 1, allPlayers, &activePlayerCount);
     
-    
 
     Uint64 deltaTime = SDL_GetTicks64();
     while(isRunning){
@@ -90,15 +105,22 @@ int main(int argv, char** args){
         printf("B");
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, backgroundtexture, NULL, NULL);
-        SDL_RenderCopy(renderer, playerTexture, NULL, Player_get_rect(player1));
-        SDL_RenderPresent(renderer);
-        /*deltaTime = SDL_GetTicks64() - deltaTime;
-        SDL_Delay(1000/60 - deltaTime); // 60 fps
-        */
+        
+        //SDL_RenderCopy(renderer, playerTexture, NULL, Player_get_rect(player1));
+
         Input_Logger *p1Logger = Player_get_inputs(p1);
         SDL_Delay(1000/60);
         Input_Logger *logger = Player_get_inputs(p1);
         Input_Logger_update_all_actions(logger, keystates);
+
+        SDL_QueryTexture(playerTexture, NULL , NULL, &spriteHeight, &spriteWidth);        
+        SDL_RenderCopy(renderer, playerTexture,get_Player_Frame(&playerFrame,2,get_Animation_Counter(logger)),Player_get_rect(player1));
+                
+        SDL_RenderPresent(renderer);
+        /*deltaTime = SDL_GetTicks64() - deltaTime;
+        SDL_Delay(1000/60 - deltaTime); // 60 fps
+        */
+
         printf("attack just pressed %d\n", Input_Logger_is_action_just_pressed(p1Logger, "attack"));
         printf("attack pressed %d\n", Input_Logger_is_action_pressed(p1Logger, "attack"));
         printf("attack just released %d\n", Input_Logger_is_action_just_released(p1Logger, "attack"));
