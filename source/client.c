@@ -1,6 +1,9 @@
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_net.h>
+#include <stdio.h>
+#include <stdbool.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
+#include <SDL_net.h>
 
 #include "../include/input_logger.h"
 #include "../include/attacks.h"
@@ -8,6 +11,7 @@
 #include "../include/collision.h"
 #include "../include/vector2.h"
 #include "../include/movement.h"
+#include "../include/dynamic_textarea.h"
 
 #define PACKETLOSSLIMIT 10 // Give up sending packets to server after this many failed attempts
 #define MAXCLIENTS 4
@@ -71,6 +75,8 @@ int client_game_over();
 
 int send_player_input();
 void sync_game_state_with_server();
+void client_background();
+char *client_lobby();
 
 void show_debug_info_client(GameState *gameState, Client *client) {
     printf("Player ID: %d\n", gameState->playerID);
@@ -86,14 +92,14 @@ void show_debug_info_client(GameState *gameState, Client *client) {
     }
 }
 
-int client_main() {
+int client_main(SDL_Window* Window,  SDL_Renderer* renderer) {
     Client client;
     GameState gameState;
 
     if (init_client(&client, &gameState)) return 1;
-
+    
     while (1) {
-        if(client_waiting(&client, &gameState)) {
+        if(client_waiting(&client, &gameState,renderer)) {
             break;
         }
         if(client_playing(&client, &gameState)) {
@@ -136,10 +142,11 @@ int init_client(Client *client, GameState *gameState) {
     return 0;
 }
 
-int client_waiting(Client *client, GameState *gameState) {
+int client_waiting(Client *client, GameState *gameState, SDL_Renderer *renderer) {
     char targetIPaddress[16];
-    printf("Enter server IP address: ");
-    scanf("%s", &targetIPaddress);
+    bool quit = false;
+    client_lobby(renderer, targetIPaddress, &quit);
+    if(quit) return 1;
     SDLNet_ResolveHost(&client->serverIP, targetIPaddress, SERVERPORT);
     printf("server: %s\n", SDLNet_ResolveIP(&client->serverIP));
     SDL_Event event;
@@ -303,4 +310,63 @@ void sync_game_state_with_server(Client *client, GameState *gameState) {
         }
     }
     client->packetsReceived = 0;
+}
+
+
+
+
+
+void client_background(SDL_Renderer* renderer){  
+    SDL_Surface* surface= IMG_Load("images/background.png");
+    SDL_Texture* texture= SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_RenderCopy(renderer,texture,NULL,NULL);
+    SDL_FreeSurface(surface);
+    SDL_DestroyTexture(texture);
+}
+
+char* client_lobby(SDL_Renderer* renderer, char* targetIPaddress, bool *quit) {
+    
+    strcpy(targetIPaddress, "_______________");
+    int max=15, count=0;
+    while(!*quit){
+      
+        TTF_Font* font = TTF_OpenFont("fonts/poppins.regular.ttf", 50);
+        SDL_RenderClear(renderer);
+        client_background(renderer);
+        create_textarea(renderer, 450-120,  100, 50, NULL, "Enter the server ip", (SDL_Color){0,0,0,255});
+        create_textarea(renderer, 450-120,  300, 50, font, targetIPaddress, (SDL_Color){0,0,0,255});
+        SDL_RenderPresent(renderer);
+        
+        SDL_StartTextInput();
+        SDL_Event event;
+        SDL_WaitEvent(&event);
+        switch(event.type)
+        {
+            case SDL_QUIT:
+                {
+                   *quit=true;
+                    break;
+                }
+            case SDL_TEXTINPUT:
+                {
+                    printf("%s",event.text.text);
+                    if(count<max){
+                        printf("%d",count);
+                        targetIPaddress[count]= *event.text.text;
+                        count++;
+                    }
+                    break;
+                }
+        }   
+        if (event.key.keysym.sym == SDLK_BACKSPACE){
+                if(count>-1){
+                    if(count!=0)count--;
+                    targetIPaddress[count]='_';
+                    
+                }
+        }
+        else if(event.key.keysym.sym == SDLK_RETURN){
+            return targetIPaddress;
+        }
+    }
 }

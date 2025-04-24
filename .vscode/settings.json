@@ -61,10 +61,21 @@
     "attacks.h": "c",
     "vector2.h": "c",
     "string.h": "c",
+<<<<<<< HEAD
+    "sdl_image.h": "c",
+    "menu.h": "c",
+    "sdl_ttf.h": "c",
+    "dynamic_textarea.h": "c"
+=======
     "sdl.h": "c",
     "movement.h": "c",
     "sdl_net.h": "c",
+<<<<<<< HEAD
     "input_logger.h": "c",
     "stdlib.h": "c"
+=======
+    "input_logger.h": "c"
+>>>>>>> server-client
+>>>>>>> main-menu
   }
 }
