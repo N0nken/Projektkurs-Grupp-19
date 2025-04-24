@@ -12,6 +12,9 @@
 #define CLIENTPORT 50000
 #define SERVERPORT 50001
 #define MAXPACKETSRECEIVEDPERFRAME 4
+#define TARGETFPS 60
+#define GAMEOVERCOOLDOWN 30000 // 30 seconds cooldown before match restarts after game over
+#define GAMESTARTTIMER 15000 // 15 seconds timer before match starts after all players are connected
 
 enum MatchStates {WAITING,PLAYING,GAME_OVER};
 
@@ -141,6 +144,7 @@ int init_server(Server *server, GameState *gameState) {
 }
 
 void server_waiting(Server *server, GameState *gameState) {
+    // Wait for players to connect
     gameState->matchState = WAITING;
     while (server->clientCount < MAXCLIENTS) {
         while (SDLNet_UDP_Recv(server->socket, server->recvPacket)) {
@@ -149,6 +153,15 @@ void server_waiting(Server *server, GameState *gameState) {
         send_server_game_state_to_all_clients(server, gameState);
         printf("Waiting for players... (%d)\n", server->clientCount);
         SDL_Delay(500); // Wait for 1 second before checking again
+    }
+    // All players connected, start the game after a short timer
+    Uint64 deltaTime = SDL_GetTicks64();
+    int totalTime = 0;
+    while (totalTime < GAMESTARTTIMER) {
+        deltaTime = SDL_GetTicks64() - deltaTime;
+        totalTime += deltaTime;
+        receive_player_inputs(server, gameState);
+        send_server_game_state_to_all_clients(server, gameState);
     }
     gameState->matchState = PLAYING;
 }
@@ -165,15 +178,25 @@ void server_playing(Server *server, GameState *gameState) {
         }
         handle_attack_input(gameState->players, MAXCLIENTS);
 
+        // Broadcast game state to all clients
         send_server_game_state_to_all_clients(server, gameState);
-        SDL_Delay(1000 / 5); // Run at 60 FPS
+        SDL_Delay(1000 / TARGETFPS); // Run at 60 FPS
     }
 }
 
 void server_game_over(Server *server, GameState *gameState) {
     // Game logic for game over state
+    Uint64 deltaTime = SDL_GetTicks64();
+    int totalTime = 0;
     while (gameState->matchState == GAME_OVER) {
         // Handle game over logic here
+        deltaTime = SDL_GetTicks64() - deltaTime;
+        totalTime += deltaTime;
+        if (totalTime > GAMEOVERCOOLDOWN) {
+            gameState->matchState = WAITING; // Go back to waiting state after game over
+        }
+        send_server_game_state_to_all_clients(server, gameState);
+        SDL_Delay(1000 / TARGETFPS); // Run at target FPS
     }
 }
 
@@ -231,7 +254,7 @@ void send_server_game_state_to_all_clients(Server *server, GameState *gameState)
             simulationData.players[j].posY = Vector2_get_y(Player_get_position(gameState->players[j]));
             simulationData.players[j].direction = Player_get_direction(gameState->players[j]);
             simulationData.players[j].state = Player_get_state(gameState->players[j]);
-            //printf("%d %d %d %d %.2f %.2f %d\n", simulationData.players[j].isAlive, simulationData.players[j].hp, simulationData.players[j].weapon, simulationData.players[j].posX, simulationData.players[j].posY, simulationData.players[j].direction);
+            printf("%d %d %d %.2f %.2f %d\n", simulationData.players[j].isAlive, simulationData.players[j].hp, simulationData.players[j].weapon, simulationData.players[j].posX, simulationData.players[j].posY, simulationData.players[j].direction);
         }
     }
     // ...send to each client

@@ -14,7 +14,7 @@
 #define CLIENTPORT 50000
 #define SERVERPORT 50001
 #define MAXPACKETSRECEIVEDPERFRAME 10
-#define TARGETFPS 5
+#define TARGETFPS 60
 
 enum MatchStates {WAITING,PLAYING,GAME_OVER};
 
@@ -184,8 +184,6 @@ int client_playing(Client *client, GameState *gameState) {
             }
         }
         show_debug_info_client(gameState, client);
-        // sync simulation with server
-        sync_game_state_with_server(client, gameState);
         // Update player input...
         if (Player_get_isAlive(gameState->players[gameState->playerID])) {
             InputLogger_update_all_actions(Player_get_inputs(gameState->players[gameState->playerID]), SDL_GetKeyboardState(NULL));
@@ -206,15 +204,15 @@ int client_playing(Client *client, GameState *gameState) {
             // handle_weapon_switching(gameState->players[i]);
         }
         handle_attack_input(gameState->players, MAXCLIENTS);
-        if (gameState->playerAliveCount == 1) {
-            gameState->matchState = GAME_OVER;
-        }
+
+        // sync simulation with server
+        sync_game_state_with_server(client, gameState);
 
         // Render current frame
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
         SDL_RenderPresent(renderer);
-
+        
         SDL_Delay(1000 / TARGETFPS); // Run at target FPS
     }
     return 0;
@@ -270,12 +268,12 @@ void sync_game_state_with_server(Client *client, GameState *gameState) {
             memcpy(&simulationData, client->recvPacket->data, sizeof(SimulationData));
             gameState->matchState = simulationData.matchState;
             gameState->playerID = simulationData.playerID;
-            gameState->playerAliveCount = 0;
+            gameState->playerAliveCount = MAXCLIENTS;
             for (int i = 0; i < MAXCLIENTS; i++) {
-                if (!simulationData.players[i].isAlive) {
+                if (simulationData.players[i].isAlive == 0) {
+                    gameState->playerAliveCount--;
                     continue;
                 }
-                gameState->playerAliveCount++;
                 //printf("%d %d %d %d %.2f %.2f %d\n", simulationData.players[i].isAlive, simulationData.players[i].hp, simulationData.players[i].weapon, simulationData.players[i].posX, simulationData.players[i].posY, simulationData.players[i].direction);
                 Player_set_isAlive(gameState->players[i], simulationData.players[i].isAlive);
                 Player_set_hp(gameState->players[i], simulationData.players[i].hp);
@@ -283,6 +281,7 @@ void sync_game_state_with_server(Client *client, GameState *gameState) {
                 Vector2_set_x(Player_get_position(gameState->players[i]), simulationData.players[i].posX);
                 Vector2_set_y(Player_get_position(gameState->players[i]), simulationData.players[i].posY);
                 Player_set_direction(gameState->players[i], simulationData.players[i].direction);
+                printf("%d %d %d %.2f %.2f %d\n", simulationData.players[i].isAlive, simulationData.players[i].hp, simulationData.players[i].weapon, simulationData.players[i].posX, simulationData.players[i].posY, simulationData.players[i].direction);
             }
         // sync player input data
         } else if (client->recvPacket->len == sizeof(ClientInput)) {
