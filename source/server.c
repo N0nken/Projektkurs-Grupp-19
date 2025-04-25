@@ -154,7 +154,7 @@ void server_waiting(Server *server, GameState *gameState) {
         printf("Waiting for players... (%d)\n", server->clientCount);
         SDL_Delay(500); // Wait for 1 second before checking again
     }
-    // All players connected, start the game after a short timer
+    // All players connected, start the game after a short countdown
     Uint64 deltaTime = SDL_GetTicks64();
     int totalTime = 0;
     while (totalTime < GAMESTARTTIMER) {

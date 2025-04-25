@@ -4,10 +4,12 @@
 #include <stdio.h>
 
 #define NUMBEROFACTIONS 8
+// Contains string representations of each action
 char allActions[8][20] = {
     "move_up", "move_down", "move_left", "move_right",
     "attack", "switch_to_rock", "switch_to_paper", "switch_to_scissors"
 };
+// Contains SDL_SCANCODE representation of each action
 int actionTranslations[8][2] = {
     {SDL_SCANCODE_W, SDL_SCANCODE_UP}, {SDL_SCANCODE_S, SDL_SCANCODE_DOWN}, {SDL_SCANCODE_A, SDL_SCANCODE_LEFT}, {SDL_SCANCODE_D, SDL_SCANCODE_RIGHT},
     {SDL_SCANCODE_SPACE, SDL_SCANCODE_UNKNOWN}, {SDL_SCANCODE_1, SDL_SCANCODE_UNKNOWN}, {SDL_SCANCODE_2, SDL_SCANCODE_UNKNOWN}, {SDL_SCANCODE_3, SDL_SCANCODE_UNKNOWN}
@@ -41,6 +43,7 @@ InputLogger *create_InputLogger() {
 void destroy_InputLogger(InputLogger *logger) {
     free(logger);
 }
+// Gets the selected state of the selected action. Ideally not used outside of this input_logger.c. Use is_action_just_pressed/is_action_pressed/is_action_just_released instead
 int InputLogger_get_action_state(InputLogger *logger, char action[], int stateID) {
     if (strcmp(action, "move_up") == 0) {
         return logger->up[stateID];
@@ -60,6 +63,7 @@ int InputLogger_get_action_state(InputLogger *logger, char action[], int stateID
         return logger->switchToScissors[stateID];
     }
 }
+// Sets the selected state of the selected action. Ideally not used outside of this input_logger.c
 void InputLogger_set_action_state(InputLogger *logger, char action[], int stateID, int state) {
     if (strcmp(action, "move_up") == 0) {
         logger->up[stateID] = state;
@@ -79,7 +83,9 @@ void InputLogger_set_action_state(InputLogger *logger, char action[], int stateI
         logger->switchToScissors[stateID] = state;
     }
 }
-/* CLIENT ONLY */
+/*  CLIENT ONLY 
+    Updates the state of all actions
+*/
 void InputLogger_update_all_actions(InputLogger *logger, const Uint8 *keystates) {
     for (int i = 0; i < NUMBEROFACTIONS; i++) {
         if (keystates[actionTranslations[i][0]] == 1 || keystates[actionTranslations[i][1]] == 1) {
@@ -104,12 +110,15 @@ void InputLogger_update_all_actions(InputLogger *logger, const Uint8 *keystates)
         }
     }
 }
+// returns 1 if the selected action was just pressed (not pressed the frame before but pressed this frame) else return 0
 int InputLogger_is_action_just_pressed(InputLogger *logger, char action[]) {
     return InputLogger_get_action_state(logger, action, 0);
 }
+// returns 1 if the selected action was pressed the frame before and this frame else return 0
 int InputLogger_is_action_pressed(InputLogger *logger, char action[]) {
     return InputLogger_get_action_state(logger, action, 1);
 }
+// returns 1 if the selected action was pressed the frame before but not this frame else return 0
 int InputLogger_is_action_just_released(InputLogger *logger, char action[]) {
     return InputLogger_get_action_state(logger, action, 2);
 }

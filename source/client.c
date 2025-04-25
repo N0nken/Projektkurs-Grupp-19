@@ -23,6 +23,7 @@
 
 enum MatchStates {WAITING,PLAYING,GAME_OVER};
 
+//  Basic struct for sdl_net
 struct Client {
     IPaddress serverIP;
     UDPsocket socket;
@@ -32,6 +33,7 @@ struct Client {
     int packetsReceived; // Number of packets received in the current frame
 }; typedef struct Client Client;
 
+// contains the current state of the game. E.g. if theres an active match, how many players are alive, which player this client controls etc.
 struct GameState {
     int playerID; // ID of the clients player
     int matchState; // waiting, playing, game over
@@ -39,6 +41,7 @@ struct GameState {
     Player *players[MAXCLIENTS]; // array of players
 }; typedef struct GameState GameState;
 
+// Struct for receiving player data from the server
 struct UDPplayer {
     int isAlive;
     int hp;
@@ -49,12 +52,14 @@ struct UDPplayer {
     int state; // 0 = idle, 1 = moving, 2 = attacking
 }; typedef struct UDPplayer UDPplayer;
 
+// Struct for receiving game state data from the server
 struct SimulationData {
     int matchState; // waiting, playing, game over
     UDPplayer players[MAXCLIENTS];
     int playerID; // ID of the player receiving the data
 }; typedef struct SimulationData SimulationData;
 
+// Struct for sending/receiving player inputs to/from the server. !!!!!Update when new actions are added!!!!!
 struct ClientInput {
     int playerID; // ID of the player whose input is being sent. = -1 when sent from client
     int up[3];
@@ -140,6 +145,7 @@ int init_client(Client *client, GameState *gameState) {
     return 0;
 }
 
+// connects to the server at the given ip address and waits until the server says that the match has begun
 int client_waiting(Client *client, GameState *gameState, RenderController* renderController, char targetIPaddress[]) {
     SDLNet_ResolveHost(&client->serverIP, targetIPaddress, SERVERPORT);
     printf("server: %s\n", SDLNet_ResolveIP(&client->serverIP));
@@ -147,6 +153,7 @@ int client_waiting(Client *client, GameState *gameState, RenderController* rende
     while (gameState->matchState == WAITING) {
         SDL_RenderClear(renderController->renderer);
         SDL_RenderCopy(renderController->renderer, renderController->background, NULL, NULL);
+        SDL_RenderPresent(renderController->renderer);
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
@@ -170,6 +177,7 @@ int client_waiting(Client *client, GameState *gameState, RenderController* rende
     return 0;
 }
 
+// main match loop
 int client_playing(Client *client, GameState *gameState, RenderController* renderController) {
     Collider *ground = create_Collider(create_Vector2(400, 400), create_Vector2(400, 10), 0, GROUNDCOLLISIONLAYER);
     SDL_Event event;
@@ -209,6 +217,16 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
         // Render current frame
         SDL_RenderClear(renderController->renderer);
         SDL_RenderCopy(renderController->renderer, renderController->background, NULL, NULL);
+        // draws all players to the renderer
+        for (int i = 0; i < MAXCLIENTS; i++) {
+            Vector2 *playerPosition = Player_get_position(gameState->players[i]);
+            Vector2 *playerDimensions = Collider_get_dimensions(Player_get_collider(gameState->players[i]));
+            int rectPosX = Vector2_get_x(playerPosition) - Vector2_get_x(playerDimensions);
+            int rectPosY = Vector2_get_y(playerPosition) - Vector2_get_y(playerDimensions);
+            SDL_Rect playerPosRect = {rectPosX, rectPosY, (int) Vector2_get_x(playerDimensions) * 2, (int) Vector2_get_y(playerDimensions) * 2};
+            // ||||||| byt ut NULL till en SDL_rect som markerar rätt frame i spritesheeten ||||||| 
+            SDL_RenderCopy(renderController->renderer, renderController->playerSpritesheet, NULL, &playerPosRect);
+        }
         SDL_RenderPresent(renderController->renderer);
         
         SDL_Delay(1000 / TARGETFPS); // Run at target FPS
@@ -216,6 +234,7 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
     return 0;
 }
 
+// shows the winner and after a certain time restarts (? end?) the match
 int client_game_over(Client *client, GameState *gameState, RenderController* renderController) {
     SDL_Event event;
     while (gameState->matchState == GAME_OVER) {
@@ -235,6 +254,7 @@ int client_game_over(Client *client, GameState *gameState, RenderController* ren
     return 0;
 }
 
+// sends this clients input to the server
 int send_player_input(Client *client, GameState *gameState) {
     ClientInput clientInput;
     printf("Preparing sending packet\n");
@@ -257,19 +277,22 @@ int send_player_input(Client *client, GameState *gameState) {
     return SDLNet_UDP_Send(client->socket, -1, client->sendPacket);
 }
 
+// corrects this clients simulation with the simulation on the server. Also collects all inputs from the other clients to predict the coming frame(s) until the next server sync
 void sync_game_state_with_server(Client *client, GameState *gameState) {
     SimulationData simulationData;
     ClientInput clientInput;
     // Receive all packets from the server
     while (SDLNet_UDP_Recv(client->socket, client->recvPacket) && client->packetsReceived < MAXPACKETSRECEIVEDPERFRAME) {
         client->packetsReceived++;
-        // sync player data
+        // receive simulation data from the server 
         if (client->recvPacket->len == sizeof(SimulationData)) {
             printf("Simulation packet received from: %s\n", SDLNet_ResolveIP(&client->recvPacket->address));
             memcpy(&simulationData, client->recvPacket->data, sizeof(SimulationData));
+            // copy the server game state to this clients game state
             gameState->matchState = simulationData.matchState;
             gameState->playerID = simulationData.playerID;
             gameState->playerAliveCount = MAXCLIENTS;
+            // copy each players position, hp, selected weapon etc
             for (int i = 0; i < MAXCLIENTS; i++) {
                 if (simulationData.players[i].isAlive == 0) {
                     gameState->playerAliveCount--;
@@ -306,6 +329,7 @@ void sync_game_state_with_server(Client *client, GameState *gameState) {
     client->packetsReceived = 0;
 }
 
+// menu for the player to enter the ip address of the server
 int client_lobby(RenderController* renderController, char targetIPaddress[]) {
     strcpy(targetIPaddress, "_______________");
     int max=15, count=0;

@@ -90,6 +90,7 @@ void print_Collider(Collider *collider) {
     printf("ID: %d\n", Collider_get_id(collider));
 }
 
+// checks if two specific colliders are colliding
 int is_colliding(Collider *collider1, Collider *collider2, int layer) {
     if (Vector2_equals(Collider_get_position(collider1), Collider_get_position(collider2))) {
         return 1;
@@ -107,6 +108,9 @@ int is_colliding(Collider *collider1, Collider *collider2, int layer) {
     float yMin2 = Vector2_get_y(Collider_get_position(collider2)) - Vector2_get_y(Collider_get_dimensions(collider2));
     float xMin2 = Vector2_get_x(Collider_get_position(collider2)) - Vector2_get_x(Collider_get_dimensions(collider2));
 
+    /*
+        Checks wether one of the edges of either collider is within the other collider.
+    */
     if (
         (((yMin2 <= yMin1 && yMin1 <= yMax2) || (yMin2 <= yMax1 && yMax1 <= yMax2)) && 
             ((xMin2 <= xMin1 && xMin1 <= xMax2) || (xMin2 <= xMax1 && xMax1 <= xMax2))) ||
@@ -115,23 +119,8 @@ int is_colliding(Collider *collider1, Collider *collider2, int layer) {
         return 1;
     }
     return 0;
-
-    /*
-    Vector2 *vBetween = Vector2_subtraction(Collider_get_position(collider1), Collider_get_position(collider2));
-    float angleBetween = angle_of(vBetween);
-    float xMulti = clampf(cosf(angleBetween*2),0.0,1.0);
-    float yMulti = clampf(sinf(angleBetween*2),0.0,1.0);
-    float dist = distance_to(Collider_get_position(collider1), Collider_get_position(collider2));
-    float maxX = (Vector2_get_x(Collider_get_dimensions(collider1)) + Vector2_get_x(Collider_get_dimensions(collider2)))*xMulti;
-    float maxY = (Vector2_get_y(Collider_get_dimensions(collider1)) + Vector2_get_y(Collider_get_dimensions(collider2)))*yMulti;
-    float maxDist = sqrtf(powf(maxX, 2.0) + powf(maxY, 2.0));
-    if (dist < maxDist) {
-        return 1;
-    }
-    return 0;
-    */
 }
-
+// checks if a chosen collider is colliding with ANY other collider
 int is_colliding_any(Collider *collider, int layer) {
     for (int i = 0; i < MAXCOLLIDERCOUNT; i++) {
         if (allColliders[i] == NULL) break;
@@ -146,13 +135,16 @@ int is_colliding_any(Collider *collider, int layer) {
 }
 
 void move_and_collide(Collider *collider, Vector2 *velocity, int layer) {
+    // if the collider is a trigger then it wont collide so just move it to the end
     if (Collider_is_trigger(collider)) {
         Collider_set_position(collider, Vector2_addition(Collider_get_position(collider), velocity));
         return;
     }
+    // if the velocity is 0,0 then it wont move so just return
     if (magnitude(velocity) == 0) {
         return;
     }
+    // moves the collider in steps of VELOCITYFRAMESIZE units. Each step it checks if its colliding. If true then go back one step and return
     int numberOfMoves = magnitude(velocity) / VELOCITYFRAMESIZE;
     Vector2 *velocityFrame = create_Vector2(Vector2_get_x(velocity) / magnitude(velocity) * VELOCITYFRAMESIZE, Vector2_get_y(velocity) / magnitude(velocity) * VELOCITYFRAMESIZE);
     for (int i = 0; i < numberOfMoves; i++) {

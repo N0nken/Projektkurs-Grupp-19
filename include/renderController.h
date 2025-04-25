@@ -6,6 +6,7 @@ struct RenderController {
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Texture* background;
+    SDL_Texture* playerSpritesheet;
 }; typedef struct RenderController RenderController;
 
 #endif

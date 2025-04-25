@@ -40,8 +40,7 @@ Player *create_Player(Vector2 *position, Collider *collider, Collider *attackHit
     newPlayer->rect->w = 64;
     newPlayer->rect->h = 64;
     allPlayers[(*activePlayerCount)++] = newPlayer;
-    newPlayer->direction = 1; // default direction to right
-    
+    newPlayer->direction = 1; // default direction to right    
     return newPlayer;
 }
 int destroy_Player(Player *p) {
