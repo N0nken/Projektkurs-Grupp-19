@@ -1,6 +1,7 @@
 #ifndef CLIENT_H_
 #define CLIENT_H_
+#include "renderController.h"
 
-int client_main(SDL_Window* Window,  SDL_Renderer* renderer);
+int client_main(RenderController* renderController);
 
 #endif

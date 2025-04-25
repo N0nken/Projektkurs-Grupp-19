@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
-#include <SDL_net.h>
+#include <SDL2/SDL_net.h>
 
 #include "../include/input_logger.h"
 #include "../include/attacks.h"
@@ -12,6 +12,7 @@
 #include "../include/vector2.h"
 #include "../include/movement.h"
 #include "../include/dynamic_textarea.h"
+#include "../include/renderController.h"
 
 #define PACKETLOSSLIMIT 10 // Give up sending packets to server after this many failed attempts
 #define MAXCLIENTS 4
@@ -76,7 +77,7 @@ int client_game_over();
 int send_player_input();
 void sync_game_state_with_server();
 void client_background();
-char *client_lobby();
+int client_lobby();
 
 void show_debug_info_client(GameState *gameState, Client *client) {
     printf("Player ID: %d\n", gameState->playerID);
@@ -92,22 +93,19 @@ void show_debug_info_client(GameState *gameState, Client *client) {
     }
 }
 
-int client_main(SDL_Window* Window,  SDL_Renderer* renderer) {
+int client_main(RenderController* renderController) {
     Client client;
     GameState gameState;
 
     if (init_client(&client, &gameState)) return 1;
     
+    char targetIP[16];
+
     while (1) {
-        if(client_waiting(&client, &gameState,renderer)) {
-            break;
-        }
-        if(client_playing(&client, &gameState)) {
-            break;
-        }
-        if(client_game_over(&client, &gameState)) {
-            break;
-        }
+        if (client_lobby(renderController, targetIP)) return 1;
+        if (client_waiting(&client, &gameState, renderController, targetIP)) return 1;
+        if (client_playing(&client, &gameState, renderController)) return 1;
+        if (client_game_over(&client, &gameState, renderController)) return 1;
     }
 
     return 0;
@@ -142,15 +140,13 @@ int init_client(Client *client, GameState *gameState) {
     return 0;
 }
 
-int client_waiting(Client *client, GameState *gameState, SDL_Renderer *renderer) {
-    char targetIPaddress[16];
-    bool quit = false;
-    client_lobby(renderer, targetIPaddress, &quit);
-    if(quit) return 1;
+int client_waiting(Client *client, GameState *gameState, RenderController* renderController, char targetIPaddress[]) {
     SDLNet_ResolveHost(&client->serverIP, targetIPaddress, SERVERPORT);
     printf("server: %s\n", SDLNet_ResolveIP(&client->serverIP));
     SDL_Event event;
     while (gameState->matchState == WAITING) {
+        SDL_RenderClear(renderController->renderer);
+        SDL_RenderCopy(renderController->renderer, renderController->background, NULL, NULL);
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
@@ -174,12 +170,7 @@ int client_waiting(Client *client, GameState *gameState, SDL_Renderer *renderer)
     return 0;
 }
 
-int client_playing(Client *client, GameState *gameState) {
-    SDL_Window *window = SDL_CreateWindow("Hello SDL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_RESIZABLE);
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
-    SDL_Surface *background = IMG_Load("images/background.png");
-    SDL_Texture *backgroundTexture = SDL_CreateTextureFromSurface(renderer, background);
-
+int client_playing(Client *client, GameState *gameState, RenderController* renderController) {
     Collider *ground = create_Collider(create_Vector2(400, 400), create_Vector2(400, 10), 0, GROUNDCOLLISIONLAYER);
     SDL_Event event;
     while (gameState->matchState == PLAYING) {
@@ -216,16 +207,16 @@ int client_playing(Client *client, GameState *gameState) {
         sync_game_state_with_server(client, gameState);
 
         // Render current frame
-        SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
-        SDL_RenderPresent(renderer);
+        SDL_RenderClear(renderController->renderer);
+        SDL_RenderCopy(renderController->renderer, renderController->background, NULL, NULL);
+        SDL_RenderPresent(renderController->renderer);
         
         SDL_Delay(1000 / TARGETFPS); // Run at target FPS
     }
     return 0;
 }
 
-int client_game_over(Client *client, GameState *gameState) {
+int client_game_over(Client *client, GameState *gameState, RenderController* renderController) {
     SDL_Event event;
     while (gameState->matchState == GAME_OVER) {
         while (SDL_PollEvent(&event)) {
@@ -234,6 +225,9 @@ int client_game_over(Client *client, GameState *gameState) {
                     return 1;
             }
         }
+        SDL_RenderClear(renderController->renderer);
+        SDL_RenderCopy(renderController->renderer, renderController->background, NULL, NULL);
+        SDL_RenderPresent(renderController->renderer);
         // Render game over screen
         printf("Game Over\n");
         SDL_Delay(1000 / TARGETFPS); // Run at target FPS
@@ -312,30 +306,17 @@ void sync_game_state_with_server(Client *client, GameState *gameState) {
     client->packetsReceived = 0;
 }
 
-
-
-
-
-void client_background(SDL_Renderer* renderer){  
-    SDL_Surface* surface= IMG_Load("images/background.png");
-    SDL_Texture* texture= SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_RenderCopy(renderer,texture,NULL,NULL);
-    SDL_FreeSurface(surface);
-    SDL_DestroyTexture(texture);
-}
-
-char* client_lobby(SDL_Renderer* renderer, char* targetIPaddress, bool *quit) {
-    
+int client_lobby(RenderController* renderController, char targetIPaddress[]) {
     strcpy(targetIPaddress, "_______________");
     int max=15, count=0;
-    while(!*quit){
-      
+    // run till player quits or enters an IP address
+    while(1){
         TTF_Font* font = TTF_OpenFont("fonts/poppins.regular.ttf", 50);
-        SDL_RenderClear(renderer);
-        client_background(renderer);
-        create_textarea(renderer, 450-120,  100, 50, NULL, "Enter the server ip", (SDL_Color){0,0,0,255});
-        create_textarea(renderer, 450-120,  300, 50, font, targetIPaddress, (SDL_Color){0,0,0,255});
-        SDL_RenderPresent(renderer);
+        SDL_RenderClear(renderController->renderer);
+        SDL_RenderCopy(renderController->renderer, renderController->background, NULL, NULL);
+        create_textarea(renderController->renderer, 450-120,  100, 50, NULL, "Enter the server ip", (SDL_Color){0,0,0,255});
+        create_textarea(renderController->renderer, 450-120,  300, 50, font, targetIPaddress, (SDL_Color){0,0,0,255});
+        SDL_RenderPresent(renderController->renderer);
         
         SDL_StartTextInput();
         SDL_Event event;
@@ -343,30 +324,25 @@ char* client_lobby(SDL_Renderer* renderer, char* targetIPaddress, bool *quit) {
         switch(event.type)
         {
             case SDL_QUIT:
-                {
-                   *quit=true;
-                    break;
-                }
+                return 1;
             case SDL_TEXTINPUT:
-                {
-                    printf("%s",event.text.text);
-                    if(count<max){
-                        printf("%d",count);
-                        targetIPaddress[count]= *event.text.text;
-                        count++;
-                    }
-                    break;
+                printf("%s",event.text.text);
+                if(count<max){
+                    printf("%d",count);
+                    targetIPaddress[count]= *event.text.text;
+                    count++;
                 }
+                break;
         }   
-        if (event.key.keysym.sym == SDLK_BACKSPACE){
-                if(count>-1){
-                    if(count!=0)count--;
-                    targetIPaddress[count]='_';
-                    
-                }
+        if (event.key.keysym.scancode == SDL_SCANCODE_BACKSPACE){
+            if(count>-1){
+                if(count!=0)count--;
+                targetIPaddress[count]='_';
+                
+            }
         }
-        else if(event.key.keysym.sym == SDLK_RETURN){
-            return targetIPaddress;
+        else if(event.key.keysym.scancode == SDL_SCANCODE_RETURN){
+            return 0; // ip adress entered, DONT quit program
         }
     }
 }
