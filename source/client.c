@@ -169,12 +169,19 @@ int client_waiting(Client *client, GameState *gameState) {
 
 int client_playing(Client *client, GameState *gameState) {
     SDL_Window *window = SDL_CreateWindow("Hello SDL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALWAYS_ON_TOP);
-    SDL_ShowWindow(window);
+    if (!window) {                           /* ← Fångar fel! */
+        SDL_Log("CreateWindow: %s", SDL_GetError());
+        return 1;
+    }
     SDL_RaiseWindow(window);
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, /*0*/ SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (!renderer) {                                  /* <— FELKOLL */
+        SDL_Log("CreateRenderer: %s", SDL_GetError());
+        SDL_DestroyWindow(window);
+        return 1;
+    }
     SDL_Surface *background = IMG_Load("images/background.png");
     SDL_Texture *backgroundTexture = SDL_CreateTextureFromSurface(renderer, background);
-
     Collider *ground = create_Collider(create_Vector2(400, 400), create_Vector2(400, 10), 0, GROUNDCOLLISIONLAYER);
     SDL_Event event;
     while (gameState->matchState == PLAYING) {
@@ -185,6 +192,7 @@ int client_playing(Client *client, GameState *gameState) {
                     return 1;
             }
         }
+
         show_debug_info_client(gameState, client);
         // Update player input...
         if (Player_get_isAlive(gameState->players[gameState->playerID])) {
@@ -198,7 +206,6 @@ int client_playing(Client *client, GameState *gameState) {
         } else {
             printf("Player %d is dead\n", gameState->playerID);
         }
-        
         
         // run simulation
         for (int i = 0; i < MAXCLIENTS; i++) {

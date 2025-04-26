@@ -35,7 +35,7 @@ int main(int argv, char** args){
             continue;
         }
     }
+    IMG_Quit();
     SDL_Quit();
-
     return 0;
 }
