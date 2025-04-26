@@ -19,8 +19,8 @@ else
     ifeq ($(UNAME_S),Darwin)               # macOS (Homebrew)
         PLATFORM   := MAC
         CC         := clang                
-        CFLAGS_SDL := $(shell sdl2-config --cflags) $(shell pkg-config --cflags SDL2_image)
-        LIBS_SDL   := $(shell sdl2-config --libs)   $(shell pkg-config --libs SDL2_image)
+        CFLAGS_SDL := $(shell sdl2-config --cflags) $(shell pkg-config --cflags SDL2_image SDL2_net SDL2_ttf)
+        LIBS_SDL   := $(shell sdl2-config --libs)   $(shell pkg-config --libs SDL2_image SDL2_net SDL2_ttf)
         MKDIR      := @mkdir -p $(BINDIR)
         RM         := rm -f
     else
