@@ -3,16 +3,16 @@
 #include <string.h>
 #include <stdio.h>
 
-#define NUMBEROFACTIONS 8
+#define NUMBEROFACTIONS 9
 // Contains string representations of each action
-char allActions[8][20] = {
+char allActions[9][20] = {
     "move_up", "move_down", "move_left", "move_right",
-    "attack", "switch_to_rock", "switch_to_paper", "switch_to_scissors"
+    "attack", "switch_to_rock", "switch_to_paper", "switch_to_scissors", "dash"
 };
 // Contains SDL_SCANCODE representation of each action
-int actionTranslations[8][2] = {
+int actionTranslations[9][2] = {
     {SDL_SCANCODE_W, SDL_SCANCODE_UP}, {SDL_SCANCODE_S, SDL_SCANCODE_DOWN}, {SDL_SCANCODE_A, SDL_SCANCODE_LEFT}, {SDL_SCANCODE_D, SDL_SCANCODE_RIGHT},
-    {SDL_SCANCODE_SPACE, SDL_SCANCODE_UNKNOWN}, {SDL_SCANCODE_1, SDL_SCANCODE_UNKNOWN}, {SDL_SCANCODE_2, SDL_SCANCODE_UNKNOWN}, {SDL_SCANCODE_3, SDL_SCANCODE_UNKNOWN}
+    {SDL_SCANCODE_SPACE, SDL_SCANCODE_UNKNOWN}, {SDL_SCANCODE_1, SDL_SCANCODE_UNKNOWN}, {SDL_SCANCODE_2, SDL_SCANCODE_UNKNOWN}, {SDL_SCANCODE_3, SDL_SCANCODE_UNKNOWN}, {SDL_SCANCODE_LSHIFT}
 };
 
 struct InputLogger {
@@ -24,6 +24,7 @@ struct InputLogger {
     int switchToRock[3];
     int switchToPaper[3];
     int switchToScissors[3];
+    int dash[3];
 };
 
 InputLogger *create_InputLogger() {
@@ -37,6 +38,7 @@ InputLogger *create_InputLogger() {
         newInputLogger->switchToRock[i] = 0;
         newInputLogger->switchToPaper[i] = 0;
         newInputLogger->switchToScissors[i] = 0;
+        newInputLogger->dash[i] = 0;
     }
     return newInputLogger;
 }
@@ -61,6 +63,8 @@ int InputLogger_get_action_state(InputLogger *logger, char action[], int stateID
         return logger->switchToPaper[stateID];
     } else if (strcmp(action, "switch_to_scissors") == 0) {
         return logger->switchToScissors[stateID];
+    } else if (strcmp(action, "dash") == 0) {
+        return logger->dash[stateID];
     }
 }
 // Sets the selected state of the selected action. Ideally not used outside of this input_logger.c
@@ -81,6 +85,8 @@ void InputLogger_set_action_state(InputLogger *logger, char action[], int stateI
         logger->switchToPaper[stateID] = state;
     } else if (strcmp(action, "switch_to_scissors") == 0) {
         logger->switchToScissors[stateID] = state;
+    } else if (strcmp(action, "dash") == 0) {
+        logger->dash[stateID] = state;
     }
 }
 /*  CLIENT ONLY 

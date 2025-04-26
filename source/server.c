@@ -168,13 +168,22 @@ void server_waiting(Server *server, GameState *gameState) {
 
 void server_playing(Server *server, GameState *gameState) {
     // Game logic for playing state
-    Collider *ground = create_Collider(create_Vector2(400, 400), create_Vector2(800, 600), 0,GROUNDCOLLISIONLAYER);
+    Collider *platform1 = create_Collider(create_Vector2(100, 410), create_Vector2(120, 20), 0, 1);  
+    Collider *platform2 = create_Collider(create_Vector2(290, 410-100), create_Vector2(120, 20), 0, 1);  //x led fungerar tvärtom i collider och sdl rect
+    Collider *platform3 = create_Collider(create_Vector2(480, 410), create_Vector2(120, 20), 0, 1);  //x led fungerar tvärtom i collider och sdl rect
+    Uint64 lastTicks = SDL_GetTicks64();
     while (gameState->matchState == PLAYING) {
         receive_player_inputs(server, gameState);
         show_debug_info_server(gameState, server);
         // Update game state logic here
+        Uint64 currentTicks = SDL_GetTicks64();             // nu i ms
+        Uint64 elapsedTicks = currentTicks - lastTicks;     // skillnad i ms
+        lastTicks = currentTicks;
+        float deltaTime = elapsedTicks * 0.001f;
+        // run simulation
         for (int i = 0; i < MAXCLIENTS; i++) {
-            handle_movement(gameState->players[i], 5.0f, ground); // Assuming ground is NULL for now
+            handle_movement(gameState->players[i], PLAYERSPEED, platform1, platform2, platform3, deltaTime);
+            // handle_weapon_switching(gameState->players[i]);
         }
         handle_attack_input(gameState->players, MAXCLIENTS);
 

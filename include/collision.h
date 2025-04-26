@@ -15,6 +15,7 @@ int destroy_Collider(Collider *collider);
 void print_Collider(Collider *collider);
 /* Setters */
 void Collider_set_position(Collider *collider, Vector2 *position);
+float Collider_set_yposition(Collider *collider, float position);
 void Collider_set_dimensions(Collider *collider, Vector2 *dimensions);
 void Collider_set_trigger(Collider *collider, int isTrigger);
 

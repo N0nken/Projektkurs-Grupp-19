@@ -37,7 +37,7 @@ int main(int argv, char** args){
     SDL_Texture* backgroundTexture = SDL_CreateTextureFromSurface(renderController.renderer, backgroundSurface);
     renderController.background = backgroundTexture;
     SDL_FreeSurface(backgroundSurface);
-    SDL_Surface* playerSpritesheetSurface = IMG_Load("images/char.png");
+    SDL_Surface* playerSpritesheetSurface = IMG_Load("images/animationer.png");
     SDL_Texture* playerSpritesheetTexture = SDL_CreateTextureFromSurface(renderController.renderer, playerSpritesheetSurface);
     SDL_FreeSurface(playerSpritesheetSurface);
     renderController.playerSpritesheet = playerSpritesheetTexture;

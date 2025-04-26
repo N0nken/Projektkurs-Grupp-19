@@ -6,6 +6,8 @@
 #include "../include/collision.h"
 #include "../include/vector2.h"
 
+#define PLAYER_SIZE 32
+
 struct Player {
     Vector2 *position;
     Collider *collider;
@@ -58,6 +60,7 @@ void Player_set_position(Player *p, struct Vector2 *position) {
     destroy_Vector2(p->position);
 
     p->position = position;    
+    Collider_set_position(Player_get_collider(p), position);
     p->rect->x = (int)Vector2_get_x(position);
     p->rect->y = (int)Vector2_get_y(position);  //flytta på rect
 }
@@ -168,3 +171,70 @@ void health_bar(Player *p, SDL_Renderer *renderer){
     SDL_RenderFillRect(renderer, &healthBar);
 }
 
+struct Frame{
+    int x;
+    int y;
+    int h;
+    int w;
+} typedef frame;
+
+SDL_Rect *get_Player_Frame(frame *f, int weapon, int animationCounter){
+
+    f->x = animationCounter * PLAYER_SIZE;
+    f->y = weapon * PLAYER_SIZE;
+    f->w = PLAYER_SIZE;
+    f->h = PLAYER_SIZE;
+
+    return (SDL_Rect*)f;
+}
+
+
+//Denna counter ska växla mellan frames i spritesheet i functionen rendercopy i main
+int get_Animation_Counter(InputLogger *logger){
+    static Uint64 lastUpdate = 0;
+    static int animationCounter = 0;
+    static int offset = 0;
+    static int frames = 0;
+    offset = get_animation_offset(logger);
+    frames = get_Number_Of_Frames(logger);
+    Uint64 now = SDL_GetTicks64();
+
+    if ((InputLogger_is_action_pressed(logger, "move_right") > 0 ||InputLogger_is_action_pressed(logger, "move_left") > 0) 
+    && now - lastUpdate >= 250) {
+        animationCounter = (animationCounter + 1) % frames; 
+        lastUpdate = now;
+    }
+    if (InputLogger_is_action_just_released(logger, "move_right") > 0 ||
+    InputLogger_is_action_just_released(logger, "move_left") > 0) {
+        animationCounter = 0;
+        offset=0;
+    }
+    return animationCounter+offset;
+}
+
+
+//behövs offset för att bestämma vart i x-led i spritesheeten
+int get_animation_offset(InputLogger *logger) {
+    if (InputLogger_is_action_pressed(logger, "move_right")==1) {
+        return 0;
+    }
+    else if (InputLogger_is_action_pressed(logger, "move_left")==1){
+        return 2; 
+    }   
+    return 0; 
+}
+
+//behöver antalet frames den ska växla mellan, attack är 2 och gå är 4
+int get_Number_Of_Frames(InputLogger *logger){
+
+    if (InputLogger_is_action_pressed(logger, "move_right")==1) {
+        return 4;
+    }
+    else if (InputLogger_is_action_pressed(logger, "move_left")==1){
+        return 4; 
+    }
+    else if (InputLogger_is_action_pressed(logger, "attack")==1){
+        return 2;
+    }
+    
+}

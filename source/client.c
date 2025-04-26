@@ -72,6 +72,13 @@ struct ClientInput {
     int switchToScissors[3];
 }; typedef struct ClientInput ClientInput;
 
+struct Frame{
+    int x;
+    int y;
+    int h;
+    int w;
+} typedef frame;
+
 int client_main();
 int init_client();
 
@@ -179,8 +186,21 @@ int client_waiting(Client *client, GameState *gameState, RenderController* rende
 
 // main match loop
 int client_playing(Client *client, GameState *gameState, RenderController* renderController) {
-    Collider *ground = create_Collider(create_Vector2(400, 400), create_Vector2(400, 10), 0, GROUNDCOLLISIONLAYER);
+    // player animations
+    int spriteWidth = 32,spriteHeight = 32, animationCounter=0;
+    frame playerFrame = {0};
+
+    // Arena collision
+    Collider *platform1 = create_Collider(create_Vector2(100, 410), create_Vector2(120, 20), 0, 1);  
+    Collider *platform2 = create_Collider(create_Vector2(290, 410-100), create_Vector2(120, 20), 0, 1);  //x led fungerar tvärtom i collider och sdl rect
+    Collider *platform3 = create_Collider(create_Vector2(480, 410), create_Vector2(120, 20), 0, 1);  //x led fungerar tvärtom i collider och sdl rect
+    SDL_Rect platforms[3];
+    platforms[0] = (SDL_Rect){10, 388+64, 240, 20};
+    platforms[1] = (SDL_Rect){200, 388+64-100, 240, 20};
+    platforms[2] = (SDL_Rect){390, 388+64, 240, 20};
+    
     SDL_Event event;
+    Uint64 lastTicks = SDL_GetTicks64();
     while (gameState->matchState == PLAYING) {
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -204,9 +224,13 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
         }
         
         
+        Uint64 currentTicks = SDL_GetTicks64();             // nu i ms
+        Uint64 elapsedTicks = currentTicks - lastTicks;     // skillnad i ms
+        lastTicks = currentTicks;
+        float deltaTime = elapsedTicks * 0.001f;
         // run simulation
         for (int i = 0; i < MAXCLIENTS; i++) {
-            handle_movement(gameState->players[i], PLAYERSPEED, ground);
+            handle_movement(gameState->players[i], PLAYERSPEED, platform1, platform2, platform3, deltaTime);
             // handle_weapon_switching(gameState->players[i]);
         }
         handle_attack_input(gameState->players, MAXCLIENTS);
@@ -214,18 +238,21 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
         // sync simulation with server
         sync_game_state_with_server(client, gameState);
 
-        // Render current frame
+        // clear renderer
         SDL_RenderClear(renderController->renderer);
+        
+        // draw background
         SDL_RenderCopy(renderController->renderer, renderController->background, NULL, NULL);
-        // draws all players to the renderer
+        
+        // draw platforms
+        SDL_RenderFillRect(renderController->renderer, &platforms[0]);
+        SDL_RenderFillRect(renderController->renderer, &platforms[1]);
+        SDL_RenderFillRect(renderController->renderer, &platforms[2]);
+
+        // draw all players
         for (int i = 0; i < MAXCLIENTS; i++) {
-            Vector2 *playerPosition = Player_get_position(gameState->players[i]);
-            Vector2 *playerDimensions = Collider_get_dimensions(Player_get_collider(gameState->players[i]));
-            int rectPosX = Vector2_get_x(playerPosition) - Vector2_get_x(playerDimensions);
-            int rectPosY = Vector2_get_y(playerPosition) - Vector2_get_y(playerDimensions);
-            SDL_Rect playerPosRect = {rectPosX, rectPosY, (int) Vector2_get_x(playerDimensions) * 2, (int) Vector2_get_y(playerDimensions) * 2};
-            // ||||||| byt ut NULL till en SDL_rect som markerar rätt frame i spritesheeten ||||||| 
-            SDL_RenderCopy(renderController->renderer, renderController->playerSpritesheet, NULL, &playerPosRect);
+            SDL_QueryTexture(renderController->playerSpritesheet, NULL , NULL, &spriteHeight, &spriteWidth);        
+            SDL_RenderCopy(renderController->renderer, renderController->playerSpritesheet,get_Player_Frame(&playerFrame,2,get_Animation_Counter(Player_get_inputs(gameState->players[i]))),Player_get_rect(gameState->players[i]));
         }
         SDL_RenderPresent(renderController->renderer);
         
