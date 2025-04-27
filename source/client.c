@@ -15,7 +15,7 @@
 #include "../include/renderController.h"
 
 #define PACKETLOSSLIMIT 10 // Give up sending packets to server after this many failed attempts
-#define MAXCLIENTS 4
+#define MAXCLIENTS 2
 #define CLIENTPORT 50000
 #define SERVERPORT 50001
 #define MAXPACKETSRECEIVEDPERFRAME 10
@@ -251,6 +251,7 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
 
         // draw all players
         for (int i = 0; i < MAXCLIENTS; i++) {
+            health_bar(gameState->players[i], renderController->renderer);
             SDL_QueryTexture(renderController->playerSpritesheet, NULL , NULL, &spriteHeight, &spriteWidth);        
             SDL_RenderCopy(renderController->renderer, renderController->playerSpritesheet,get_Player_Frame(&playerFrame,2,get_Animation_Counter(Player_get_inputs(gameState->players[i]))),Player_get_rect(gameState->players[i]));
         }

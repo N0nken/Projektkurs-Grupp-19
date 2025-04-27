@@ -8,7 +8,7 @@
 #include "../include/vector2.h"
 #include "../include/movement.h"
 
-#define MAXCLIENTS 4
+#define MAXCLIENTS 2
 #define CLIENTPORT 50000
 #define SERVERPORT 50001
 #define MAXPACKETSRECEIVEDPERFRAME 4
