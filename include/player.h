@@ -49,6 +49,7 @@ int Player_get_direction(Player *p);
 int Player_get_state(Player *p);
 
 void deal_damage(Player *player, int damage);
+void health_bar(Player *p, SDL_Renderer *renderer);
 
 void switch_player_weapon(Player *p, int keyPressed);
 void switch_player_weapon_sprite(Player *p, int Key, int *pCurrentImage);

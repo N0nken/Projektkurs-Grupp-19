@@ -268,8 +268,11 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
 
         // draw all players
         for (int i = 0; i < MAXCLIENTS; i++) {
-            SDL_QueryTexture(renderController->playerSpritesheet, NULL , NULL, &spriteHeight, &spriteWidth);        
-            SDL_RenderCopy(renderController->renderer, renderController->playerSpritesheet,get_Player_Frame(&playerFrame,2,get_Animation_Counter(Player_get_inputs(gameState->players[i]))),Player_get_rect(gameState->players[i]));
+            health_bar(gameState->players[i], renderController->renderer);
+            if(Player_get_isAlive(gameState->players[i])){
+                SDL_QueryTexture(renderController->playerSpritesheet, NULL , NULL, &spriteHeight, &spriteWidth);        
+                SDL_RenderCopy(renderController->renderer, renderController->playerSpritesheet,get_Player_Frame(&playerFrame,2,get_Animation_Counter(Player_get_inputs(gameState->players[i]))),Player_get_rect(gameState->players[i]));
+            }
         }
         SDL_RenderPresent(renderController->renderer);
         
