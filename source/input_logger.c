@@ -139,6 +139,7 @@ void InputLogger_reset_all_actions(InputLogger *logger) {
         logger->switchToRock[i] = 0;
         logger->switchToPaper[i] = 0;
         logger->switchToScissors[i] = 0;
+        logger->dash[i] = 0;
     }
 }
 

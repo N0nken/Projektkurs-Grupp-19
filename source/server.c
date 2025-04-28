@@ -8,7 +8,7 @@
 #include "../include/vector2.h"
 #include "../include/movement.h"
 
-#define MAXCLIENTS 2
+#define MAXCLIENTS 4
 #define CLIENTPORT 50000
 #define SERVERPORT 50001
 #define MAXPACKETSRECEIVEDPERFRAME 4
@@ -61,6 +61,7 @@ struct ClientInput {
     int switchToRock[3];
     int switchToPaper[3];
     int switchToScissors[3];
+    int dash[3];
 }; typedef struct ClientInput ClientInput;
 
 struct UDPplayer {
@@ -295,6 +296,7 @@ void receive_player_inputs(Server *server, GameState *gameState) {
             InputLogger_set_action_state(playerInputLogger, "switch_to_rock", i, clientInput.switchToRock[i]);
             InputLogger_set_action_state(playerInputLogger, "switch_to_paper", i, clientInput.switchToPaper[i]);
             InputLogger_set_action_state(playerInputLogger, "switch_to_scissors", i, clientInput.switchToScissors[i]);
+            InputLogger_set_action_state(playerInputLogger, "dash", i, clientInput.dash[i]);
         }
     }
 }
@@ -355,6 +357,7 @@ void send_server_game_state_to_all_clients(Server *server, GameState *gameState)
             clientInputs.switchToRock[j] = InputLogger_get_action_state(Player_get_inputs(gameState->players[i]), "switch_to_rock", j);
             clientInputs.switchToPaper[j] = InputLogger_get_action_state(Player_get_inputs(gameState->players[i]), "switch_to_paper", j);
             clientInputs.switchToScissors[j] = InputLogger_get_action_state(Player_get_inputs(gameState->players[i]), "switch_to_scissors", j);
+            clientInputs.dash[j] = InputLogger_get_action_state(Player_get_inputs(gameState->players[i]), "dash", j);
         }
         // ...load packet and...
         server->sendPacket->len = sizeof(ClientInput);

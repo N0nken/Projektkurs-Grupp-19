@@ -29,7 +29,7 @@ void handle_movement(Player *player, float speed, Collider *platform1, Collider 
     static float dashTimeLeft     = 0.0f;
     static float dashCooldownLeft = 0.0f;
 
-    const float dashDuration   = 0.2f;  // sekunder
+    const float dashDuration   = 0.6f;  // sekunder
     const float dashCooldown   = 1.0f;  // sekunder
 
     //float dashspeed = speed * 2;

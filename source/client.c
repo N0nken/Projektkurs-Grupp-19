@@ -15,7 +15,7 @@
 #include "../include/renderController.h"
 
 #define PACKETLOSSLIMIT 10 // Give up sending packets to server after this many failed attempts
-#define MAXCLIENTS 2
+#define MAXCLIENTS 4
 #define CLIENTPORT 50000
 #define SERVERPORT 50001
 #define MAXPACKETSRECEIVEDPERFRAME 10
@@ -88,6 +88,7 @@ struct ClientInput {
     int switchToRock[3];
     int switchToPaper[3];
     int switchToScissors[3];
+    int dash[3];
 }; typedef struct ClientInput ClientInput;
 
 struct Frame{
@@ -393,6 +394,7 @@ int send_player_input(Client *client, GameState *gameState) {
         clientInput.switchToRock[i] = InputLogger_get_action_state(playerInputLogger, "switch_to_rock", i);
         clientInput.switchToPaper[i] = InputLogger_get_action_state(playerInputLogger, "switch_to_paper", i);
         clientInput.switchToScissors[i] = InputLogger_get_action_state(playerInputLogger, "switch_to_scissors", i);
+        clientInput.dash[i] = InputLogger_get_action_state(playerInputLogger, "dash", i);
     }
     memcpy(client->sendPacket->data, &clientInput, sizeof(ClientInput));
     client->sendPacket->address = client->serverIP;
@@ -446,6 +448,7 @@ void sync_game_state_with_server(Client *client, GameState *gameState) {
                 InputLogger_set_action_state(logger, "switch_to_rock",   i, clientInput.switchToRock[i]);
                 InputLogger_set_action_state(logger, "switch_to_paper",  i, clientInput.switchToPaper[i]);
                 InputLogger_set_action_state(logger, "switch_to_scissors",i, clientInput.switchToScissors[i]);
+                InputLogger_set_action_state(logger, "dash",              i, clientInput.dash[i]);
             }
 
         } else {
