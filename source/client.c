@@ -378,9 +378,10 @@ void sync_game_state_with_server(Client *client, GameState *gameState) {
 
 // menu for the player to enter the ip address of the server
 int client_lobby(RenderController* renderController, char targetIPaddress[]) {
-    strcpy(targetIPaddress, "_______________");
-    int max=15, count=0;
+    strcpy(targetIPaddress, "127.0.0.1_____");
+    int max=15, count=9;
     // run till player quits or enters an IP address
+    int rctrl=0, lctrl=0;
     while(1){
         TTF_Font* font = TTF_OpenFont("fonts/poppins.regular.ttf", 50);
         SDL_RenderClear(renderController->renderer);
@@ -388,7 +389,7 @@ int client_lobby(RenderController* renderController, char targetIPaddress[]) {
         create_textarea(renderController->renderer, 450-120,  100, 50, NULL, "Enter the server ip", (SDL_Color){0,0,0,255});
         create_textarea(renderController->renderer, 450-120,  300, 50, font, targetIPaddress, (SDL_Color){0,0,0,255});
         SDL_RenderPresent(renderController->renderer);
-        
+       
         SDL_StartTextInput();
         SDL_Event event;
         SDL_WaitEvent(&event);
@@ -396,6 +397,14 @@ int client_lobby(RenderController* renderController, char targetIPaddress[]) {
         {
             case SDL_QUIT:
                 return 1;
+                case SDL_KEYDOWN:
+                if(event.key.keysym.scancode == SDL_SCANCODE_RCTRL) { rctrl = 1; }
+                else if(event.key.keysym.scancode == SDL_SCANCODE_LCTRL) { lctrl = 1; }
+                break;
+            case SDL_KEYUP:
+                if(event.key.keysym.scancode == SDL_SCANCODE_RCTRL) { rctrl = 0; }
+                else if(event.key.keysym.scancode == SDL_SCANCODE_LCTRL) { lctrl = 0; }
+                break;
             case SDL_TEXTINPUT:
                 printf("%s",event.text.text);
                 if(count<max){
@@ -404,14 +413,29 @@ int client_lobby(RenderController* renderController, char targetIPaddress[]) {
                     count++;
                 }
                 break;
+           
         }   
-        if (event.key.keysym.scancode == SDL_SCANCODE_BACKSPACE){
+
+        if (event.key.keysym.scancode == SDL_SCANCODE_BACKSPACE && event.type==SDL_KEYDOWN){
             if(count>-1){
                 if(count!=0)count--;
                 targetIPaddress[count]='_';
                 
             }
         }
+        if(event.key.keysym.scancode == SDL_SCANCODE_V && event.type==SDL_KEYDOWN && (rctrl || lctrl)){
+            char *clipboardText = SDL_GetClipboardText();
+            if (strlen(clipboardText)<max) {
+                strcpy(targetIPaddress, clipboardText);
+                count=strlen(clipboardText);
+                SDL_free(clipboardText); 
+                for(int i = count; i < max; i++) {
+                    targetIPaddress[i] = '_';
+                }
+            }
+
+        }
+       
         else if(event.key.keysym.scancode == SDL_SCANCODE_RETURN){
             return 0; // ip adress entered, DONT quit program
         }
