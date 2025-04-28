@@ -297,23 +297,26 @@ int client_game_over(Client *client, GameState *gameState, RenderController* ren
     SDL_Surface* winnerImage;
     switch (gameState->winnerID) {
         case 0:
-            winnerImage = IMG_Load("filepath/to/image/winner0");
+            winnerImage = IMG_Load("images/char.png");
             break;
         case 1:
-            winnerImage = IMG_Load("filepath/to/image/winner1");
+            winnerImage = IMG_Load("images/char.png");
             break;
         case 2:
-            winnerImage = IMG_Load("filepath/to/image/winner2");
+            winnerImage = IMG_Load("images/char.png");
             break;
         case 3:
-            winnerImage = IMG_Load("filepath/to/image/winner3");
+            winnerImage = IMG_Load("images/char.png");
             break;
         default:
             winnerImage = IMG_Load("images/char.png");
     }
     SDL_Texture* winnerImageTexture = SDL_CreateTextureFromSurface(renderController->renderer, winnerImage);
+    SDL_FreeSurface(winnerImage);
     SDL_Rect targetRect = {960/2,600/2,200,200};
-
+    client->sendPacket->address = client->serverIP;
+    client->sendPacket->len = sizeof(1);
+    *(client->sendPacket->data) = 1;
     while (gameState->matchState == GAME_OVER) {
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -326,18 +329,19 @@ int client_game_over(Client *client, GameState *gameState, RenderController* ren
         SDL_RenderCopy(renderController->renderer, winnerImageTexture, NULL, &targetRect);
         switch (gameState->winnerID) {
             case 0:
-                create_textarea(renderController->renderer, 200, 50, 20, NULL, "Player 1 Won!", (SDL_Color){0, 0, 0, 255});
+                create_textarea(renderController->renderer, 200, 50, 20, NULL, "Player One Won!", (SDL_Color){0, 0, 0, 255});
                 break;
             case 1:
-                create_textarea(renderController->renderer, 200, 50, 20, NULL, "Player 2 Won!", (SDL_Color){0, 0, 0, 255});
+                create_textarea(renderController->renderer, 200, 50, 20, NULL, "Player Two Won!", (SDL_Color){0, 0, 0, 255});
                 break;
             case 2:
-                create_textarea(renderController->renderer, 200, 50, 20, NULL, "Player 3 Won!", (SDL_Color){0, 0, 0, 255});
+                create_textarea(renderController->renderer, 200, 50, 20, NULL, "Player Three Won!", (SDL_Color){0, 0, 0, 255});
                 break;
             case 3:
-                create_textarea(renderController->renderer, 200, 50, 20, NULL, "Player 4 Won!", (SDL_Color){0, 0, 0, 255});
+                create_textarea(renderController->renderer, 200, 50, 20, NULL, "Player Four Won!", (SDL_Color){0, 0, 0, 255});
                 break;
         }
+        SDLNet_UDP_Send(client->socket, -1, client->sendPacket);
         SDL_RenderPresent(renderController->renderer);
         // Render game over screen
         printf("Game Over\n");
