@@ -249,7 +249,7 @@ void receive_player_inputs(Server *server, GameState *gameState) {
             save_client(server, server->recvPacket->address); // Player not found, save new client
             playerID = server->clientCount - 1; // Get the new player ID
         }
-        if(sizeof(server->recvPacket->len) != sizeof(ClientInput)){
+        if(server->recvPacket->len != sizeof(ClientInput)){
             continue;
         }
         memcpy(&clientInput, server->recvPacket->data, sizeof(ClientInput));
