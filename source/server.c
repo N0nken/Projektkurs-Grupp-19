@@ -244,12 +244,15 @@ void receive_player_inputs(Server *server, GameState *gameState) {
     ClientInput clientInput;
     while (SDLNet_UDP_Recv(server->socket, server->recvPacket) && server->packetsReceived < MAXPACKETSRECEIVEDPERFRAME) {
         printf("Packet received from %s\n", SDLNet_ResolveIP(&server->recvPacket->address));
-        memcpy(&clientInput, server->recvPacket->data, sizeof(ClientInput));
         int playerID = get_player_id_from_ip(server, server->recvPacket->address);
         if (playerID == -1) {
             save_client(server, server->recvPacket->address); // Player not found, save new client
             playerID = server->clientCount - 1; // Get the new player ID
         }
+        if(sizeof(server->recvPacket->data) != sizeof(ClientInput)){
+            continue;
+        }
+        memcpy(&clientInput, server->recvPacket->data, sizeof(ClientInput));
         InputLogger *playerInputLogger = Player_get_inputs(gameState->players[playerID]);
         for (int i = 0; i < 3; i++) {
             InputLogger_set_action_state(playerInputLogger, "move_up", i, clientInput.up[i]);
@@ -285,7 +288,7 @@ void send_server_game_state_to_all_clients(Server *server, GameState *gameState)
         remMs = (elapsed < 5000 ? (int)(5000 - elapsed) : 0);
     }
     simulationData.gameOverTimerMs = remMs;
-    
+
     // Prepare simulation status packet and...
     for (int j = 0; j < MAXCLIENTS; j++) {
         if (gameState->players[j]) {
