@@ -26,11 +26,13 @@ struct Server {
     UDPpacket *recvPacket;
     int framesSinceLatestPacket[MAXCLIENTS]; // Number of frames since the last packet was received from each client. Assume client has disconnected when it reaches X frames.
     int packetsReceived; // Number of packets received in the current frame
+    Uint64 gameOverStartTime;    // timer for server
 }; typedef struct Server Server;
 
 struct GameState {
     int matchState; // waiting, playing, game over
     int playerAliveCount; // number of players left alive
+    int winnerID; // identify winner
     Player *players[MAXCLIENTS]; // array of players
 }; typedef struct GameState GameState;
 
@@ -60,6 +62,9 @@ struct SimulationData {
     int matchState; // waiting, playing, game over
     UDPplayer players[MAXCLIENTS];
     int playerID; // ID of the player receiving the data
+    int playerAliveCount; //send info about how many players are alive
+    int winnerID;
+    int gameOverTimerMs; // how many milisec until game restarts
 }; typedef struct SimulationData SimulationData;
 
 int server_main();
@@ -187,6 +192,24 @@ void server_playing(Server *server, GameState *gameState) {
         }
         handle_attack_input(gameState->players, MAXCLIENTS);
 
+        int alive = 0;
+        int lastAlive = -1;
+        for(int i = 0; i < MAXCLIENTS; i++){
+            if(Player_get_isAlive(gameState->players[i])){
+                alive++;
+                lastAlive = i;
+            }
+        }
+        gameState->playerAliveCount = alive;
+
+        if(alive <= 1){ //if only 1 player is left -> GAME_OVER
+            gameState->matchState = GAME_OVER;
+            gameState->winnerID = lastAlive;
+            server->gameOverStartTime = SDL_GetTicks64();
+            send_server_game_state_to_all_clients(server, gameState);
+            break;
+        }
+
         // Broadcast game state to all clients
         send_server_game_state_to_all_clients(server, gameState);
         SDL_Delay(1000 / TARGETFPS); // Run at 60 FPS
@@ -194,19 +217,19 @@ void server_playing(Server *server, GameState *gameState) {
 }
 
 void server_game_over(Server *server, GameState *gameState) {
-    // Game logic for game over state
-    Uint64 deltaTime = SDL_GetTicks64();
-    int totalTime = 0;
-    while (gameState->matchState == GAME_OVER) {
-        // Handle game over logic here
-        deltaTime = SDL_GetTicks64() - deltaTime;
-        totalTime += deltaTime;
-        if (totalTime > GAMEOVERCOOLDOWN) {
-            gameState->matchState = WAITING; // Go back to waiting state after game over
-        }
+    Uint64 start = server->gameOverStartTime;
+
+    // Skicka GAME_OVER en första gång
+    send_server_game_state_to_all_clients(server, gameState);
+
+    // Vänta 5 sekunder och skicka state varje frame
+    while (SDL_GetTicks64() - start < 5000) {
+        SDL_Delay(1000 / TARGETFPS);
         send_server_game_state_to_all_clients(server, gameState);
-        SDL_Delay(1000 / TARGETFPS); // Run at target FPS
     }
+
+    //gå tillbaka till WAITING
+    gameState->matchState = WAITING;
 }
 
 int save_client(Server *server, IPaddress ip) {
@@ -221,12 +244,15 @@ void receive_player_inputs(Server *server, GameState *gameState) {
     ClientInput clientInput;
     while (SDLNet_UDP_Recv(server->socket, server->recvPacket) && server->packetsReceived < MAXPACKETSRECEIVEDPERFRAME) {
         printf("Packet received from %s\n", SDLNet_ResolveIP(&server->recvPacket->address));
-        memcpy(&clientInput, server->recvPacket->data, sizeof(ClientInput));
         int playerID = get_player_id_from_ip(server, server->recvPacket->address);
         if (playerID == -1) {
             save_client(server, server->recvPacket->address); // Player not found, save new client
             playerID = server->clientCount - 1; // Get the new player ID
         }
+        if(server->recvPacket->len != sizeof(ClientInput)){
+            continue;
+        }
+        memcpy(&clientInput, server->recvPacket->data, sizeof(ClientInput));
         InputLogger *playerInputLogger = Player_get_inputs(gameState->players[playerID]);
         for (int i = 0; i < 3; i++) {
             InputLogger_set_action_state(playerInputLogger, "move_up", i, clientInput.up[i]);
@@ -253,6 +279,16 @@ int get_player_id_from_ip(Server *server, IPaddress ip) {
 void send_server_game_state_to_all_clients(Server *server, GameState *gameState) {
     SimulationData simulationData;
     simulationData.matchState = gameState->matchState;
+    simulationData.playerAliveCount = gameState->playerAliveCount;
+    simulationData.winnerID = gameState->winnerID;
+
+    int remMs = 0;
+    if (gameState->matchState == GAME_OVER) {
+        Uint64 elapsed = SDL_GetTicks64() - server->gameOverStartTime;
+        remMs = (elapsed < 5000 ? (int)(5000 - elapsed) : 0);
+    }
+    simulationData.gameOverTimerMs = remMs;
+
     // Prepare simulation status packet and...
     for (int j = 0; j < MAXCLIENTS; j++) {
         if (gameState->players[j]) {
