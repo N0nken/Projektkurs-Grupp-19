@@ -39,6 +39,7 @@ struct GameState {
     int matchState; // waiting, playing, game over
     int playerAliveCount; // number of players left alive
     Player *players[MAXCLIENTS]; // array of players
+    int winnerID;
 }; typedef struct GameState GameState;
 
 // Struct for receiving player data from the server
@@ -281,9 +282,29 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
     return 0;
 }
 
-// shows the winner and after a certain time restarts (? end?) the match
+// shows the winner and after a certain time restarts (end?) the match
 int client_game_over(Client *client, GameState *gameState, RenderController* renderController) {
     SDL_Event event;
+    SDL_Surface* winnerImage;
+    switch (gameState->winnerID) {
+        case 0:
+            winnerImage = IMG_Load("filepath/to/image/winner0");
+            break;
+        case 1:
+            winnerImage = IMG_Load("filepath/to/image/winner1");
+            break;
+        case 2:
+            winnerImage = IMG_Load("filepath/to/image/winner2");
+            break;
+        case 3:
+            winnerImage = IMG_Load("filepath/to/image/winner3");
+            break;
+        default:
+            winnerImage = IMG_Load("images/char.png");
+    }
+    SDL_Texture* winnerImageTexture = SDL_CreateTextureFromSurface(renderController->renderer, winnerImage);
+    SDL_Rect targetRect = {960/2,600/2,200,200};
+
     while (gameState->matchState == GAME_OVER) {
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -293,6 +314,17 @@ int client_game_over(Client *client, GameState *gameState, RenderController* ren
         }
         SDL_RenderClear(renderController->renderer);
         SDL_RenderCopy(renderController->renderer, renderController->background, NULL, NULL);
+        SDL_RenderCopy(renderController->renderer, winnerImageTexture, NULL, &targetRect);
+        switch (gameState->winnerID) {
+            case 0:
+                create_textarea(renderController->renderer, 200, 50, 20, NULL, "Player 1 Won!", (SDL_Color){0, 0, 0, 255});
+            case 1:
+                create_textarea(renderController->renderer, 200, 50, 20, NULL, "Player 2 Won!", (SDL_Color){0, 0, 0, 255});
+            case 2:
+                create_textarea(renderController->renderer, 200, 50, 20, NULL, "Player 3 Won!", (SDL_Color){0, 0, 0, 255});
+            case 3:
+                create_textarea(renderController->renderer, 200, 50, 20, NULL, "Player 4 Won!", (SDL_Color){0, 0, 0, 255});
+        }
         SDL_RenderPresent(renderController->renderer);
         // Render game over screen
         printf("Game Over\n");
