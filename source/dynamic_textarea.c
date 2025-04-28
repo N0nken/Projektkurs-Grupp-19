@@ -31,5 +31,4 @@ void create_textarea_linebreaks(SDL_Renderer* renderer,int x, int y, int size, T
     TTF_CloseFont(font);
     SDL_FreeSurface(surfaceMessage);
     SDL_DestroyTexture(Message);
-    
 }
