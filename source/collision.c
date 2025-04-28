@@ -82,6 +82,10 @@ int Collider_get_layer(Collider *collider) {
     return collider->layer;
 }
 
+int Collider_get_collidercount(void){
+    return activeColliderCount;
+}
+
 void print_Collider(Collider *collider) {
     printf("Position: ");
     print_Vector2(Collider_get_position(collider));
@@ -136,6 +140,13 @@ int is_colliding_any(Collider *collider, int layer) {
         }
     }
     return 0;
+}
+
+void clear_all_colliders(void) {
+    for (int i = 0; i < activeColliderCount; i++) {
+        allColliders[i] = NULL;
+    }
+    activeColliderCount = 0;
 }
 
 void move_and_collide(Collider *collider, Vector2 *velocity, int layer) {

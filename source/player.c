@@ -21,6 +21,7 @@ struct Player {
     InputLogger *logger;
     int direction; // left -1, right 1
     int state; // 0 = idle, 1 = moving, 2 = attacking
+    float vertical_velocity;
 };
 
 enum Weapons {ROCK, SCISSORS, PAPER};
@@ -69,6 +70,9 @@ void Player_set_yposition(Player *p, float y) {
     Vector2 *new_pos = create_Vector2(current_x, y);
     Player_set_position(p, new_pos);
 }
+void Player_set_vertical_velocity(Player *p, float velocity){
+    p->vertical_velocity = velocity;
+}
 void Player_set_can_dash(Player *p, int yes) {
     p->canDash = yes; //yes 1 = kan dasha
 }
@@ -102,6 +106,9 @@ Vector2 *Player_get_position(Player *p) {
 }
 float Player_get_yposition(Player *p) {
     return Vector2_get_y(p->position);
+}
+float Player_get_vertical_velocity(Player *p){
+    return p->vertical_velocity;
 }
 int Player_get_can_dash(Player *p){
     return p->canDash;
@@ -161,16 +168,14 @@ void switch_player_weapon_sprite(Player *p, int weapon, int *pCurrentWeaponImage
     }
 }
 void health_bar(Player *p, SDL_Renderer *renderer){
-    if(p->hp>0){
-        SDL_Rect healthBar = {0, 0, 100, 10};
-        healthBar.x = (int)Vector2_get_x(p->position);
-        healthBar.y = (int)Vector2_get_y(p->position)-20;
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        SDL_RenderFillRect(renderer, &healthBar);
-        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-        healthBar.w = p->hp;
-        SDL_RenderFillRect(renderer, &healthBar);
-    }
+    SDL_Rect healthBar = {0, 0, 100, 10};
+    healthBar.x = (int)Vector2_get_x(p->position);
+    healthBar.y = (int)Vector2_get_y(p->position)-20;
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_RenderFillRect(renderer, &healthBar);
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    healthBar.w = p->hp;
+    SDL_RenderFillRect(renderer, &healthBar);
 }
 
 struct Frame{

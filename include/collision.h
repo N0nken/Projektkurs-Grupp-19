@@ -27,6 +27,7 @@ Vector2 *Collider_get_dimensions(Collider *collider);
 int Collider_is_trigger(Collider *collider);
 int Collider_get_id(Collider *collider);
 int Collider_get_layer(Collider *collider);
+int Collider_get_collidercount(void);
 
 /* Checks if two colliders are colliding */
 int is_colliding(Collider *collider1, Collider *collider2, int layer);
@@ -35,5 +36,6 @@ set layer=-1 to collide with all layers */
 void move_and_collide(Collider *collider, Vector2 *velocity, int layer);
 
 int is_colliding_any(Collider *collider, int layer);
+void clear_all_colliders(void);
 
 #endif

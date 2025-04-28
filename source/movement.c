@@ -22,7 +22,7 @@ void move_player(Player *player, Vector2 *velocity) {
 
 void handle_movement(Player *player, float speed, Collider *platform1, Collider *platform2, Collider *platform3, float deltaTime) {
     Vector2 *direction = create_Vector2(0.0f, 0.0f);
-    static float vertical_velocity = 0;  // Behåller hastighet mellan frames
+    //static float vertical_velocity = 0;  // Behåller hastighet mellan frames
     const float gravity = 0.6f;
     const float jump_force = -12.0f;
 
@@ -43,13 +43,12 @@ void handle_movement(Player *player, float speed, Collider *platform1, Collider 
     else if (InputLogger_is_action_pressed(logger, "move_right")) {
         Vector2_set_x(direction, 1.0f);
     }
-    Player_set_direction(player, Vector2_get_x(direction));
 
     if (InputLogger_is_action_pressed(logger, "move_up") &&
     (is_colliding(Player_get_collider(player), platform1, 1) ||
-     is_colliding(Player_get_collider(player), platform2, 1) || is_colliding(Player_get_collider(player), platform3, 1)) && vertical_velocity>=0)
+     is_colliding(Player_get_collider(player), platform2, 1) || is_colliding(Player_get_collider(player), platform3, 1)) && Player_get_vertical_velocity(player)>=0)
     {
-        vertical_velocity = jump_force;
+        Player_set_vertical_velocity(player, jump_force);
         isJumping = 1;
     }
 
@@ -85,40 +84,43 @@ void handle_movement(Player *player, float speed, Collider *platform1, Collider 
         }
     }*/
 
-    vertical_velocity += gravity;
+    //vertical_velocity += gravity;
+    Player_set_vertical_velocity(player, Player_get_vertical_velocity(player) + gravity);
 
     float currentSpeed = speed;
     if (dashTimeLeft > 0.0f){
         currentSpeed *= 3.0f;
-        vertical_velocity = 0;
+        //vertical_velocity = 0;
+        Player_set_vertical_velocity(player, 0);
     }
 
     Vector2 *velocity = create_Vector2(
         Vector2_get_x(direction) * currentSpeed,
-        vertical_velocity
+        Player_get_vertical_velocity(player)
     );
 
-    if(((is_colliding(Player_get_collider(player), platform1, 1)) && vertical_velocity>=0)) { //ska checka alla plattformar, har bara en nu
+    if(((is_colliding(Player_get_collider(player), platform1, 1)) && Player_get_vertical_velocity(player)>=0)) { //ska checka alla plattformar, har bara en nu
         if(isJumping==0){
-            vertical_velocity = 0;  // Nollställ fallhastighet
-            Vector2_set_y(velocity, vertical_velocity);
-            Player_set_yposition(player, Collider_get_yposition(platform1)-22); //vet ej varför -22 men det blir fel annars
+            //vertical_velocity = 0;  // Nollställ fallhastighet
+            Player_set_vertical_velocity(player, 0);
+            Vector2_set_y(velocity, Player_get_vertical_velocity(player));
+            //Player_set_yposition(player, Collider_get_yposition(platform1)); //vet ej varför -22 men det blir fel annars
             
         }
     }
-    else if(((is_colliding(Player_get_collider(player), platform2, 1)) && vertical_velocity>=0)) { //ska checka alla plattformar, har bara en nu
+    else if(((is_colliding(Player_get_collider(player), platform2, 1)) && Player_get_vertical_velocity(player)>=0)) { //ska checka alla plattformar, har bara en nu
         if(isJumping==0){
-            vertical_velocity = 0;  // Nollställ fallhastighet
-            Vector2_set_y(velocity, vertical_velocity);
-            Player_set_yposition(player, Collider_get_yposition(platform2)-22);
+            Player_set_vertical_velocity(player, 0);  // Nollställ fallhastighet
+            Vector2_set_y(velocity, Player_get_vertical_velocity(player));
+            //Player_set_yposition(player, Collider_get_yposition(platform2));
             
         }
     }
-    else if(((is_colliding(Player_get_collider(player), platform3, 1)) && vertical_velocity>=0)) { //ska checka alla plattformar, har bara en nu
+    else if(((is_colliding(Player_get_collider(player), platform3, 1)) && Player_get_vertical_velocity(player)>=0)) { //ska checka alla plattformar, har bara en nu
         if(isJumping==0){
-            vertical_velocity = 0;  // Nollställ fallhastighet
-            Vector2_set_y(velocity, vertical_velocity);
-            Player_set_yposition(player, Collider_get_yposition(platform3)-22);
+            Player_set_vertical_velocity(player, 0);  // Nollställ fallhastighet
+            Vector2_set_y(velocity, Player_get_vertical_velocity(player));
+            //Player_set_yposition(player, Collider_get_yposition(platform3));
             
         }
     }

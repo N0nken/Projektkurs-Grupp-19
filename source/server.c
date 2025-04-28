@@ -8,13 +8,28 @@
 #include "../include/vector2.h"
 #include "../include/movement.h"
 
-#define MAXCLIENTS 4
+#define MAXCLIENTS 2
 #define CLIENTPORT 50000
 #define SERVERPORT 50001
 #define MAXPACKETSRECEIVEDPERFRAME 4
 #define TARGETFPS 60
 #define GAMEOVERCOOLDOWN 30000 // 30 seconds cooldown before match restarts after game over
 #define GAMESTARTTIMER 15000 // 15 seconds timer before match starts after all players are connected
+
+typedef struct {
+    float cx, cy;  // plattformens centrum
+    float hw, hh;  // half-width, half-height
+} PlatformDef;
+
+#define PLATFORM_COUNT 3
+
+static const PlatformDef platformDefs[PLATFORM_COUNT] = {
+    { 50.0f, 410.0f, 120.0f, 10.0f },
+    { 290.0f, 310.0f, 120.0f, 10.0f },
+    { 580.0f, 410.0f, 120.0f, 10.0f },
+};
+//detta e till för att försöka matcha sdl rect med colliders
+//MÅSTE MATCHA MED CLIENT
 
 enum MatchStates {WAITING,PLAYING,GAME_OVER};
 
@@ -167,10 +182,27 @@ void server_waiting(Server *server, GameState *gameState) {
 }
 
 void server_playing(Server *server, GameState *gameState) {
-    // Game logic for playing state
-    Collider *platform1 = create_Collider(create_Vector2(100, 410), create_Vector2(120, 20), 0, 1);  
-    Collider *platform2 = create_Collider(create_Vector2(290, 410-100), create_Vector2(120, 20), 0, 1);  //x led fungerar tvärtom i collider och sdl rect
-    Collider *platform3 = create_Collider(create_Vector2(480, 410), create_Vector2(120, 20), 0, 1);  //x led fungerar tvärtom i collider och sdl rect
+
+    //clear_all_colliders();
+    Collider *colls[PLATFORM_COUNT];
+    // du behöver inte SDL_Rects här, men vi deklarerar ändå arrayen:
+    SDL_Rect dummyRects[PLATFORM_COUNT];
+
+    // Initiera colliders (och rects om du skulle behöva dem):
+    for (int i = 0; i < PLATFORM_COUNT; i++) {
+        float cx = platformDefs[i].cx;
+        float cy = platformDefs[i].cy;
+        float hw = platformDefs[i].hw;
+        float hh = platformDefs[i].hh;
+
+        colls[i] = create_Collider(
+            create_Vector2(cx, cy),
+            create_Vector2(hw, hh),
+            0,  /* isTrigger */
+            1   /* layer */
+        );
+    }
+
     Uint64 lastTicks = SDL_GetTicks64();
     while (gameState->matchState == PLAYING) {
         receive_player_inputs(server, gameState);
@@ -182,7 +214,7 @@ void server_playing(Server *server, GameState *gameState) {
         float deltaTime = elapsedTicks * 0.001f;
         // run simulation
         for (int i = 0; i < MAXCLIENTS; i++) {
-            handle_movement(gameState->players[i], PLAYERSPEED, platform1, platform2, platform3, deltaTime);
+            handle_movement(gameState->players[i], PLAYERSPEED, colls[0], colls[1], colls[2], deltaTime);
             // handle_weapon_switching(gameState->players[i]);
         }
         handle_attack_input(gameState->players, MAXCLIENTS);
@@ -230,7 +262,7 @@ void receive_player_inputs(Server *server, GameState *gameState) {
         InputLogger *playerInputLogger = Player_get_inputs(gameState->players[playerID]);
         for (int i = 0; i < 3; i++) {
             InputLogger_set_action_state(playerInputLogger, "move_up", i, clientInput.up[i]);
-            InputLogger_set_action_state(playerInputLogger, "move_up", i, clientInput.down[i]);
+            InputLogger_set_action_state(playerInputLogger, "move_down", i, clientInput.down[i]);
             InputLogger_set_action_state(playerInputLogger, "move_left", i, clientInput.left[i]);
             InputLogger_set_action_state(playerInputLogger, "move_right", i, clientInput.right[i]);
             InputLogger_set_action_state(playerInputLogger, "attack", i, clientInput.attack[i]);

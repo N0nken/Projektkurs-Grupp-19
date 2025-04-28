@@ -15,11 +15,24 @@
 #include "../include/renderController.h"
 
 #define PACKETLOSSLIMIT 10 // Give up sending packets to server after this many failed attempts
-#define MAXCLIENTS 4
+#define MAXCLIENTS 2
 #define CLIENTPORT 50000
 #define SERVERPORT 50001
 #define MAXPACKETSRECEIVEDPERFRAME 10
 #define TARGETFPS 60
+
+typedef struct {
+    float cx, cy;  // plattformens centrum
+    float hw, hh;  // half-width, half-height
+} PlatformDef;
+
+#define PLATFORM_COUNT 3
+
+static const PlatformDef platformDefs[PLATFORM_COUNT] = {
+    { 50.0f, 410.0f, 120.0f, 10.0f },
+    { 290.0f, 310.0f, 120.0f, 10.0f },
+    { 580.0f, 410.0f, 120.0f, 10.0f },
+};//MÅSTE MATCHA MED SERVER
 
 enum MatchStates {WAITING,PLAYING,GAME_OVER};
 
@@ -200,18 +213,31 @@ int client_waiting(Client *client, GameState *gameState, RenderController* rende
 // main match loop
 int client_playing(Client *client, GameState *gameState, RenderController* renderController) {
     // player animations
+    //clear_all_colliders();
     int spriteWidth = 32,spriteHeight = 32, animationCounter=0;
     frame playerFrame = {0};
 
-    // Arena collision
-    Collider *platform1 = create_Collider(create_Vector2(100, 410), create_Vector2(120, 20), 0, 1);  
-    Collider *platform2 = create_Collider(create_Vector2(290, 410-100), create_Vector2(120, 20), 0, 1);  //x led fungerar tvärtom i collider och sdl rect
-    Collider *platform3 = create_Collider(create_Vector2(480, 410), create_Vector2(120, 20), 0, 1);  //x led fungerar tvärtom i collider och sdl rect
-    SDL_Rect platforms[3];
-    platforms[0] = (SDL_Rect){10, 388+64, 240, 20};
-    platforms[1] = (SDL_Rect){200, 388+64-100, 240, 20};
-    platforms[2] = (SDL_Rect){390, 388+64, 240, 20};
-    
+    Collider *colls[PLATFORM_COUNT];
+    SDL_Rect platforms[PLATFORM_COUNT];
+
+    for (int i = 0; i < PLATFORM_COUNT; i++) {
+        float cx = platformDefs[i].cx;
+        float cy = platformDefs[i].cy;
+        float hw = platformDefs[i].hw;
+        float hh = platformDefs[i].hh;
+
+        colls[i] = create_Collider(
+            create_Vector2(cx, cy),
+            create_Vector2(hw, hh),
+            0,  1
+        );
+
+        platforms[i].x = (int)(cx - hw);
+        platforms[i].y = (int)(cy - hh);
+        platforms[i].w = (int)(hw * 2.65f);
+        platforms[i].h = (int)(hh * 2);
+    }
+
     SDL_Event event;
     Uint64 lastTicks = SDL_GetTicks64();
     while (gameState->matchState == PLAYING) {
@@ -243,7 +269,7 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
         float deltaTime = elapsedTicks * 0.001f;
         // run simulation
         for (int i = 0; i < MAXCLIENTS; i++) {
-            handle_movement(gameState->players[i], PLAYERSPEED, platform1, platform2, platform3, deltaTime);
+            handle_movement(gameState->players[i], PLAYERSPEED, colls[0], colls[1], colls[2], deltaTime);
             // handle_weapon_switching(gameState->players[i]);
         }
         handle_attack_input(gameState->players, MAXCLIENTS);
@@ -256,12 +282,14 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
         
         // draw background
         SDL_RenderCopy(renderController->renderer, renderController->background, NULL, NULL);
+
         
         // draw platforms
         SDL_SetRenderDrawColor(renderController->renderer, 255, 255, 255, 255);
         SDL_RenderFillRect(renderController->renderer, &platforms[0]);
         SDL_RenderFillRect(renderController->renderer, &platforms[1]);
         SDL_RenderFillRect(renderController->renderer, &platforms[2]);
+        
 
         for (int i = 0; i < MAXCLIENTS; i++) {
             draw_player_hitbox(gameState->players[i], renderController);

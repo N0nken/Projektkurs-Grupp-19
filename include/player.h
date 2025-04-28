@@ -24,6 +24,7 @@ int destroy_Player(Player *p);
 /* */
 void Player_set_position(Player *p, Vector2 *position);
 void Player_set_yposition(Player *p, float y);
+void Player_set_vertical_velocity(Player *p, float velocity);
 void Player_set_can_dash(Player *p, int yes);
 void Player_set_collider(Player *p, Collider *collider);
 void Player_set_attackHitbox(Player *p, Collider *attackHitbox);
@@ -37,6 +38,7 @@ void Player_set_direction(Player *p, int direction);
 InputLogger *Player_get_inputs(Player *p);
 Vector2 *Player_get_position(Player *p);
 float Player_get_yposition(Player *p);
+float Player_get_vertical_velocity(Player *p);
 int Player_get_can_dash(Player *p);
 Collider *Player_get_collider(Player *p);
 Collider *Player_get_attackHitbox(Player *p);
