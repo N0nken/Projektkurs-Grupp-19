@@ -91,6 +91,18 @@ void sync_game_state_with_server();
 void client_background();
 int client_lobby();
 
+void draw_player_hitbox(Player *p, RenderController *renderController) {
+    SDL_Rect hitbox = {Vector2_get_x(Player_get_position(p)), Vector2_get_y(Player_get_position(p)), Vector2_get_x(Collider_get_dimensions(Player_get_collider(p))), Vector2_get_y(Collider_get_dimensions(Player_get_collider(p)))};
+    SDL_Rect attackHitbox = {Vector2_get_x(Player_get_position(p)) + Vector2_get_x(Collider_get_position(Player_get_attackHitbox(p))), 
+        Vector2_get_y(Player_get_position(p)) + Vector2_get_y(Collider_get_position(Player_get_attackHitbox(p))), 
+        Vector2_get_x(Collider_get_dimensions(Player_get_attackHitbox(p))), 
+        Vector2_get_y(Collider_get_dimensions(Player_get_attackHitbox(p)))};
+    SDL_SetRenderDrawColor(renderController->renderer, 255, 0, 255, 255);
+    SDL_RenderFillRect(renderController->renderer, &hitbox);
+    SDL_SetRenderDrawColor(renderController->renderer, 0, 255, 0, 255);
+    SDL_RenderFillRect(renderController->renderer, &attackHitbox);
+}
+
 void show_debug_info_client(GameState *gameState, Client *client) {
     printf("Player ID: %d\n", gameState->playerID);
     printf("Match State: %d\n", gameState->matchState);
@@ -245,15 +257,22 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
         SDL_RenderCopy(renderController->renderer, renderController->background, NULL, NULL);
         
         // draw platforms
+        SDL_SetRenderDrawColor(renderController->renderer, 255, 255, 255, 255);
         SDL_RenderFillRect(renderController->renderer, &platforms[0]);
         SDL_RenderFillRect(renderController->renderer, &platforms[1]);
         SDL_RenderFillRect(renderController->renderer, &platforms[2]);
 
+        for (int i = 0; i < MAXCLIENTS; i++) {
+            draw_player_hitbox(gameState->players[i], renderController);
+        }
+
         // draw all players
         for (int i = 0; i < MAXCLIENTS; i++) {
             health_bar(gameState->players[i], renderController->renderer);
-            SDL_QueryTexture(renderController->playerSpritesheet, NULL , NULL, &spriteHeight, &spriteWidth);        
-            SDL_RenderCopy(renderController->renderer, renderController->playerSpritesheet,get_Player_Frame(&playerFrame,2,get_Animation_Counter(Player_get_inputs(gameState->players[i]))),Player_get_rect(gameState->players[i]));
+            if(Player_get_isAlive(gameState->players[i])){
+                SDL_QueryTexture(renderController->playerSpritesheet, NULL , NULL, &spriteHeight, &spriteWidth);        
+                SDL_RenderCopy(renderController->renderer, renderController->playerSpritesheet,get_Player_Frame(&playerFrame,Player_get_weapon(gameState->players[gameState->playerID]),get_Animation_Counter(Player_get_inputs(gameState->players[i]))),Player_get_rect(gameState->players[i]));
+            }
         }
         SDL_RenderPresent(renderController->renderer);
         

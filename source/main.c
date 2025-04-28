@@ -76,7 +76,7 @@ char main_menu(RenderController* renderController, bool *mainQuit){
         SDL_RenderClear(renderController->renderer);
         SDL_RenderCopy(renderController->renderer, renderController->background, NULL, NULL);
         //Ändra Namnet på spelet här och försök få den att va på mitten också då jag inte gjorde en center funktion till den.
-        create_textarea(renderController->renderer, 450-120,  100, 120, NULL, "Game name", (SDL_Color){0,0,0,255});
+        create_textarea(renderController->renderer, 450-120,  100, 120, NULL, "Rock Paper Scissors Arena PLUS+", (SDL_Color){0,0,0,255});
 
         for(int i=0; i<NrOfButton; i++){
             if (ret_button_hover_state(Button[i])) ret_button_hover(ret_button_rect(Button[i]), renderController->renderer);

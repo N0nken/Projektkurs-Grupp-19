@@ -22,7 +22,7 @@ void attack(Player *attackingPlayer, Player *allPlayers[], int activePlayerCount
     // play attack animation
     Collider *attackHitbox = Player_get_attackHitbox(attackingPlayer);
     Vector2 *origin = create_Vector2(Vector2_get_x(Collider_get_position(attackHitbox)), Vector2_get_y(Collider_get_position(attackHitbox)));
-    Vector2 *offset = Vector2_const_multiplication(Collider_get_position(attackHitbox), Player_get_direction(attackingPlayer));
+    Vector2 *offset = create_Vector2(Vector2_get_x(Collider_get_position(attackHitbox)) * Player_get_direction(attackingPlayer), Vector2_get_y(Collider_get_position(attackHitbox)));
     Collider_set_position(attackHitbox, Vector2_addition(Player_get_position(attackingPlayer), offset));
     destroy_Vector2(offset);
     for (int i = 0; i < activePlayerCount; i++) {

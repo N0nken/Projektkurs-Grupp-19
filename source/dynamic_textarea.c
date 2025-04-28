@@ -7,7 +7,6 @@
 
 
 void create_textarea(SDL_Renderer* renderer,int x, int y, int size, TTF_Font* font,   const char *text, SDL_Color color){
-    
     if(!font){
         font = TTF_OpenFont("fonts/p.ttf", size);
     }
@@ -18,7 +17,6 @@ void create_textarea(SDL_Renderer* renderer,int x, int y, int size, TTF_Font* fo
     TTF_CloseFont(font);
     SDL_FreeSurface(surfaceMessage);
     SDL_DestroyTexture(Message);
-    
 }
 
 
