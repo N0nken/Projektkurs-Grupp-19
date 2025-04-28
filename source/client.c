@@ -227,6 +227,7 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
             }
         }
         show_debug_info_client(gameState, client);
+        
         // Update player input...
         if (Player_get_isAlive(gameState->players[gameState->playerID])) {
             InputLogger_update_all_actions(Player_get_inputs(gameState->players[gameState->playerID]), SDL_GetKeyboardState(NULL));
@@ -237,7 +238,11 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
                 client->failedPackets++;
             }
         } else {
-            printf("Player %d is dead\n", gameState->playerID);
+            printf("Player %d is dead\n", gameState->playerID); //fixes issue that makes server thinks that connection has failed when killed
+            client->sendPacket->address = client->serverIP;
+            client->sendPacket->len = sizeof(1);
+            *(client->sendPacket->data) = 1;
+            SDLNet_UDP_Send(client->socket, -1, client->sendPacket);
         }
         
         
