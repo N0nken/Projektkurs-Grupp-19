@@ -318,12 +318,16 @@ int client_game_over(Client *client, GameState *gameState, RenderController* ren
         switch (gameState->winnerID) {
             case 0:
                 create_textarea(renderController->renderer, 200, 50, 20, NULL, "Player 1 Won!", (SDL_Color){0, 0, 0, 255});
+                break;
             case 1:
                 create_textarea(renderController->renderer, 200, 50, 20, NULL, "Player 2 Won!", (SDL_Color){0, 0, 0, 255});
+                break;
             case 2:
                 create_textarea(renderController->renderer, 200, 50, 20, NULL, "Player 3 Won!", (SDL_Color){0, 0, 0, 255});
+                break;
             case 3:
                 create_textarea(renderController->renderer, 200, 50, 20, NULL, "Player 4 Won!", (SDL_Color){0, 0, 0, 255});
+                break;
         }
         SDL_RenderPresent(renderController->renderer);
         // Render game over screen
