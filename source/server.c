@@ -225,21 +225,21 @@ void server_playing(Server *server, GameState *gameState) {
         }
         handle_attack_input(gameState->players, MAXCLIENTS);
 
-        int alive = 0;
-        int lastAlive = -1;
-        for(int i = 0; i < MAXCLIENTS; i++){
-            if(Player_get_isAlive(gameState->players[i])){
+        int alive = 0;  // counter for # of alive players
+        int lastAlive = -1; // index that points out lastAlive player
+        for(int i = 0; i < MAXCLIENTS; i++){ // loops through all players
+            if(Player_get_isAlive(gameState->players[i])){ //if player is alive, increment, then save index
                 alive++;
                 lastAlive = i;
             }
         }
-        gameState->playerAliveCount = alive;
+        gameState->playerAliveCount = alive; // send state of alive in next network packet
 
         if(alive <= 1){ //if only 1 player is left -> GAME_OVER
             gameState->matchState = GAME_OVER;
-            gameState->winnerID = lastAlive;
-            server->gameOverStartTime = SDL_GetTicks64();
-            send_server_game_state_to_all_clients(server, gameState);
+            gameState->winnerID = lastAlive; //declare which index that won
+            server->gameOverStartTime = SDL_GetTicks64(); // for 5 sec timer until restart
+            send_server_game_state_to_all_clients(server, gameState); // sends last package of all states 
             break;
         }
 
@@ -250,15 +250,15 @@ void server_playing(Server *server, GameState *gameState) {
 }
 
 void server_game_over(Server *server, GameState *gameState) {
-    Uint64 start = server->gameOverStartTime;
+    Uint64 start = server->gameOverStartTime; // gets time when loop started
 
-    // Skicka GAME_OVER en första gång
+    // sends all clients match state
     send_server_game_state_to_all_clients(server, gameState);
 
     // Vänta 5 sekunder och skicka state varje frame
     while (SDL_GetTicks64() - start < 5000) {
         SDL_Delay(1000 / TARGETFPS);
-        send_server_game_state_to_all_clients(server, gameState);
+        send_server_game_state_to_all_clients(server, gameState); //after 5 sec state returns to waiting. 
     }
 
     //gå tillbaka till WAITING
