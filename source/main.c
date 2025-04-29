@@ -48,7 +48,7 @@ int main(int argv, char** args){
         if (choice == 's'){
             server_main();
         } else if (choice == 'c'){
-            if(!client_main(&renderController)) return 1;
+            if(client_main(&renderController)) return 1;
         } else if (choice == 'q'){
             isRunning = 0;
         } else {
