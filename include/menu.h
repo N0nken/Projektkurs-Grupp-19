@@ -34,5 +34,6 @@ void ret_button_clicked(SDL_Rect Area, SDL_Renderer *Renderer);
 void ret_button_image(SDL_Rect Area, SDL_Renderer *Renderer, SDL_Surface* img);
 void load_Button_Text(button *Button, const char *text, SDL_Renderer* Renderer);
 void center_button(button *Button,SDL_Window *Window);
+void load_button_image(button *Button, SDL_Renderer *renderer, int buttonNr, int state);
 
 #endif
