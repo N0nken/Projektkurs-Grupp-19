@@ -129,38 +129,41 @@ int is_colliding(Collider *collider1, Collider *collider2, int layer) {
     return 0;
 }
 
-int is_standing_on(Collider *top, Collider *bottom, int layer) {
-    if (layer >= 0 && top->layer != layer) {
+int is_standing_on(Collider *top, Collider *bottom) {
+
+
+    float yMax1 = Vector2_get_y(Collider_get_position(top)) + Vector2_get_y(Collider_get_dimensions(top));
+    float xMax1 = Vector2_get_x(Collider_get_position(top)) + Vector2_get_x(Collider_get_dimensions(top));
+    float yMin1 = Vector2_get_y(Collider_get_position(top)) - Vector2_get_y(Collider_get_dimensions(top));
+    float xMin1 = Vector2_get_x(Collider_get_position(top)) - Vector2_get_x(Collider_get_dimensions(top));
+
+    float yMax2 = Vector2_get_y(Collider_get_position(bottom)) + Vector2_get_y(Collider_get_dimensions(bottom));
+    float xMax2 = Vector2_get_x(Collider_get_position(bottom)) + Vector2_get_x(Collider_get_dimensions(bottom));
+    float yMin2 = Vector2_get_y(Collider_get_position(bottom)) - Vector2_get_y(Collider_get_dimensions(bottom));
+    float xMin2 = Vector2_get_x(Collider_get_position(bottom)) - Vector2_get_x(Collider_get_dimensions(bottom));
+
+    const float tol = 0.5f;  // tillåten vertikal tolerans i pixlar
+
+    // 1) Horisontell överlapp?
+    //    top ligger inte helt till vänster eller höger om bottom
+    if (xMax1 <= xMin2 || xMin1 >= xMax2) {
         return 0;
     }
 
-    // Hämta positioner och dimensioner för top
-    float x_top = Vector2_get_x(Collider_get_position(top));
-    float y_top = Vector2_get_y(Collider_get_position(top));
-    float half_width_top = Vector2_get_x(Collider_get_dimensions(top));
-    float half_height_top = Vector2_get_y(Collider_get_dimensions(top));
-    float xMintop = x_top - half_width_top;
-    float xMaxtop = x_top + half_width_top;
-    float yMintop = y_top - half_height_top;
+    // 2) Vertikal tolerans: nederkant på top mot överkant på bottom
+    int touch = (fabsf(yMax1 - yMin2) <= tol);
 
-    // Hämta positioner och dimensioner för bottom
-    float x_bot = Vector2_get_x(Collider_get_position(bottom));
-    float y_bot = Vector2_get_y(Collider_get_position(bottom));
-    float half_width_bot = Vector2_get_x(Collider_get_dimensions(bottom));
-    float half_height_bot = Vector2_get_y(Collider_get_dimensions(bottom));
-    float xMinbot = x_bot - half_width_bot;
-    float xMaxbot = x_bot + half_width_bot;
-    float yMaxbot = y_bot + half_height_bot;
+    // Lite overlap: top kolliderar inuti bottom utan att passera under
+    int overlap = (yMax1 > yMin2 && yMax1 <= yMax2);
 
-    // Kontrollera om top står på bottom:
-    // 1. X-områdena överlappar
-    // 2. Botten av top är exakt på toppen av bottom
-    if ((xMintop < xMaxbot && xMinbot < xMaxtop) && yMintop == yMaxbot) {
+    if (touch || overlap) {
         return 1;
     }
 
+    // Annars står den inte på
     return 0;
 }
+
 // checks if a chosen collider is colliding with ANY other collider
 int is_colliding_any(Collider *collider, int layer) {
     for (int i = 0; i < MAXCOLLIDERCOUNT; i++) {

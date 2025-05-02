@@ -43,8 +43,8 @@ void handle_movement(Player *player, float speed, Collider *platform1, Collider 
     }
 
     if (InputLogger_is_action_pressed(logger, "move_up") &&
-    (is_colliding(Player_get_collider(player), platform1, 1) ||
-     is_colliding(Player_get_collider(player), platform2, 1) || is_colliding(Player_get_collider(player), platform3, 1)) && Player_get_vertical_velocity(player)>=0)
+    (is_standing_on(Player_get_collider(player),platform1) ||
+    is_standing_on(Player_get_collider(player),platform2) || is_standing_on(Player_get_collider(player),platform3)) && Player_get_vertical_velocity(player)>=0)
     {
         Player_set_vertical_velocity(player, jump_force);
         isJumping = 1;
@@ -92,11 +92,18 @@ void handle_movement(Player *player, float speed, Collider *platform1, Collider 
         Player_get_vertical_velocity(player)
     );
 
-    if(((is_colliding(Player_get_collider(player), platform1, 1)) && Player_get_vertical_velocity(player)>=0)) { //ska checka alla plattformar, har bara en nu
+
+    if((is_standing_on(Player_get_collider(player),platform1) ||
+    is_standing_on(Player_get_collider(player),platform2) || is_standing_on(Player_get_collider(player),platform3)) && Player_get_vertical_velocity(player)>=0){
+        Player_set_vertical_velocity(player, 0);  // Nollställ fallhastighet
+        Vector2_set_y(velocity, Player_get_vertical_velocity(player));
+    }
+
+    /*if(((is_colliding(Player_get_collider(player), platform1, 1)) && Player_get_vertical_velocity(player)>=0)) { //ska checka alla plattformar, har bara en nu
         if(isJumping==0){
             //vertical_velocity = 0;  // Nollställ fallhastighet
-            Player_set_vertical_velocity(player, 0);
-            Vector2_set_y(velocity, Player_get_vertical_velocity(player));
+(is_standing_on(Player_get_collider(player),platform1) ||
+    is_standing_on(Player_get_collider(player),platform2) || is_standing_on(Player_get_collider(player),platform3)) && Player_get_vertical_velocity(player)>=0)
             //Player_set_yposition(player, Collider_get_yposition(platform1)); //vet ej varför -22 men det blir fel annars
             
         }
@@ -116,7 +123,7 @@ void handle_movement(Player *player, float speed, Collider *platform1, Collider 
             //Player_set_yposition(player, Collider_get_yposition(platform3));
             
         }
-    }
+    }*/
     move_player(player, velocity); 
 
     destroy_Vector2(direction);
