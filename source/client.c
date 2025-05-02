@@ -119,19 +119,15 @@ void draw_player_hitbox(Player *p, RenderController *renderController) {
     SDL_SetRenderDrawColor(renderController->renderer, 255, 0, 255, 255);
     SDL_RenderFillRect(renderController->renderer, &hitbox);
     SDL_SetRenderDrawColor(renderController->renderer, 0, 255, 0, 255);
-    //SDL_RenderFillRect(renderController->renderer, &attackHitbox);
+    SDL_RenderFillRect(renderController->renderer, &attackHitbox);
 }
 
 void draw_colliders(RenderController *renderController, Collider *c) {
-    Vector2 *pos = Collider_get_position(c);
-    Vector2 *dim = Collider_get_dimensions(c);
-    
-    // Beräkna övre vänstra hörnet och fulla dimensionerna
     SDL_Rect collider = {
-        (int)(Vector2_get_x(pos) - Vector2_get_x(dim)), // x
-        (int)(Vector2_get_y(pos) - Vector2_get_y(dim)), // y
-        (int)(2 * Vector2_get_x(dim)),                  // width
-        (int)(2 * Vector2_get_y(dim))                   // height
+        (int)(Vector2_get_x(Collider_get_position(c)) - Vector2_get_x(Collider_get_dimensions(c))), // x
+        (int)(Vector2_get_y(Collider_get_position(c)) - Vector2_get_y(Collider_get_dimensions(c))), // y
+        (int)(2 * Vector2_get_x(Collider_get_dimensions(c))),                  // width
+        (int)(2 * Vector2_get_y(Collider_get_dimensions(c)))                   // height
     };
     
     SDL_SetRenderDrawColor(renderController->renderer, 255, 0, 255, 255);
@@ -254,7 +250,6 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
         );
 
     }
-
     SDL_Event event;
     Uint64 lastTicks = SDL_GetTicks64();
     while (gameState->matchState == PLAYING) {
@@ -265,12 +260,11 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
                     return 1;
             }
         }
-        //show_debug_info_client(gameState, client);
         
         // Update player input...
         if (Player_get_isAlive(gameState->players[gameState->playerID])) {
             InputLogger_update_all_actions(Player_get_inputs(gameState->players[gameState->playerID]), SDL_GetKeyboardState(NULL));
-            InputLogger_print_inputs(Player_get_inputs(gameState->players[gameState->playerID]));
+            //InputLogger_print_inputs(Player_get_inputs(gameState->players[gameState->playerID]));
             // ...and send it to the server
             while (!send_player_input(client, gameState) && client->failedPackets < PACKETLOSSLIMIT) {
                 //printf("Failed to send player input\n");
@@ -313,9 +307,9 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
         //draw_colliders(renderController, Player_get_collider(gameState->players[0]));
         
 
-        for (int i = 0; i < MAXCLIENTS; i++) {
+        /*for (int i = 0; i < MAXCLIENTS; i++) {
             draw_player_hitbox(gameState->players[i], renderController);
-        }
+        }*/
 
         // draw all players
         for (int i = 0; i < MAXCLIENTS; i++) {

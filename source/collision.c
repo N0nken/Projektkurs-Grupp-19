@@ -142,25 +142,20 @@ int is_standing_on(Collider *top, Collider *bottom) {
     float yMin2 = Vector2_get_y(Collider_get_position(bottom)) - Vector2_get_y(Collider_get_dimensions(bottom));
     float xMin2 = Vector2_get_x(Collider_get_position(bottom)) - Vector2_get_x(Collider_get_dimensions(bottom));
 
-    const float tol = 0.5f;  // tillåten vertikal tolerans i pixlar
+    const float tol = 0.5f;  // tillåten vertikal tolerans i pixlar, gäller både över och under
 
-    // 1) Horisontell överlapp?
-    //    top ligger inte helt till vänster eller höger om bottom
-    if (xMax1 <= xMin2 || xMin1 >= xMax2) {
+    if (xMax1 <= xMin2 || xMin1 >= xMax2) { //jämför x led
         return 0;
     }
 
-    // 2) Vertikal tolerans: nederkant på top mot överkant på bottom
-    int touch = (fabsf(yMax1 - yMin2) <= tol);
+    int touch = (fabsf(yMax1 - yMin2) <= tol); //om dem rör sig, använder tolerans
 
-    // Lite overlap: top kolliderar inuti bottom utan att passera under
-    int overlap = (yMax1 > yMin2 && yMax1 <= yMax2);
+    int overlap = (yMax1 > yMin2 && yMax1 <= yMax2); //om dem overlappar, la till detta för att kunna sänka tolerans, eftersom hög tolerans gör att karaktären kan sväva lite
 
     if (touch || overlap) {
         return 1;
     }
 
-    // Annars står den inte på
     return 0;
 }
 

@@ -95,7 +95,7 @@ void InputLogger_set_action_state(InputLogger *logger, char action[], int stateI
 void InputLogger_update_all_actions(InputLogger *logger, const Uint8 *keystates) {
     for (int i = 0; i < NUMBEROFACTIONS; i++) {
         if (keystates[actionTranslations[i][0]] == 1 || keystates[actionTranslations[i][1]] == 1) {
-            printf("action %s pressed\n", allActions[i]);
+            //printf("action %s pressed\n", allActions[i]);
             if (!InputLogger_get_action_state(logger, allActions[i], 0) && !InputLogger_get_action_state(logger, allActions[i], 1) && !InputLogger_get_action_state(logger, allActions[i], 2)) {
                 InputLogger_set_action_state(logger, allActions[i], 0, 1);
             } else if (InputLogger_get_action_state(logger, allActions[i], 0) && !InputLogger_get_action_state(logger, allActions[i], 1) && !InputLogger_get_action_state(logger, allActions[i], 2)) {
@@ -103,7 +103,7 @@ void InputLogger_update_all_actions(InputLogger *logger, const Uint8 *keystates)
                 InputLogger_set_action_state(logger, allActions[i], 0, 0);
             }
         } else {
-            printf("action %s not pressed\n", allActions[i]);
+            //printf("action %s not pressed\n", allActions[i]);
             if ((InputLogger_get_action_state(logger, allActions[i], 0) || InputLogger_get_action_state(logger, allActions[i], 1)) && !InputLogger_get_action_state(logger, allActions[i], 2)) {
                 InputLogger_set_action_state(logger, allActions[i], 2, 1);
                 InputLogger_set_action_state(logger, allActions[i], 1, 0);
