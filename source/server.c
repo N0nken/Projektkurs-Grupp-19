@@ -147,7 +147,7 @@ int init_server(Server *server, GameState *gameState) {
     }
     server->recvPacket = SDLNet_AllocPacket(512);
     if (!server->recvPacket) {
-        printf("SDLNet_AllocPacket: %s\n", SDLNet_GetError());
+        //printf("SDLNet_AllocPacket: %s\n", SDLNet_GetError());
         return 1;
     }
     server->clientCount = 0;
@@ -172,7 +172,7 @@ void server_waiting(Server *server, GameState *gameState) {
             save_client(server, server->recvPacket->address);
         }
         send_server_game_state_to_all_clients(server, gameState);
-        printf("Waiting for players... (%d)\n", server->clientCount);
+        //printf("Waiting for players... (%d)\n", server->clientCount);
         SDL_Delay(500); // Wait for 1 second before checking again
     }
     // All players connected, start the game after a short countdown
@@ -189,7 +189,7 @@ void server_waiting(Server *server, GameState *gameState) {
 
 void server_playing(Server *server, GameState *gameState) {
 
-    //clear_all_colliders();
+    clear_all_colliders();
     Collider *colls[PLATFORM_COUNT];
     // du behöver inte SDL_Rects här, men vi deklarerar ändå arrayen:
     SDL_Rect dummyRects[PLATFORM_COUNT];
@@ -212,7 +212,7 @@ void server_playing(Server *server, GameState *gameState) {
     Uint64 lastTicks = SDL_GetTicks64();
     while (gameState->matchState == PLAYING) {
         receive_player_inputs(server, gameState);
-        show_debug_info_server(gameState, server);
+        //show_debug_info_server(gameState, server);
         // Update game state logic here
         Uint64 currentTicks = SDL_GetTicks64();             // nu i ms
         Uint64 elapsedTicks = currentTicks - lastTicks;     // skillnad i ms
@@ -276,7 +276,7 @@ int save_client(Server *server, IPaddress ip) {
 void receive_player_inputs(Server *server, GameState *gameState) {
     ClientInput clientInput;
     while (SDLNet_UDP_Recv(server->socket, server->recvPacket) && server->packetsReceived < MAXPACKETSRECEIVEDPERFRAME) {
-        printf("Packet received from %s\n", SDLNet_ResolveIP(&server->recvPacket->address));
+        //printf("Packet received from %s\n", SDLNet_ResolveIP(&server->recvPacket->address));
         int playerID = get_player_id_from_ip(server, server->recvPacket->address);
         if (playerID == -1) {
             save_client(server, server->recvPacket->address); // Player not found, save new client

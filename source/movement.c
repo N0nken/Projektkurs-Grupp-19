@@ -15,27 +15,25 @@ void move_player(Player *player, Vector2 *velocity) {
     Vector2 *pos = Player_get_position(player);
     
     // Uppdatera positionen
-    move_and_collide(Player_get_collider(player), velocity, 1);
+    move_and_collide(Player_get_collider(player), velocity, 0);
     Vector2 *newPosition = copy_Vector2(Collider_get_position(Player_get_collider(player)));
     Player_set_position(player, newPosition);
 }
 
 void handle_movement(Player *player, float speed, Collider *platform1, Collider *platform2, Collider *platform3, float deltaTime) {
     Vector2 *direction = create_Vector2(0.0f, 0.0f);
-    //static float vertical_velocity = 0;  // Behåller hastighet mellan frames
     const float gravity = 0.6f;
-    const float jump_force = -12.0f;
+    const float jump_force = -16.0f;
 
     static float dashTimeLeft     = 0.0f;
     static float dashCooldownLeft = 0.0f;
 
     const float dashDuration   = 0.6f;  // sekunder
-    const float dashCooldown   = 1.0f;  // sekunder
+    const float dashCooldown   = 3.0f;  // sekunder
 
-    //float dashspeed = speed * 2;
-    //Player_set_can_dash(player, 1);
     int isJumping = 0;
 
+    
     InputLogger *logger = Player_get_inputs(player);
     if (InputLogger_is_action_pressed(logger, "move_left")) {
         Vector2_set_x(direction, -1.0f);
@@ -51,6 +49,9 @@ void handle_movement(Player *player, float speed, Collider *platform1, Collider 
         Player_set_vertical_velocity(player, jump_force);
         isJumping = 1;
     }
+    if(Player_get_vertical_velocity(player)<0){
+        isJumping = 1;
+    }
 
     
     if (InputLogger_is_action_just_pressed(logger, "dash") &&
@@ -60,7 +61,7 @@ void handle_movement(Player *player, float speed, Collider *platform1, Collider 
         Player_set_can_dash(player, 0);
     }
 
-    // Tidsnerdragning
+    // Tidsnerdragning för dash
     if (dashTimeLeft > 0.0f){
         dashTimeLeft     -= deltaTime;
     }
@@ -75,14 +76,6 @@ void handle_movement(Player *player, float speed, Collider *platform1, Collider 
         }
     }
 
-    /*if(keystates[SDL_SCANCODE_LSHIFT])
-    {   
-        if(Player_get_can_dash(player)==1)
-        {
-            speed = speed * 6;
-            Player_set_can_dash(player, 0);
-        }
-    }*/
 
     //vertical_velocity += gravity;
     Player_set_vertical_velocity(player, Player_get_vertical_velocity(player) + gravity);

@@ -119,7 +119,23 @@ void draw_player_hitbox(Player *p, RenderController *renderController) {
     SDL_SetRenderDrawColor(renderController->renderer, 255, 0, 255, 255);
     SDL_RenderFillRect(renderController->renderer, &hitbox);
     SDL_SetRenderDrawColor(renderController->renderer, 0, 255, 0, 255);
-    SDL_RenderFillRect(renderController->renderer, &attackHitbox);
+    //SDL_RenderFillRect(renderController->renderer, &attackHitbox);
+}
+
+void draw_colliders(RenderController *renderController, Collider *c) {
+    Vector2 *pos = Collider_get_position(c);
+    Vector2 *dim = Collider_get_dimensions(c);
+    
+    // Beräkna övre vänstra hörnet och fulla dimensionerna
+    SDL_Rect collider = {
+        (int)(Vector2_get_x(pos) - Vector2_get_x(dim)), // x
+        (int)(Vector2_get_y(pos) - Vector2_get_y(dim)), // y
+        (int)(2 * Vector2_get_x(dim)),                  // width
+        (int)(2 * Vector2_get_y(dim))                   // height
+    };
+    
+    SDL_SetRenderDrawColor(renderController->renderer, 255, 0, 255, 255);
+    SDL_RenderFillRect(renderController->renderer, &collider);
 }
 
 void show_debug_info_client(GameState *gameState, Client *client) {
@@ -207,7 +223,7 @@ int client_waiting(Client *client, GameState *gameState, RenderController* rende
         } else {
             printf("Connected to server %s\n", SDLNet_ResolveIP(&client->serverIP));
             send_player_input(client, gameState);
-            printf("Player input sent\n");
+            //printf("Player input sent\n");
         }
         sync_game_state_with_server(client, gameState);
         SDL_Delay(1000);
@@ -237,10 +253,6 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
             0,  1
         );
 
-        platforms[i].x = (int)(cx - hw);
-        platforms[i].y = (int)(cy - hh);
-        platforms[i].w = (int)(hw * 2.65f);
-        platforms[i].h = (int)(hh * 2);
     }
 
     SDL_Event event;
@@ -253,7 +265,7 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
                     return 1;
             }
         }
-        show_debug_info_client(gameState, client);
+        //show_debug_info_client(gameState, client);
         
         // Update player input...
         if (Player_get_isAlive(gameState->players[gameState->playerID])) {
@@ -295,10 +307,10 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
 
         
         // draw platforms
-        SDL_SetRenderDrawColor(renderController->renderer, 255, 255, 255, 255);
-        SDL_RenderFillRect(renderController->renderer, &platforms[0]);
-        SDL_RenderFillRect(renderController->renderer, &platforms[1]);
-        SDL_RenderFillRect(renderController->renderer, &platforms[2]);
+        draw_colliders(renderController, colls[0]);
+        draw_colliders(renderController, colls[1]);
+        draw_colliders(renderController, colls[2]);
+        //draw_colliders(renderController, Player_get_collider(gameState->players[0]));
         
 
         for (int i = 0; i < MAXCLIENTS; i++) {

@@ -38,8 +38,8 @@ Player *create_Player(Vector2 *position, Collider *collider, Collider *attackHit
     newPlayer->logger = create_InputLogger();
 
     newPlayer->rect = malloc(sizeof(struct SDL_Rect));
-    newPlayer->rect->x = (int)Vector2_get_x(position);
-    newPlayer->rect->y = (int)Vector2_get_y(position);
+    newPlayer->rect->x = (int)Vector2_get_x(position) - (int)Vector2_get_x(Collider_get_dimensions(newPlayer->collider));
+    newPlayer->rect->y = (int)Vector2_get_y(position) - (int)Vector2_get_y(Collider_get_dimensions(collider));
     newPlayer->rect->w = 64;
     newPlayer->rect->h = 64;
     allPlayers[(*activePlayerCount)++] = newPlayer;
@@ -62,8 +62,8 @@ void Player_set_position(Player *p, struct Vector2 *position) {
 
     p->position = position;    
     Collider_set_position(Player_get_collider(p), position);
-    p->rect->x = (int)Vector2_get_x(position);
-    p->rect->y = (int)Vector2_get_y(position);  //flytta på rect
+    p->rect->x = (int)Vector2_get_x(position) - (int)Vector2_get_x(Collider_get_dimensions(p->collider));
+    p->rect->y = (int)Vector2_get_y(position) - (int)Vector2_get_y(Collider_get_dimensions(p->collider));  //flytta på rect
 }
 void Player_set_yposition(Player *p, float y) {
     float current_x = Vector2_get_x(p->position);

@@ -31,6 +31,7 @@ int Collider_get_collidercount(void);
 
 /* Checks if two colliders are colliding */
 int is_colliding(Collider *collider1, Collider *collider2, int layer);
+int is_standing_on(Collider *top, Collider *bottom, int layer);
 /* Moves a collider along a given vector2 until it collides with another collider 
 set layer=-1 to collide with all layers */
 void move_and_collide(Collider *collider, Vector2 *velocity, int layer);

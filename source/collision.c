@@ -128,6 +128,39 @@ int is_colliding(Collider *collider1, Collider *collider2, int layer) {
     }
     return 0;
 }
+
+int is_standing_on(Collider *top, Collider *bottom, int layer) {
+    if (layer >= 0 && top->layer != layer) {
+        return 0;
+    }
+
+    // Hämta positioner och dimensioner för top
+    float x_top = Vector2_get_x(Collider_get_position(top));
+    float y_top = Vector2_get_y(Collider_get_position(top));
+    float half_width_top = Vector2_get_x(Collider_get_dimensions(top));
+    float half_height_top = Vector2_get_y(Collider_get_dimensions(top));
+    float xMintop = x_top - half_width_top;
+    float xMaxtop = x_top + half_width_top;
+    float yMintop = y_top - half_height_top;
+
+    // Hämta positioner och dimensioner för bottom
+    float x_bot = Vector2_get_x(Collider_get_position(bottom));
+    float y_bot = Vector2_get_y(Collider_get_position(bottom));
+    float half_width_bot = Vector2_get_x(Collider_get_dimensions(bottom));
+    float half_height_bot = Vector2_get_y(Collider_get_dimensions(bottom));
+    float xMinbot = x_bot - half_width_bot;
+    float xMaxbot = x_bot + half_width_bot;
+    float yMaxbot = y_bot + half_height_bot;
+
+    // Kontrollera om top står på bottom:
+    // 1. X-områdena överlappar
+    // 2. Botten av top är exakt på toppen av bottom
+    if ((xMintop < xMaxbot && xMinbot < xMaxtop) && yMintop == yMaxbot) {
+        return 1;
+    }
+
+    return 0;
+}
 // checks if a chosen collider is colliding with ANY other collider
 int is_colliding_any(Collider *collider, int layer) {
     for (int i = 0; i < MAXCOLLIDERCOUNT; i++) {
