@@ -273,11 +273,11 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
             InputLogger_print_inputs(Player_get_inputs(gameState->players[gameState->playerID]));
             // ...and send it to the server
             while (!send_player_input(client, gameState) && client->failedPackets < PACKETLOSSLIMIT) {
-                printf("Failed to send player input\n");
+                //printf("Failed to send player input\n");
                 client->failedPackets++;
             }
         } else {
-            printf("Player %d is dead\n", gameState->playerID); //fixes issue that makes server thinks that connection has failed when killed
+            //printf("Player %d is dead\n", gameState->playerID); //fixes issue that makes server thinks that connection has failed when killed
             client->sendPacket->address = client->serverIP;
             client->sendPacket->len = sizeof(1);
             *(client->sendPacket->data) = 1;
@@ -385,7 +385,7 @@ int client_game_over(Client *client, GameState *gameState, RenderController* ren
         SDLNet_UDP_Send(client->socket, -1, client->sendPacket);
         SDL_RenderPresent(renderController->renderer);
         // Render game over screen
-        printf("Game Over\n");
+        //printf("Game Over\n");
         SDL_Delay(1000 / TARGETFPS); // Run at target FPS
     }
     return 0;
@@ -394,7 +394,7 @@ int client_game_over(Client *client, GameState *gameState, RenderController* ren
 // sends this clients input to the server
 int send_player_input(Client *client, GameState *gameState) {
     ClientInput clientInput;
-    printf("Preparing sending packet\n");
+    //printf("Preparing sending packet\n");
     InputLogger *playerInputLogger = Player_get_inputs(gameState->players[gameState->playerID]);
     clientInput.playerID = -1;
     for (int i = 0; i < 3; i++) {
@@ -411,7 +411,7 @@ int send_player_input(Client *client, GameState *gameState) {
     memcpy(client->sendPacket->data, &clientInput, sizeof(ClientInput));
     client->sendPacket->address = client->serverIP;
     client->sendPacket->len = sizeof(clientInput);
-    printf("sending packet\n");
+    //printf("sending packet\n");
     return SDLNet_UDP_Send(client->socket, -1, client->sendPacket);
 }
 
@@ -463,9 +463,9 @@ void sync_game_state_with_server(Client *client, GameState *gameState) {
                 InputLogger_set_action_state(logger, "dash",              i, clientInput.dash[i]);
             }
 
-        } else {
+        } /*else {
             printf("Unknown packet type received\n");
-        }
+        }*/
     }
 
     client->packetsReceived = 0;

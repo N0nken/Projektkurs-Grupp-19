@@ -333,7 +333,7 @@ void send_server_game_state_to_all_clients(Server *server, GameState *gameState)
             simulationData.players[j].posY = Vector2_get_y(Player_get_position(gameState->players[j]));
             simulationData.players[j].direction = Player_get_direction(gameState->players[j]);
             simulationData.players[j].state = Player_get_state(gameState->players[j]);
-            printf("%d %d %d %.2f %.2f %d\n", simulationData.players[j].isAlive, simulationData.players[j].hp, simulationData.players[j].weapon, simulationData.players[j].posX, simulationData.players[j].posY, simulationData.players[j].direction);
+            //printf("%d %d %d %.2f %.2f %d\n", simulationData.players[j].isAlive, simulationData.players[j].hp, simulationData.players[j].weapon, simulationData.players[j].posX, simulationData.players[j].posY, simulationData.players[j].direction);
         }
     }
     // ...send to each client
