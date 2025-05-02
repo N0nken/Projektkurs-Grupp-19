@@ -141,3 +141,76 @@ void center_button(button *Button,SDL_Window *Window){
     SDL_GetWindowSize(Window, &winW, &winH);
     Button->area.x=  960-Button->area.w;
 }
+void load_button_image(button *Button, SDL_Renderer *renderer, int buttonNr, int state){
+    SDL_Surface* button=NULL;
+    SDL_Texture* textureButton=NULL;
+    SDL_Rect ButtonState;
+    if(state==3){
+        SDL_Rect temp={0,0,48,16};
+        ButtonState=temp;
+    }
+    else if(state==2){  
+        SDL_Rect temp={48,0,48,16};
+        ButtonState=temp;
+
+    }
+    else if(state==1){
+        SDL_Rect temp={96,0,48,16};
+        ButtonState=temp;
+    }
+
+
+    switch(buttonNr){
+        case 0:
+        button= IMG_Load("images/Button/[0]LightBlue.png");
+        textureButton= SDL_CreateTextureFromSurface(renderer,button);
+        SDL_RenderCopy(renderer,textureButton,&ButtonState, &Button->area);
+        break;
+        case 1:
+        button= IMG_Load("images/Button/[1] Red.png");
+        textureButton= SDL_CreateTextureFromSurface(renderer,button);
+        SDL_RenderCopy(renderer,textureButton,&ButtonState, &Button->area);
+        break;
+        case 2:
+        button= IMG_Load("images/Button/[2] Yellow.png");
+        textureButton= SDL_CreateTextureFromSurface(renderer,button);
+        SDL_RenderCopy(renderer,textureButton,&ButtonState, &Button->area);
+        break;
+        case 3:
+        button= IMG_Load("images/Button/[3] Green.png");
+        textureButton= SDL_CreateTextureFromSurface(renderer,button);
+        SDL_RenderCopy(renderer,textureButton,&ButtonState, &Button->area);
+        break;
+        case 4:
+        button= IMG_Load("images/Button/[4] Blue.png");
+        textureButton= SDL_CreateTextureFromSurface(renderer,button);
+        SDL_RenderCopy(renderer,textureButton,&ButtonState, &Button->area);
+        break;
+        case 5:
+        button= IMG_Load("images/Button/[5] Silver.png");
+        textureButton= SDL_CreateTextureFromSurface(renderer,button);
+        SDL_RenderCopy(renderer,textureButton,&ButtonState, &Button->area);
+        break;
+        case 6:
+        button= IMG_Load("images/Button/[6] Gold.png");
+        textureButton= SDL_CreateTextureFromSurface(renderer,button);
+        SDL_RenderCopy(renderer,textureButton,&ButtonState, &Button->area);
+        break;
+        case 7:
+        button= IMG_Load("images/Button/[7] Wood.png");
+        textureButton= SDL_CreateTextureFromSurface(renderer,button);
+        SDL_RenderCopy(renderer,textureButton,&ButtonState, &Button->area);
+        break;
+
+
+
+
+    }
+    if(!button){
+        printf("Failed to get button: %s",SDL_GetError());
+    }
+
+    
+    SDL_DestroyTexture(textureButton);
+    SDL_FreeSurface(button);
+}

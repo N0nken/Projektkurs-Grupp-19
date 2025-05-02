@@ -426,17 +426,17 @@ void sync_game_state_with_server(Client *client, GameState *gameState) {
         client->packetsReceived++;
 
         if (client->recvPacket->len == sizeof(SimulationData)) {
-            // Läs in hela paketet
+            // Läs in hela paketet från servern
             memcpy(&simulationData, client->recvPacket->data, sizeof(simulationData));
 
-            // 1) Spegla serverns state rakt av
+            // Spegla serverns state rakt av 
             gameState->matchState       = simulationData.matchState;
             gameState->playerID         = simulationData.playerID;
             gameState->playerAliveCount = simulationData.playerAliveCount;
             gameState->winnerID         = simulationData.winnerID;
             gameState->gameOverTimerMs  = simulationData.gameOverTimerMs;  // se till att GameState har detta fält
 
-            // 2) Uppdatera alla spelare
+            // Uppdatera alla spelare
             for (int i = 0; i < MAXCLIENTS; i++) {
                 Player_set_isAlive   (gameState->players[i], simulationData.players[i].isAlive);
                 Player_set_hp        (gameState->players[i], simulationData.players[i].hp);
