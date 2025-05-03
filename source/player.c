@@ -170,8 +170,8 @@ void switch_player_weapon_sprite(Player *p, int weapon, int *pCurrentWeaponImage
 void health_bar(Player *p, SDL_Renderer *renderer){
     if(p->hp>0){
     SDL_Rect healthBar = {0, 0, 100, 10};
-    healthBar.x = (int)Vector2_get_x(p->position);
-    healthBar.y = (int)Vector2_get_y(p->position)-20;
+    healthBar.x = (int)Vector2_get_x(p->position)-40;
+    healthBar.y = (int)Vector2_get_y(p->position)-60;
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_RenderFillRect(renderer, &healthBar);
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);

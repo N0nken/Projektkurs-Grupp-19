@@ -13,6 +13,7 @@
 #include "../include/movement.h"
 #include "../include/dynamic_textarea.h"
 #include "../include/renderController.h"
+#include "../include/menu.h"
 
 #define PACKETLOSSLIMIT 10 // Give up sending packets to server after this many failed attempts
 #define MAXCLIENTS 4
@@ -151,13 +152,17 @@ void show_debug_info_client(GameState *gameState, Client *client) {
 int client_main(RenderController* renderController) {
     Client client;
     GameState gameState;
-
-    if (init_client(&client, &gameState)) return 1;
+    int lobby=0;
     
+   
+    //Behöver ändra på strukturen annars blir det en minne läcka.
     char targetIP[16];
+    lobby=client_lobby(renderController, targetIP);
+    if (lobby==1) return 1;
+    else if (lobby==2) return 2;
+    if (init_client(&client, &gameState)) return 1;
 
     while (1) {
-        if (client_lobby(renderController, targetIP)) return 1;
         if (client_waiting(&client, &gameState, renderController, targetIP)) return 1;
         if (client_playing(&client, &gameState, renderController)) return 1;
         if (client_game_over(&client, &gameState, renderController)) return 1;
@@ -467,16 +472,22 @@ void sync_game_state_with_server(Client *client, GameState *gameState) {
 
 // menu for the player to enter the ip address of the server
 int client_lobby(RenderController* renderController, char targetIPaddress[]) {
+    button *Button=button_create(1400, 20, 50, 50, NULL, renderController->renderer, renderController->window);
     strcpy(targetIPaddress, "127.0.0.1_____");
     int max=15, count=9;
     // run till player quits or enters an IP address
     int rctrl=0, lctrl=0;
     while(1){
+        int x,y;
+        SDL_GetMouseState(&x, &y);
+
         TTF_Font* font = TTF_OpenFont("fonts/poppins.regular.ttf", 50);
         SDL_RenderClear(renderController->renderer);
         SDL_RenderCopy(renderController->renderer, renderController->background, NULL, NULL);
+        load_button_image(Button, renderController->renderer, 8, 0);
         create_textarea(renderController->renderer, 450-120,  100, 50, NULL, "Enter the server ip", (SDL_Color){0,0,0,255});
         create_textarea(renderController->renderer, 450-120,  300, 50, font, targetIPaddress, (SDL_Color){0,0,0,255});
+        
         SDL_RenderPresent(renderController->renderer);
        
         SDL_StartTextInput();
@@ -485,15 +496,25 @@ int client_lobby(RenderController* renderController, char targetIPaddress[]) {
         switch(event.type)
         {
             case SDL_QUIT:
+                button_destroy(Button);
                 return 1;
-                case SDL_KEYDOWN:
+            case SDL_MOUSEBUTTONDOWN:
+                if(is_in_button_rect(x, y, ret_button_rect(Button))){
+                    button_destroy(Button);
+                    return 2; 
+                }
+                break;
+            case SDL_KEYDOWN:
                 if(event.key.keysym.scancode == SDL_SCANCODE_RCTRL) { rctrl = 1; }
                 else if(event.key.keysym.scancode == SDL_SCANCODE_LCTRL) { lctrl = 1; }
-                break;
+               
             case SDL_KEYUP:
                 if(event.key.keysym.scancode == SDL_SCANCODE_RCTRL) { rctrl = 0; }
                 else if(event.key.keysym.scancode == SDL_SCANCODE_LCTRL) { lctrl = 0; }
                 break;
+           
+               
+           
             case SDL_TEXTINPUT:
                 printf("%s",event.text.text);
                 if(count<max){
@@ -526,6 +547,7 @@ int client_lobby(RenderController* renderController, char targetIPaddress[]) {
         }
        
         else if(event.key.keysym.scancode == SDL_SCANCODE_RETURN){
+            button_destroy(Button);
             return 0; // ip adress entered, DONT quit program
         }
     }

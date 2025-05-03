@@ -29,7 +29,8 @@ int main(int argv, char** args){
     SDL_Init(SDL_INIT_EVERYTHING);
     TTF_Init();
     SDLNet_Init();
-  
+    int client=0;
+    bool isRunning = true;
     RenderController renderController;
     renderController.window = SDL_CreateWindow("Window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,960,600,SDL_WINDOW_RESIZABLE);
     renderController.renderer = SDL_CreateRenderer(renderController.window, -1,0);
@@ -42,13 +43,16 @@ int main(int argv, char** args){
     SDL_FreeSurface(playerSpritesheetSurface);
     renderController.playerSpritesheet = playerSpritesheetTexture;
 
-    bool isRunning = true;
-    char choice = main_menu(&renderController, &isRunning);
+    
+   
     while(isRunning){
+        char choice = main_menu(&renderController, &isRunning);
         if (choice == 's'){
             server_main();
         } else if (choice == 'c'){
-            if(client_main(&renderController)) return 1;
+            client= client_main(&renderController);
+            if(client==1) return 1;
+            else if(client==2);
         } else if (choice == 'q'){
             isRunning = 0;
         } else {
