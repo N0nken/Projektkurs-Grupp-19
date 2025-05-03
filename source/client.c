@@ -507,7 +507,7 @@ int client_lobby(RenderController* renderController, char targetIPaddress[]) {
             case SDL_KEYDOWN:
                 if(event.key.keysym.scancode == SDL_SCANCODE_RCTRL) { rctrl = 1; }
                 else if(event.key.keysym.scancode == SDL_SCANCODE_LCTRL) { lctrl = 1; }
-               
+                break;
             case SDL_KEYUP:
                 if(event.key.keysym.scancode == SDL_SCANCODE_RCTRL) { rctrl = 0; }
                 else if(event.key.keysym.scancode == SDL_SCANCODE_LCTRL) { lctrl = 0; }
