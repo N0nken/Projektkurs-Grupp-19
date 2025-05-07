@@ -146,27 +146,20 @@ int Player_get_state(Player *p) {
     return p->state;
 }
 
-void switch_player_weapon(Player *p, int keyPressed){
-    switch (keyPressed){
-        case SDLK_1: Player_set_weapon(p, ROCK);break;
-        case SDLK_2: Player_set_weapon(p, SCISSORS);break;
-        case SDLK_3: Player_set_weapon(p, PAPER);break;
-    }   
+void switch_player_weapon(Player *p){
+    if (InputLogger_is_action_just_pressed(p->logger, "switch_to_rock")) {
+        Player_set_weapon(p, ROCK);
+    }
+    if (InputLogger_is_action_just_pressed(p->logger, "switch_to_scissors")) {
+        Player_set_weapon(p, SCISSORS);
+    }
+    if (InputLogger_is_action_just_pressed(p->logger, "switch_to_paper")) {
+        Player_set_weapon(p, PAPER);
+    }
+
 }
 
-void switch_player_weapon_sprite(Player *p, int weapon, int *pCurrentWeaponImage){
-    switch (weapon){
-    case 0:
-        //currentWeaponImage() = rockImage;
-        break;
-    case 1:
-        //currentWeaponImage() = scissorImage;
-        break;
-    case 2:
-        //currentWeaponImage() = paperImage;
-        break;
-    }
-}
+
 void health_bar(Player *p, SDL_Renderer *renderer){
     if(p->hp>0){
     SDL_Rect healthBar = {0, 0, 100, 10};
@@ -197,53 +190,81 @@ SDL_Rect *get_Player_Frame(frame *f, int weapon, int animationCounter){
     return (SDL_Rect*)f;
 }
 
-
-//Denna counter ska växla mellan frames i spritesheet i functionen rendercopy i main
-int get_Animation_Counter(InputLogger *logger){
+int get_Animation_Counter(InputLogger *logger, int direction) {
     static Uint64 lastUpdate = 0;
     static int animationCounter = 0;
     static int offset = 0;
     static int frames = 0;
-    offset = get_animation_offset(logger);
-    frames = get_Number_Of_Frames(logger);
+
+    static int inAttack = 0;          // 1 if currently in attack animation
+    static Uint64 attackStartTime = 0;
+    const Uint64 ATTACK_FRAME_DURATION = 200; // ms per frame
+    const int ATTACK_FRAMES = 2;
+    const int ATTACK_OFFSET = 4;
+
     Uint64 now = SDL_GetTicks64();
 
-    if ((InputLogger_is_action_pressed(logger, "move_right") > 0 ||InputLogger_is_action_pressed(logger, "move_left") > 0) 
-    && now - lastUpdate >= 250) {
-        animationCounter = (animationCounter + 1) % frames; 
+    // Start attack if pressed and not already in attack animation
+    if (!inAttack && InputLogger_is_action_pressed(logger, "attack") > 0) {
+        inAttack = 1;
+        attackStartTime = now;
+        animationCounter = 0;
+        lastUpdate = now;
+        switch (direction)
+        {
+            case 1:
+                offset = ATTACK_OFFSET;
+                break;
+            case -1:
+                offset = (ATTACK_OFFSET+2);
+                break;
+        }
+        
+        frames = ATTACK_FRAMES;
+    }
+
+    // If in attack animation
+    if (inAttack) {
+        if (now - lastUpdate >= ATTACK_FRAME_DURATION) {
+            animationCounter++;
+            lastUpdate = now;
+        }
+
+        // End attack animation after all frames played
+        if (animationCounter >= ATTACK_FRAMES) {
+            inAttack = 0;
+            animationCounter = 0;
+        }
+        return offset + (animationCounter % ATTACK_FRAMES);
+    }
+
+    // Normal movement animations
+    offset = get_animation_offset(logger);
+    frames = get_Number_Of_Frames(logger);
+
+    if ((InputLogger_is_action_pressed(logger, "move_right") > 0 || 
+         InputLogger_is_action_pressed(logger, "move_left") > 0) && 
+         now - lastUpdate >= 200) {
+        animationCounter = (animationCounter + 1) % frames;
         lastUpdate = now;
     }
-    if (InputLogger_is_action_just_released(logger, "move_right") > 0 ||
-    InputLogger_is_action_just_released(logger, "move_left") > 0) {
-        animationCounter = 0;
-        offset=0;
-    }
-    return animationCounter+offset;
+
+    return animationCounter + offset;
 }
 
 
 //behövs offset för att bestämma vart i x-led i spritesheeten
 int get_animation_offset(InputLogger *logger) {
-    if (InputLogger_is_action_pressed(logger, "move_right")==1) {
-        return 0;
-    }
-    else if (InputLogger_is_action_pressed(logger, "move_left")==1){
-        return 2; 
-    }   
-    return 0; 
+    if (InputLogger_is_action_pressed(logger, "move_right")==1) {return 0;}
+    else if (InputLogger_is_action_pressed(logger, "move_left")==1){return 8; }
+    else if (InputLogger_is_action_pressed(logger, "attack")==1){return 4; }
+    return 0;
 }
 
 //behöver antalet frames den ska växla mellan, attack är 2 och gå är 4
 int get_Number_Of_Frames(InputLogger *logger){
 
-    if (InputLogger_is_action_pressed(logger, "move_right")==1) {
-        return 4;
-    }
-    else if (InputLogger_is_action_pressed(logger, "move_left")==1){
-        return 4; 
-    }
-    else if (InputLogger_is_action_pressed(logger, "attack")==1){
-        return 2;
-    }
-    
+    if (InputLogger_is_action_pressed(logger, "move_right")==1) {return 4;}
+    else if (InputLogger_is_action_pressed(logger, "move_left")==1){return 4; }
+    else if (InputLogger_is_action_pressed(logger, "attack")==1){return 2;}   
 }

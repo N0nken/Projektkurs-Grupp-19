@@ -37,9 +37,11 @@ void handle_movement(Player *player, float speed, Collider *platform1, Collider 
     InputLogger *logger = Player_get_inputs(player);
     if (InputLogger_is_action_pressed(logger, "move_left")) {
         Vector2_set_x(direction, -1.0f);
+        Player_set_direction(player, -1);
     }
     else if (InputLogger_is_action_pressed(logger, "move_right")) {
         Vector2_set_x(direction, 1.0f);
+        Player_set_direction(player, 1);
     }
 
     if (InputLogger_is_action_pressed(logger, "move_up") &&

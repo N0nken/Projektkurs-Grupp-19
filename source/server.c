@@ -222,6 +222,7 @@ void server_playing(Server *server, GameState *gameState) {
         for (int i = 0; i < MAXCLIENTS; i++) {
             handle_movement(gameState->players[i], PLAYERSPEED, colls[0], colls[1], colls[2], deltaTime);
             // handle_weapon_switching(gameState->players[i]);
+            switch_player_weapon(gameState->players[i]);
         }
         handle_attack_input(gameState->players, MAXCLIENTS);
 

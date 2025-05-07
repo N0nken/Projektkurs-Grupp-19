@@ -291,7 +291,8 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
         // run simulation
         for (int i = 0; i < MAXCLIENTS; i++) {
             handle_movement(gameState->players[i], PLAYERSPEED, colls[0], colls[1], colls[2], deltaTime);
-            // handle_weapon_switching(gameState->players[i]);
+            //handle_weapon_switching(gameState->players[i]);
+            switch_player_weapon(gameState->players[i]);
         }
         handle_attack_input(gameState->players, MAXCLIENTS);
 
@@ -321,7 +322,11 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
             health_bar(gameState->players[i], renderController->renderer);
             if(Player_get_isAlive(gameState->players[i])){
                 SDL_QueryTexture(renderController->playerSpritesheet, NULL , NULL, &spriteHeight, &spriteWidth);        
-                SDL_RenderCopy(renderController->renderer, renderController->playerSpritesheet,get_Player_Frame(&playerFrame,Player_get_weapon(gameState->players[gameState->playerID]),get_Animation_Counter(Player_get_inputs(gameState->players[i]))),Player_get_rect(gameState->players[i]));
+                SDL_RenderCopy(renderController->renderer, renderController->playerSpritesheet,
+                    get_Player_Frame(&playerFrame,
+                        Player_get_weapon(gameState->players[i]),
+                        get_Animation_Counter(Player_get_inputs(gameState->players[i]), Player_get_direction(gameState->players[i]))),
+                    Player_get_rect(gameState->players[i]));
             }
         }
         SDL_RenderPresent(renderController->renderer);
