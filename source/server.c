@@ -8,7 +8,7 @@
 #include "../include/vector2.h"
 #include "../include/movement.h"
 
-#define MAXCLIENTS 4
+#define MAXCLIENTS 2
 #define CLIENTPORT 50000
 #define SERVERPORT 50001
 #define MAXPACKETSRECEIVEDPERFRAME 4
@@ -21,12 +21,13 @@ typedef struct {
     float hw, hh;  // half-width, half-height
 } PlatformDef;
 
-#define PLATFORM_COUNT 3
+#define PLATFORM_COUNT 4
 
 static const PlatformDef platformDefs[PLATFORM_COUNT] = {
-    { 50.0f, 410.0f, 120.0f, 10.0f },
-    { 290.0f, 310.0f, 120.0f, 10.0f },
-    { 580.0f, 410.0f, 120.0f, 10.0f },
+    { 360.0f, 785.0f, 120.0f, 10.0f },
+    { 910.0f, 480.0f, 120.0f, 10.0f },
+    { 1490.0f, 785.0f, 120.0f, 10.0f },
+    { 960.0f, 975.0f, 825.0f, 30.0f }
 };
 //detta e till för att försöka matcha sdl rect med colliders
 //MÅSTE MATCHA MED CLIENT
@@ -155,8 +156,8 @@ int init_server(Server *server, GameState *gameState) {
     gameState->matchState = WAITING;
     gameState->playerAliveCount = 0;
     for (int i = 0; i < MAXCLIENTS; i++) {
-        gameState->players[i] = create_Player(create_Vector2(0, 0), 
-                    create_Collider(create_Vector2(0, 0), create_Vector2(PLAYERWIDTH, PLAYERHEIGHT), 0, PLAYERCOLLISIONLAYER), 
+        gameState->players[i] = create_Player(create_Vector2(240, 0), 
+                    create_Collider(create_Vector2(240, 0), create_Vector2(PLAYERWIDTH, PLAYERHEIGHT), 0, PLAYERCOLLISIONLAYER), 
                     create_Collider(create_Vector2(PLAYERATTACKHITBOXOFFSETX, PLAYERATTACKHITBOXOFFSETY), create_Vector2(PLAYERATTACKHITBOXWIDTH, PLAYERATTACKHITBOXHEIGHT), 0, PLAYERATTACKLAYER), 
                     100, 0, 1, gameState->players, &gameState->playerAliveCount);
         InputLogger_reset_all_actions(Player_get_inputs(gameState->players[i]));
@@ -220,7 +221,7 @@ void server_playing(Server *server, GameState *gameState) {
         float deltaTime = elapsedTicks * 0.001f;
         // run simulation
         for (int i = 0; i < MAXCLIENTS; i++) {
-            handle_movement(gameState->players[i], PLAYERSPEED, colls[0], colls[1], colls[2], deltaTime);
+            handle_movement(gameState->players[i], PLAYERSPEED, colls[0], colls[1], colls[2], colls[3], deltaTime);
             // handle_weapon_switching(gameState->players[i]);
             switch_player_weapon(gameState->players[i]);
         }

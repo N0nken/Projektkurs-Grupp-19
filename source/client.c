@@ -16,7 +16,7 @@
 #include "../include/menu.h"
 
 #define PACKETLOSSLIMIT 10 // Give up sending packets to server after this many failed attempts
-#define MAXCLIENTS 4
+#define MAXCLIENTS 2
 #define CLIENTPORT 50000
 #define SERVERPORT 50001
 #define MAXPACKETSRECEIVEDPERFRAME 10
@@ -27,12 +27,13 @@ typedef struct {
     float hw, hh;  // half-width, half-height
 } PlatformDef;
 
-#define PLATFORM_COUNT 3
+#define PLATFORM_COUNT 4
 
 static const PlatformDef platformDefs[PLATFORM_COUNT] = {
-    { 50.0f, 410.0f, 120.0f, 10.0f },
-    { 290.0f, 310.0f, 120.0f, 10.0f },
-    { 580.0f, 410.0f, 120.0f, 10.0f },
+    { 360.0f, 785.0f, 120.0f, 10.0f },
+    { 910.0f, 480.0f, 120.0f, 10.0f },
+    { 1490.0f, 785.0f, 120.0f, 10.0f },
+    { 960.0f, 975.0f, 825.0f, 30.0f }
 };//MÅSTE MATCHA MED SERVER
 
 enum MatchStates {WAITING,PLAYING,GAME_OVER};
@@ -135,6 +136,20 @@ void draw_colliders(RenderController *renderController, Collider *c) {
     SDL_RenderFillRect(renderController->renderer, &collider);
 }
 
+void draw_platforms(RenderController *renderController, Collider *c, SDL_Texture *platform) {
+    SDL_Rect collider = {
+        (int)(Vector2_get_x(Collider_get_position(c)) - Vector2_get_x(Collider_get_dimensions(c))), // x
+        (int)(Vector2_get_y(Collider_get_position(c)) - Vector2_get_y(Collider_get_dimensions(c))), // y
+        (int)(2 * Vector2_get_x(Collider_get_dimensions(c))),                  // width
+        (int)(2 * Vector2_get_y(Collider_get_dimensions(c)))                   // height
+    };
+    SDL_RenderCopy(renderController->renderer,
+        platform,
+        NULL,              // ta hela texturen
+        &collider // rita in i denna rektangel
+    ); 
+}
+
 void show_debug_info_client(GameState *gameState, Client *client) {
     printf("Player ID: %d\n", gameState->playerID);
     printf("Match State: %d\n", gameState->matchState);
@@ -153,8 +168,7 @@ int client_main(RenderController* renderController) {
     Client client;
     GameState gameState;
     int lobby=0;
-    
-   
+
     //Behöver ändra på strukturen annars blir det en minne läcka.
     char targetIP[16];
     lobby=client_lobby(renderController, targetIP);
@@ -167,7 +181,6 @@ int client_main(RenderController* renderController) {
         if (client_playing(&client, &gameState, renderController)) return 1;
         if (client_game_over(&client, &gameState, renderController)) return 1;
     }
-
     return 0;
 }
 
@@ -191,8 +204,8 @@ int init_client(Client *client, GameState *gameState) {
     gameState->playerID = -1;
     gameState->playerAliveCount = 0;
     for (int i = 0; i < MAXCLIENTS; i++) {
-        gameState->players[i] = create_Player(create_Vector2(0, 0), 
-            create_Collider(create_Vector2(0, 0), create_Vector2(PLAYERWIDTH, PLAYERHEIGHT), 0, PLAYERCOLLISIONLAYER), 
+        gameState->players[i] = create_Player(create_Vector2(240, 0), 
+            create_Collider(create_Vector2(240, 0), create_Vector2(PLAYERWIDTH, PLAYERHEIGHT), 0, PLAYERCOLLISIONLAYER), 
             create_Collider(create_Vector2(PLAYERATTACKHITBOXOFFSETX, PLAYERATTACKHITBOXOFFSETY), create_Vector2(PLAYERATTACKHITBOXWIDTH, PLAYERATTACKHITBOXHEIGHT), 0, PLAYERATTACKLAYER), 
             100, 0, 1, gameState->players, &gameState->playerAliveCount);
         InputLogger_reset_all_actions(Player_get_inputs(gameState->players[i]));
@@ -236,11 +249,15 @@ int client_waiting(Client *client, GameState *gameState, RenderController* rende
 int client_playing(Client *client, GameState *gameState, RenderController* renderController) {
     // player animations
     //clear_all_colliders();
+    SDL_Texture *platformTexture = IMG_LoadTexture(renderController->renderer, "images/platform.png");
+    if (!platformTexture) {
+        printf("Failed to load platform.png: %s\n", IMG_GetError());
+        return 1;
+    }
     int spriteWidth = 32,spriteHeight = 32, animationCounter=0;
     frame playerFrame = {0};
 
     Collider *colls[PLATFORM_COUNT];
-    SDL_Rect platforms[PLATFORM_COUNT];
 
     for (int i = 0; i < PLATFORM_COUNT; i++) {
         float cx = platformDefs[i].cx;
@@ -253,7 +270,6 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
             create_Vector2(hw, hh),
             0,  1
         );
-
     }
     SDL_Event event;
     Uint64 lastTicks = SDL_GetTicks64();
@@ -283,14 +299,13 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
             SDLNet_UDP_Send(client->socket, -1, client->sendPacket);
         }
         
-        
         Uint64 currentTicks = SDL_GetTicks64();             // nu i ms
         Uint64 elapsedTicks = currentTicks - lastTicks;     // skillnad i ms
         lastTicks = currentTicks;
         float deltaTime = elapsedTicks * 0.001f;
         // run simulation
         for (int i = 0; i < MAXCLIENTS; i++) {
-            handle_movement(gameState->players[i], PLAYERSPEED, colls[0], colls[1], colls[2], deltaTime);
+            handle_movement(gameState->players[i], PLAYERSPEED, colls[0], colls[1], colls[2], colls[3], deltaTime);
             //handle_weapon_switching(gameState->players[i]);
             switch_player_weapon(gameState->players[i]);
         }
@@ -307,15 +322,12 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
 
         
         // draw platforms
-        draw_colliders(renderController, colls[0]);
-        draw_colliders(renderController, colls[1]);
-        draw_colliders(renderController, colls[2]);
+        draw_platforms(renderController, colls[0], platformTexture);
+        draw_platforms(renderController, colls[1], platformTexture);
+        draw_platforms(renderController, colls[2], platformTexture);
         //draw_colliders(renderController, Player_get_collider(gameState->players[0]));
-        
 
-        /*for (int i = 0; i < MAXCLIENTS; i++) {
-            draw_player_hitbox(gameState->players[i], renderController);
-        }*/
+        //draw_colliders(renderController, colls[3]);
 
         // draw all players
         for (int i = 0; i < MAXCLIENTS; i++) {
@@ -329,11 +341,14 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
                     Player_get_rect(gameState->players[i]));
             }
         }
+        
         SDL_RenderPresent(renderController->renderer);
         
         SDL_Delay(1000 / TARGETFPS); // Run at target FPS
+        //SDL_DestroyTexture(platformTexture);
     }
     return 0;
+    
 }
 
 // shows the winner and after a certain time restarts (end?) the match
@@ -391,6 +406,8 @@ int client_game_over(Client *client, GameState *gameState, RenderController* ren
         // Render game over screen
         //printf("Game Over\n");
         SDL_Delay(1000 / TARGETFPS); // Run at target FPS
+        
+        
     }
     return 0;
 }
