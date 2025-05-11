@@ -6,11 +6,11 @@
 #include "vector2.h"
 #include <SDL2/SDL.h>
 
-#define PLAYERWIDTH 64
-#define PLAYERHEIGHT 64
+#define PLAYERWIDTH 20
+#define PLAYERHEIGHT 32
 #define PLAYERATTACKHITBOXWIDTH 20
 #define PLAYERATTACKHITBOXHEIGHT 20
-#define PLAYERATTACKHITBOXOFFSETX 100
+#define PLAYERATTACKHITBOXOFFSETX 0
 #define PLAYERATTACKHITBOXOFFSETY 0
 
 typedef struct Player Player;
@@ -53,12 +53,12 @@ int Player_get_state(Player *p);
 void deal_damage(Player *player, int damage);
 void health_bar(Player *p, SDL_Renderer *renderer);
 
-void switch_player_weapon(Player *p, int keyPressed);
+void switch_player_weapon(Player *p);
 void switch_player_weapon_sprite(Player *p, int Key, int *pCurrentImage);
 
 SDL_Rect *get_Player_Frame(frame *f, int weapon, int animationCounter);
 int get_animation_offset(InputLogger *logger);
-int get_Animation_Counter(InputLogger *logger);
+int get_Animation_Counter(InputLogger *logger, int direction);
 int get_Number_Of_Frames(InputLogger *logger);
 
 #endif

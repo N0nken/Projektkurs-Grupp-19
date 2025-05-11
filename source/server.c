@@ -8,7 +8,7 @@
 #include "../include/vector2.h"
 #include "../include/movement.h"
 
-#define MAXCLIENTS 4
+#define MAXCLIENTS 2
 #define CLIENTPORT 50000
 #define SERVERPORT 50001
 #define MAXPACKETSRECEIVEDPERFRAME 4
@@ -21,12 +21,13 @@ typedef struct {
     float hw, hh;  // half-width, half-height
 } PlatformDef;
 
-#define PLATFORM_COUNT 3
+#define PLATFORM_COUNT 4
 
 static const PlatformDef platformDefs[PLATFORM_COUNT] = {
-    { 50.0f, 410.0f, 120.0f, 10.0f },
-    { 290.0f, 310.0f, 120.0f, 10.0f },
-    { 580.0f, 410.0f, 120.0f, 10.0f },
+    { 360.0f, 785.0f, 120.0f, 10.0f },
+    { 910.0f, 480.0f, 120.0f, 10.0f },
+    { 1490.0f, 785.0f, 120.0f, 10.0f },
+    { 960.0f, 975.0f, 825.0f, 30.0f }
 };
 //detta e till för att försöka matcha sdl rect med colliders
 //MÅSTE MATCHA MED CLIENT
@@ -147,7 +148,7 @@ int init_server(Server *server, GameState *gameState) {
     }
     server->recvPacket = SDLNet_AllocPacket(512);
     if (!server->recvPacket) {
-        printf("SDLNet_AllocPacket: %s\n", SDLNet_GetError());
+        //printf("SDLNet_AllocPacket: %s\n", SDLNet_GetError());
         return 1;
     }
     server->clientCount = 0;
@@ -155,8 +156,8 @@ int init_server(Server *server, GameState *gameState) {
     gameState->matchState = WAITING;
     gameState->playerAliveCount = 0;
     for (int i = 0; i < MAXCLIENTS; i++) {
-        gameState->players[i] = create_Player(create_Vector2(0, 0), 
-                    create_Collider(create_Vector2(0, 0), create_Vector2(PLAYERWIDTH, PLAYERHEIGHT), 0, PLAYERCOLLISIONLAYER), 
+        gameState->players[i] = create_Player(create_Vector2(240, 0), 
+                    create_Collider(create_Vector2(240, 0), create_Vector2(PLAYERWIDTH, PLAYERHEIGHT), 0, PLAYERCOLLISIONLAYER), 
                     create_Collider(create_Vector2(PLAYERATTACKHITBOXOFFSETX, PLAYERATTACKHITBOXOFFSETY), create_Vector2(PLAYERATTACKHITBOXWIDTH, PLAYERATTACKHITBOXHEIGHT), 0, PLAYERATTACKLAYER), 
                     100, 0, 1, gameState->players, &gameState->playerAliveCount);
         InputLogger_reset_all_actions(Player_get_inputs(gameState->players[i]));
@@ -172,7 +173,7 @@ void server_waiting(Server *server, GameState *gameState) {
             save_client(server, server->recvPacket->address);
         }
         send_server_game_state_to_all_clients(server, gameState);
-        printf("Waiting for players... (%d)\n", server->clientCount);
+        //printf("Waiting for players... (%d)\n", server->clientCount);
         SDL_Delay(500); // Wait for 1 second before checking again
     }
     // All players connected, start the game after a short countdown
@@ -189,7 +190,7 @@ void server_waiting(Server *server, GameState *gameState) {
 
 void server_playing(Server *server, GameState *gameState) {
 
-    //clear_all_colliders();
+    clear_all_colliders();
     Collider *colls[PLATFORM_COUNT];
     // du behöver inte SDL_Rects här, men vi deklarerar ändå arrayen:
     SDL_Rect dummyRects[PLATFORM_COUNT];
@@ -212,7 +213,7 @@ void server_playing(Server *server, GameState *gameState) {
     Uint64 lastTicks = SDL_GetTicks64();
     while (gameState->matchState == PLAYING) {
         receive_player_inputs(server, gameState);
-        show_debug_info_server(gameState, server);
+        //show_debug_info_server(gameState, server);
         // Update game state logic here
         Uint64 currentTicks = SDL_GetTicks64();             // nu i ms
         Uint64 elapsedTicks = currentTicks - lastTicks;     // skillnad i ms
@@ -220,8 +221,9 @@ void server_playing(Server *server, GameState *gameState) {
         float deltaTime = elapsedTicks * 0.001f;
         // run simulation
         for (int i = 0; i < MAXCLIENTS; i++) {
-            handle_movement(gameState->players[i], PLAYERSPEED, colls[0], colls[1], colls[2], deltaTime);
+            handle_movement(gameState->players[i], PLAYERSPEED, colls[0], colls[1], colls[2], colls[3], deltaTime);
             // handle_weapon_switching(gameState->players[i]);
+            switch_player_weapon(gameState->players[i]);
         }
         handle_attack_input(gameState->players, MAXCLIENTS);
 
@@ -276,7 +278,7 @@ int save_client(Server *server, IPaddress ip) {
 void receive_player_inputs(Server *server, GameState *gameState) {
     ClientInput clientInput;
     while (SDLNet_UDP_Recv(server->socket, server->recvPacket) && server->packetsReceived < MAXPACKETSRECEIVEDPERFRAME) {
-        printf("Packet received from %s\n", SDLNet_ResolveIP(&server->recvPacket->address));
+        //printf("Packet received from %s\n", SDLNet_ResolveIP(&server->recvPacket->address));
         int playerID = get_player_id_from_ip(server, server->recvPacket->address);
         if (playerID == -1) {
             save_client(server, server->recvPacket->address); // Player not found, save new client
@@ -333,7 +335,7 @@ void send_server_game_state_to_all_clients(Server *server, GameState *gameState)
             simulationData.players[j].posY = Vector2_get_y(Player_get_position(gameState->players[j]));
             simulationData.players[j].direction = Player_get_direction(gameState->players[j]);
             simulationData.players[j].state = Player_get_state(gameState->players[j]);
-            printf("%d %d %d %.2f %.2f %d\n", simulationData.players[j].isAlive, simulationData.players[j].hp, simulationData.players[j].weapon, simulationData.players[j].posX, simulationData.players[j].posY, simulationData.players[j].direction);
+            //printf("%d %d %d %.2f %.2f %d\n", simulationData.players[j].isAlive, simulationData.players[j].hp, simulationData.players[j].weapon, simulationData.players[j].posX, simulationData.players[j].posY, simulationData.players[j].direction);
         }
     }
     // ...send to each client

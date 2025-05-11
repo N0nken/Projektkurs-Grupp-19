@@ -201,6 +201,11 @@ void load_button_image(button *Button, SDL_Renderer *renderer, int buttonNr, int
         textureButton= SDL_CreateTextureFromSurface(renderer,button);
         SDL_RenderCopy(renderer,textureButton,&ButtonState, &Button->area);
         break;
+        case 8:
+        button= IMG_Load("images/Button/arrow-square-left.png");
+        textureButton= SDL_CreateTextureFromSurface(renderer,button);
+        SDL_RenderCopy(renderer,textureButton,NULL, &Button->area);
+        break;
 
 
 
