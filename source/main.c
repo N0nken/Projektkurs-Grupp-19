@@ -4,6 +4,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_net.h>
+#include <SDL2/SDL_mixer.h>
 
 #include "../include/server.h"
 #include "../include/client.h"
@@ -17,6 +18,7 @@
 #include "../include/menu.h"
 #include "../include/dynamic_textarea.h"
 #include "../include/renderController.h"
+#include "../include/sounds.h"
 
 #define NrOfButton 3
 
@@ -29,6 +31,9 @@ int main(int argv, char** args){
     SDL_Init(SDL_INIT_EVERYTHING);
     TTF_Init();
     SDLNet_Init();
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
+    Mix_VolumeMusic(70);
+    init_music_system("audio/soundtrack-main_menu.mp3");
     int client=0;
     bool isRunning = true;
     RenderController renderController;
@@ -43,17 +48,19 @@ int main(int argv, char** args){
     SDL_FreeSurface(playerSpritesheetSurface);
     renderController.playerSpritesheet = playerSpritesheetTexture;
 
-    
+
    
     while(isRunning){
         char choice = main_menu(&renderController, &isRunning);
         if (choice == 's'){
+            close_music_system();
             server_main();
         } else if (choice == 'c'){
             client= client_main(&renderController);
             if(client==1) return 1;
             else if(client==2);
         } else if (choice == 'q'){
+            close_music_system();
             isRunning = 0;
         } else {
             printf("Invalid choice. Please enter 's' for server or 'c' for client.\n");
@@ -76,7 +83,7 @@ char main_menu(RenderController* renderController, bool *mainQuit){
     bool howtoplay=false;
     bool quit;
     int Textoffset[NrOfButton]={0};
-    
+
     while(quit==false){
         int x,y;
         SDL_GetMouseState(&x, &y);
@@ -144,9 +151,6 @@ char main_menu(RenderController* renderController, bool *mainQuit){
                     
                 }  
             }
-
-            
-            
         }
         //Ändra how to play texten här! 
         if(howtoplay){
@@ -154,7 +158,6 @@ char main_menu(RenderController* renderController, bool *mainQuit){
            
         }
         
-       
         create_textarea( renderController->renderer,ret_button_rect(Button[2]).x+10,ret_button_rect(Button[2]).y+Textoffset[2], 75,NULL,"Server",(SDL_Color){0,0,0,255});
         create_textarea( renderController->renderer,ret_button_rect(Button[1]).x+10,ret_button_rect(Button[1]).y+Textoffset[1], 75,NULL,"Client",(SDL_Color){0,0,0,255});
         create_textarea( renderController->renderer,ret_button_rect(Button[0]).x+10,ret_button_rect(Button[0]).y+Textoffset[0], 75,NULL,"Help?",(SDL_Color){0,0,0,255});
@@ -162,5 +165,7 @@ char main_menu(RenderController* renderController, bool *mainQuit){
         SDL_RenderPresent(renderController->renderer);
     }
     for(int i=0; i<NrOfButton; i++) button_destroy(Button[i]);
+    close_music_system();
+    Mix_CloseAudio();
 }
 

@@ -5,6 +5,7 @@
 #include "../include/movement.h" 
 #include "../include/vector2.h"
 #include "../include/input_logger.h"
+#include "../include/sounds.h"
 
 #define MOVEUP 0
 
@@ -18,7 +19,6 @@ void move_player(Player *player, Vector2 *velocity) {
     move_and_collide(Player_get_collider(player), velocity, 0);
     Vector2 *newPosition = copy_Vector2(Collider_get_position(Player_get_collider(player)));
     Player_set_position(player, newPosition);
-
     if((int)Player_get_yposition(player)>1100){ // dödar spelare om man ramlar
         Player_set_isAlive(player, 0);
     }
@@ -42,10 +42,12 @@ void handle_movement(Player *player, float speed, Collider *platform1, Collider 
     if (InputLogger_is_action_pressed(logger, "move_left")) {
         Vector2_set_x(direction, -1.0f);
         Player_set_direction(player, -1);
+        play_sound_effect("audio/sfx-walking-shortened.wav", 30);
     }
     else if (InputLogger_is_action_pressed(logger, "move_right")) {
         Vector2_set_x(direction, 1.0f);
         Player_set_direction(player, 1);
+        play_sound_effect("audio/sfx-walking-shortened.wav", 30);
     }
 
     if (InputLogger_is_action_pressed(logger, "move_up") &&
@@ -89,6 +91,7 @@ void handle_movement(Player *player, float speed, Collider *platform1, Collider 
     if (dashTimeLeft > 0.0f){ //om dash pågår öka hastighet med 3
         currentSpeed *= 3.0f;
         Player_set_vertical_velocity(player, 0);
+        play_sound_effect("audio/sfx-dash.wav", 30);
     }
 
     Vector2 *velocity = create_Vector2(

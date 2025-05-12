@@ -7,6 +7,7 @@
 #include "../include/collision.h"
 #include "../include/vector2.h"
 #include "../include/movement.h"
+#include "../include/sounds.h"
 
 #define MAXCLIENTS 2
 #define CLIENTPORT 50000
@@ -130,6 +131,7 @@ int server_main() {
     for (int i = 0; i < MAXCLIENTS; i++) {
         if (gameState.players[i] != NULL) {
             destroy_Player(gameState.players[i]);
+            play_sound_effect("audio/sfx-death1-8bit.wav", 100);
         }
     }
     return 0;

@@ -4,6 +4,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_net.h>
+#include <SDL2/SDL_mixer.h>
 
 #include "../include/input_logger.h"
 #include "../include/attacks.h"
@@ -14,6 +15,7 @@
 #include "../include/dynamic_textarea.h"
 #include "../include/renderController.h"
 #include "../include/menu.h"
+#include "../include/sounds.h"
 
 #define PACKETLOSSLIMIT 10 // Give up sending packets to server after this many failed attempts
 #define MAXCLIENTS 2
@@ -169,17 +171,16 @@ int client_main(RenderController* renderController) {
     GameState gameState;
     int lobby=0;
 
-    //Behöver ändra på strukturen annars blir det en minne läcka.
     char targetIP[16];
     lobby=client_lobby(renderController, targetIP);
     if (lobby==1) return 1;
     else if (lobby==2) return 2;
     if (init_client(&client, &gameState)) return 1;
-
+    init_music_system("audio/soundtrack-match.mp3");
     while (1) {
-        if (client_waiting(&client, &gameState, renderController, targetIP)) return 1;
-        if (client_playing(&client, &gameState, renderController)) return 1;
-        if (client_game_over(&client, &gameState, renderController)) return 1;
+        if (client_waiting(&client, &gameState, renderController, targetIP)) break;
+        if (client_playing(&client, &gameState, renderController)) break;
+        if (client_game_over(&client, &gameState, renderController)) break;
     }
     return 0;
 }
@@ -247,8 +248,6 @@ int client_waiting(Client *client, GameState *gameState, RenderController* rende
 
 // main match loop
 int client_playing(Client *client, GameState *gameState, RenderController* renderController) {
-    // player animations
-    //clear_all_colliders();
     SDL_Texture *platformTexture = IMG_LoadTexture(renderController->renderer, "images/platform.png");
     if (!platformTexture) {
         printf("Failed to load platform.png: %s\n", IMG_GetError());
@@ -355,6 +354,9 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
 int client_game_over(Client *client, GameState *gameState, RenderController* renderController) {
     SDL_Event event;
     SDL_Surface* winnerImage;
+    close_music_system();
+    init_music_system("audio/soundtrack-gameover.mp3");
+    Mix_VolumeMusic(70);
     switch (gameState->winnerID) {
         case 0:
             winnerImage = IMG_Load("images/char.png");

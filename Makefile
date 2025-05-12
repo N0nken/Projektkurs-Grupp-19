@@ -11,7 +11,7 @@ ifeq ($(OS),Windows_NT)                    # MSYS / Git‑Bash / mingw32‑make
     PLATFORM   := WINDOWS
     CC         := gcc
     CFLAGS_SDL := -IC:/msys64/mingw64/include/SDL2
-    LIBS_SDL   := -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_net -lSDL2_ttf
+    LIBS_SDL   := -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_net -lSDL2_ttf -lSDL2_mixer
     MKDIR      := @if not exist "$(BINDIR)" mkdir "$(BINDIR)"
     RM         := rm -f
 else
@@ -47,15 +47,15 @@ helloSDL: $(BINDIR)/main.o
 	    $(BINDIR)/attacks.o $(BINDIR)/player.o $(BINDIR)/collision.o \
 	    $(BINDIR)/vector2.o $(BINDIR)/mathex.o \
 	    $(BINDIR)/movement.o $(BINDIR)/input_logger.o \
-		$(BINDIR)/dynamic_textarea.o  $(BINDIR)/menu.o  $(LDFLAGS)
+		$(BINDIR)/dynamic_textarea.o  $(BINDIR)/menu.o  $(BINDIR)/sounds.o $(LDFLAGS)
 
 # ---------------- main.o ----------------
-$(BINDIR)/main.o: $(SRCDIR)/main.c $(BINDIR)/client.o $(BINDIR)/server.o $(BINDIR)/menu.o $(BINDIR)/dynamic_textarea.o
+$(BINDIR)/main.o: $(SRCDIR)/main.c $(BINDIR)/client.o $(BINDIR)/server.o $(BINDIR)/menu.o $(BINDIR)/dynamic_textarea.o $(BINDIR)/sounds.o
 	$(MKDIR)
 	$(CC) $(CFLAGS) -c $(SRCDIR)/main.c -o $@
 
 # ---------------- client.o -------------
-$(BINDIR)/client.o: $(SRCDIR)/client.c $(BINDIR)/attacks.o $(BINDIR)/player.o $(BINDIR)/input_logger.o $(BINDIR)/movement.o
+$(BINDIR)/client.o: $(SRCDIR)/client.c $(BINDIR)/attacks.o $(BINDIR)/player.o $(BINDIR)/input_logger.o $(BINDIR)/movement.o $(BINDIR)/sounds.o
 	$(MKDIR)
 	$(CC) $(CFLAGS) -c $(SRCDIR)/client.c -o $@
 
@@ -107,6 +107,10 @@ $(BINDIR)/menu.o: $(SRCDIR)/menu.c
 $(BINDIR)/dynamic_textarea.o: $(SRCDIR)/dynamic_textarea.c
 	$(MKDIR)
 	$(CC) $(CFLAGS) -c $(SRCDIR)/dynamic_textarea.c -o $@
+# ---------------- sounds.o ----
+$(BINDIR)/sounds.o: $(SRCDIR)/sounds.c
+	$(MKDIR)
+	$(CC) $(CFLAGS) -c $(SRCDIR)/sounds.c -o $@
 
 # ----------------------------------------------------------
 #  Städning

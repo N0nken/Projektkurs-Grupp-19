@@ -4,6 +4,7 @@
 #include "../include/player.h"
 #include "../include/collision.h"
 #include "../include/input_logger.h"
+#include "../include/sounds.h"
 
 #define BASEDAMAGE 5
 #define DAMAGEBONUSMULTIPLIER 2
@@ -16,6 +17,7 @@ void deal_damage(Player *player, int damage) {
     if (Player_get_hp(player) <= 0) {
         Player_set_isAlive(player, 0);
     }
+    play_sound_effect("audio/sfx-hurt.wav", 60);
 }
 
 void attack(Player *attackingPlayer, Player *allPlayers[], int activePlayerCount) {
@@ -53,6 +55,7 @@ void handle_attack_input(Player *allPlayers[], int activePlayerCount) {
         InputLogger *logger = Player_get_inputs(p);
         if (InputLogger_is_action_just_pressed(logger, "attack")) {
             attack(p, allPlayers, activePlayerCount);
+            play_sound_effect("audio/sfx-hit.wav", 70);
         }
     }
 }
