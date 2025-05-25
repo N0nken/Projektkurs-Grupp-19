@@ -18,7 +18,7 @@
 #include "../include/sounds.h"
 
 #define PACKETLOSSLIMIT 10 // Give up sending packets to server after this many failed attempts
-#define MAXCLIENTS 2
+#define MAXCLIENTS 4
 #define CLIENTPORT 50000
 #define SERVERPORT 50001
 #define MAXPACKETSRECEIVEDPERFRAME 10

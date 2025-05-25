@@ -9,7 +9,7 @@
 #include "../include/movement.h"
 #include "../include/sounds.h"
 
-#define MAXCLIENTS 2
+#define MAXCLIENTS 4
 #define CLIENTPORT 50000
 #define SERVERPORT 50001
 #define MAXPACKETSRECEIVEDPERFRAME 4
@@ -164,6 +164,10 @@ int init_server(Server *server, GameState *gameState) {
                     100, 0, 1, gameState->players, &gameState->playerAliveCount);
         InputLogger_reset_all_actions(Player_get_inputs(gameState->players[i]));
     }
+    Player_set_position(gameState->players[0], create_Vector2(400, 1080-400));
+    Player_set_position(gameState->players[1], create_Vector2(1920/2, 400));
+    Player_set_position(gameState->players[2], create_Vector2(1920/2, 1080-400));
+    Player_set_position(gameState->players[3], create_Vector2(1920-400, 1080-400));
     return 0;
 }
 
