@@ -324,6 +324,7 @@ int client_playing(Client *client, GameState *gameState, RenderController* rende
         draw_platforms(renderController, colls[0], platformTexture);
         draw_platforms(renderController, colls[1], platformTexture);
         draw_platforms(renderController, colls[2], platformTexture);
+        draw_platforms(renderController, colls[3], platformTexture);
         //draw_colliders(renderController, Player_get_collider(gameState->players[0]));
 
         //draw_colliders(renderController, colls[3]);
